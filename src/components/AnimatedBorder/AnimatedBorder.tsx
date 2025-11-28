@@ -4,6 +4,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type AnchorHTMLAttributes,
   type HTMLAttributes,
   type MouseEvent,
   type ReactNode,
@@ -47,6 +48,7 @@ export interface AnimatedBorderProps
   hoverDelay?: number;
   unhoverIntent?: HoverIntentOptions;
   visibleRootMargin?: VisibleRootMargin;
+  linkProps?: AnchorHTMLAttributes<HTMLAnchorElement>;
 }
 
 const clampPercent = (value: number | string | undefined | null): number => {
@@ -78,6 +80,7 @@ export default function AnimatedBorder({
   visibleRootMargin = 75,
   onMouseEnter,
   onMouseLeave,
+  linkProps,
   ...rest
 }: AnimatedBorderProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -242,11 +245,20 @@ export default function AnimatedBorder({
         <div className={overlayClassNames.join(" ")} style={overlayStyle} />
       )}
 
-      <div
-        className={`relative z-10 overflow-hidden ${borderRadius} ${innerClassName}`}
-      >
-        {children}
-      </div>
+      {linkProps?.href ? (
+        <a
+          {...linkProps}
+          className={`relative z-10 overflow-hidden ${borderRadius} ${innerClassName} ${linkProps.className ?? ""}`.trim()}
+        >
+          {children}
+        </a>
+      ) : (
+        <div
+          className={`relative z-10 overflow-hidden ${borderRadius} ${innerClassName}`}
+        >
+          {children}
+        </div>
+      )}
     </div>
   );
 }

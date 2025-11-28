@@ -6,7 +6,7 @@
  */
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
-import FeatureCard from "@/components/LoopComponents/FeatureCard.astro";
+import FeatureCard from "@/components/LoopComponents/FeatureCard.tsx";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 
@@ -45,28 +45,6 @@ const columnClasses = {
   6: "grid-cols-1 md:grid-cols-3 lg:grid-cols-6",
 };
 
-const toFeatureCardData = (item: any = {}) => {
-  const base = typeof item.data === "object" ? item.data : {};
-  return {
-    icon: base.icon ?? item.icon,
-    title:
-      base.title ??
-      base.name ??
-      base.heading ??
-      item.title ??
-      item.name ??
-      "",
-    description:
-      base.description ??
-      base.summary ??
-      item.description ??
-      item.summary ??
-      item.excerpt ??
-      "",
-    featured: base.featured ?? item.featured ?? false,
-  };
-};
-
 const getCardClassName = (item: any = "") =>
   [item?.class ?? item?.className ?? "", "h-full"].filter(Boolean).join(" ");
 ---
@@ -89,9 +67,10 @@ const getCardClassName = (item: any = "") =>
         {items.map((item) => (
           <li>
             <FeatureCard
-              data={toFeatureCardData(item)}
+              client:visible
+              data={item}
               ringDuration={item?.ringDuration ?? 800}
-              class={getCardClassName(item)}
+              className={getCardClassName(item)}
             />
           </li>
         ))}

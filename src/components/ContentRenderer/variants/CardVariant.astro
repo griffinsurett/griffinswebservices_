@@ -6,7 +6,7 @@
  */
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
-import FeatureCard from "@/components/LoopComponents/FeatureCard.astro";
+import FeatureCard from "@/components/LoopComponents/FeatureCard.tsx";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 
@@ -14,8 +14,7 @@ interface Props extends BaseVariantProps {
   columns?: 1 | 2 | 3 | 4;
 }
 
-const {
-  items = [],
+const { items = [],
   title,
   description,
   className = "",
@@ -26,6 +25,7 @@ const {
 } = Astro.props as Props;
 
 const viewAllText = `Explore All ${collectionTitle || ""}`.trim();
+const safeItems = Array.isArray(items) ? items : [];
 
 const columnClasses = {
   1: "grid-cols-1",
@@ -33,6 +33,9 @@ const columnClasses = {
   3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
   4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
 };
+
+const getCardClassName = (item: any = "") =>
+  [item?.class ?? item?.className ?? ""].filter(Boolean).join(" ");
 ---
 
 <section id={id} class={`py-16 ${className}`}>
@@ -48,11 +51,16 @@ const columnClasses = {
   }
 
   {
-    items.length > 0 && (
+    safeItems.length > 0 && (
       <ul class={`grid ${columnClasses[columns]} gap-8 list-none`}>
-        {items.map((item) => (
+        {safeItems.map((item) => (
           <li>
-            <FeatureCard {...item} />
+            <FeatureCard
+              client:visible
+              data={item}
+              ringDuration={item?.ringDuration ?? 800}
+              className={getCardClassName(item)}
+            />
           </li>
         ))}
       </ul>
@@ -60,7 +68,7 @@ const columnClasses = {
   }
 
   {
-    shouldShowCollectionCTA(collectionUrl, items.length) && (
+    shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
       <div class="mt-12 text-center">
         <Button
           client:load

@@ -770,7 +770,7 @@ npx astro sync                 # Regenerate TypeScript types
 # Utilities
 npm run log-redirects          # Show all configured redirects
 
-# 
+# git specific
 rm -rf .git
 ```
 
