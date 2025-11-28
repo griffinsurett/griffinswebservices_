@@ -416,7 +416,7 @@ body {
   }
 
   .card-icon-color {
-    @apply bg-gradient-to-br from-primary light:to-bg2 dark:to-primary/25 text-bg;
+    @apply bg-gradient-to-br border-primary border-2 from-primary light:to-bg2 dark:to-primary/25 text-bg;
   }
 
   /* Grid helpers */
