@@ -9,36 +9,6 @@ export function manualChunks(id) {
   ) {
     return 'react-core';
   }
-  
-  // Consent system (lazy loaded)
-  if (id.includes('/components/preferences/consent/')) {
-    return 'consent';
-  }
-  
-  // Accessibility system (lazy loaded)
-  if (id.includes('/components/preferences/accessibility/')) {
-    return 'accessibility';
-  }
-  
-  // Language switcher (lazy loaded)
-  if (id.includes('/components/preferences/language/')) {
-    return 'language';
-  }
-  
-  // Modal system
-  if (id.includes('/components/Modal')) {
-    return 'modal';
-  }
-  
-  // Icons
-  if (id.includes('react-icons')) {
-    return 'icons';
-  }
-  
-  // Other node_modules
-  if (id.includes('node_modules')) {
-    return 'vendor';
-  }
 }
 
 export function assetFileNames(assetInfo) {
