@@ -153,7 +153,7 @@ function CookiePreferencesModal({
         <h2 className="text-3xl font-bold text-heading mb-4">
           Manage Consent Preferences
         </h2>
-        <p className="text-text text-sm leading-relaxed mb-3">
+        <p className="text-text text-sm lg:text-base leading-relaxed mb-3">
           We use cookies and similar technologies to help personalize content
           and offer a better experience. You can click{" "}
           <Button
