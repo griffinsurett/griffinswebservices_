@@ -118,7 +118,7 @@ export default function LanguageDropdown() {
 
       {open && (
         <div
-          className="absolute top-full left-1/2 z-[60] mt-3 min-w-[220px] -translate-x-1/2 rounded-2xl border border-white/10 bg-bg/95 p-3 shadow-2xl backdrop-blur-xl"
+          className="absolute top-full left-1/2 z-[60] mt-3 min-w-[220px] -translate-x-1/2 rounded-2xl border card-bg p-3 shadow-2xl backdrop-blur-xl"
           onWheel={(event) => {
             // Prevent wheel scroll from bubbling to window (which hides the logo text)
             event.stopPropagation();
@@ -126,7 +126,7 @@ export default function LanguageDropdown() {
           onWheelCapture={(event) => event.stopPropagation()}
         >
           {!hasFunctionalConsent && (
-            <div className="mb-2 rounded-xl border border-yellow-400/40 bg-yellow-500/15 px-3 py-2 text-xs text-yellow-100">
+            <div className="mb-2 rounded-xl border border-yellow-400/40 bg-yellow-500/15 px-3 py-2 text-xs text-text">
               Enable functional cookies to switch languages.
             </div>
           )}
@@ -164,7 +164,7 @@ export default function LanguageDropdown() {
                       className="text-primary"
                       aria-label="Currently selected language"
                     >
-                      •
+                      <Icon icon="lucide:check-square" size="sm" className="text-primary" />
                     </span>
                   )}
                 </button>
