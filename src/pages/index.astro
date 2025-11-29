@@ -27,9 +27,7 @@ import FrontPageHero from "@/layouts/FrontPageHero.astro";
     />
 
     <ContentRenderer
-      query={query("projects")
-        .orderBy(sortByDate("publishDate", "desc"))
-        .limit(5)}
+      query={query("projects")}
       variant="PortfolioVariant"
     />
 
@@ -73,7 +71,7 @@ import FrontPageHero from "@/layouts/FrontPageHero.astro";
     <!-- Testimonials with rating filter -->
     <ContentRenderer
       query={query("testimonials").where((entry) => entry.data.rating >= 4)}
-      variant="CardVariant"
+      variant="TestimonialCarouselVariant"
     />
 
     <!-- Addon Capabilities - auto-populates from capabilities meta -->
@@ -90,6 +88,11 @@ import FrontPageHero from "@/layouts/FrontPageHero.astro";
       variant="CardVariant"
       columns={3}
       gap="lg"
+    />
+
+    <ContentRenderer
+      query={query("technologies").orderBy(sortByOrder())}
+      variant="TechnologiesVariant"
     />
 
     <!-- FAQ ContentRenderer -->

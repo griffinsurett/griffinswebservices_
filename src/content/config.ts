@@ -110,10 +110,10 @@ export const collections = {
   "projects": defineCollection({
     schema: ({ image }) =>
       baseSchema({ image }).extend({
-        client: z.string(),
+        client: z.string().optional(),
         projectUrl: z.string().url().optional(),
         technologies: z.array(z.string()).default([]),
-        category: z.string(),
+        category: z.string().optional(),
       }),
   }),
 

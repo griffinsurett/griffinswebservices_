@@ -6,7 +6,7 @@
  * Consolidates all user preference systems:
  * - Cookie consent (with script management)
  * - Accessibility preferences
- * - Language switcher (Google Translate)
+ * - Language translation scripts (Google Translate)
  *
  * All use the same lazy-load, zero-impact pattern.
  */
@@ -20,8 +20,6 @@ import ConsentScript from "@/components/preferences/consent/ConsentScript.astro"
 import AccessibilityButton from "@/components/preferences/accessibility/AccessibilityButton";
 import "../styles/accessibility.css";
 
-// Language Switcher
-import LanguageSwitcher from "@/components/preferences/language/LanguageSwitcher";
 import GoogleTranslateScript from "@/components/preferences/language/GoogleTranslateScript.astro";
 import "../styles/language-switcher.css";
 ---
@@ -33,9 +31,6 @@ import "../styles/language-switcher.css";
 <GoogleTranslateScript />
 
 <div class="flex flex-wrap justify-center items-center gap-3">
-
-{/* Language Switcher - Client-side only */}
-<LanguageSwitcher client:visible />
 
 {/* CCPA Opt-Out Link */}
 <a href="/privacy-policy#ccpa-rights" class="text-text hover:underline"

@@ -1,5 +1,7 @@
 // src/components/LoopComponents/AccordionItem.tsx
 import type { ReactNode } from "react";
+import AnimatedBorder from "@/components/AnimatedBorder/AnimatedBorder";
+import IconListItem from "@/components/LoopComponents/IconListItem";
 
 export interface AccordionItemProps {
   id: string;
@@ -25,31 +27,70 @@ export default function AccordionItem({
   headerSlot,
 }: AccordionItemProps) {
   return (
-    <div className={`border border-bg bg-bg rounded-lg overflow-hidden ${className}`}>
-      <button
-        type="button"
-        className={`flex items-center justify-between p-4 bg-text/5 cursor-pointer hover:bg-text/5 transition-colors w-full text-left ${headerClassName}`}
-        onClick={onToggle}
-        aria-expanded={isExpanded}
-        aria-controls={`${id}-content`}
+    <div
+      className={`group relative ${className}`.trim()}
+      data-accordion-item
+      data-active={isExpanded ? "true" : "false"}
+    >
+      <AnimatedBorder
+        variant="progress-b-f"
+        triggers="controlled"
+        active={isExpanded}
+        borderRadius="rounded-3xl"
+        borderWidth={2}
+        duration={800}
+        className="transition-all duration-200 overflow-hidden"
+        innerClassName="card-bg"
       >
-          <span className="text-text font-medium text-xl px-2">
-            {isExpanded ? "−" : "+"}
-          </span>
+        <button
+          type="button"
+          id={`${id}-trigger`}
+          aria-expanded={isExpanded}
+          aria-controls={`${id}-content`}
+          className={`w-full text-left flex items-center justify-between px-6 py-5 hover:bg-card/60 transition-colors duration-300 cursor-pointer relative z-20 ${headerClassName}`.trim()}
+          onClick={onToggle}
+        >
           {headerSlot ? (
             <div className="flex-1">{headerSlot}</div>
           ) : (
-            <div className="flex-1">
-              <h3 className="font-semibold text-heading">{title}</h3>
-            </div>
+            <IconListItem
+              data={{ title }}
+              layout="horizontal"
+              alignment="left"
+              className="gap-4 flex-1"
+              showDescription={false}
+            />
           )}
-      </button>
 
-      {isExpanded && children && (
-        <div id={`${id}-content`} className="p-6">
-          <div className="prose prose-surface max-w-none">{children}</div>
+          <div
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-500 text-lg font-semibold ${
+              isExpanded
+                ? "bg-primary text-bg rotate-45"
+                : "bg-primary/20 text-accent rotate-0"
+            }`}
+            aria-hidden="true"
+          >
+            <span className="translate-y-[-1px]">{isExpanded ? "−" : "+"}</span>
+          </div>
+        </button>
+
+        <div
+          id={`${id}-content`}
+          role="region"
+          aria-labelledby={`${id}-trigger`}
+          className={`overflow-hidden transition-all duration-500 ease-in-out relative z-20 ${
+            isExpanded ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="px-6 pb-6">
+            <div className="w-full h-px bg-primary/15 mb-4" />
+            {description && (
+              <p className="text-text/90 leading-relaxed mb-4">{description}</p>
+            )}
+            {children}
+          </div>
         </div>
-      )}
+      </AnimatedBorder>
     </div>
   );
 }

@@ -1,0 +1,64 @@
+---
+// src/components/ContentRenderer/variants/TestimonialCarouselVariant.astro
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import SectionHeader from "@/components/SectionHeader.astro";
+import Button from "@/components/Button/Button";
+import { shouldShowCollectionCTA } from "../utils/helpers";
+import TestimonialCarousel from "@/components/LoopTemplates/TestimonialCarousel";
+
+interface Props extends BaseVariantProps {
+  eyebrow?: string;
+}
+
+const {
+  items = [],
+  title,
+  description,
+  className = "",
+  collectionUrl,
+  collectionTitle,
+  id,
+  eyebrow,
+} = Astro.props as Props;
+
+const safeItems = Array.isArray(items) ? (items as Record<string, any>[]) : [];
+const heading = title ?? "What Our Clients Say";
+const eyebrowText = eyebrow ?? "Testimonials";
+const descriptionText =
+  description ??
+  "Don't just take our word for it—hear directly from the partners we've helped grow.";
+const viewAllText = `View All ${collectionTitle || heading}`.trim();
+---
+
+<section
+  id={id}
+  class={`outer-section bg-bg relative overflow-hidden ${className}`.trim()}
+>
+  <div class="section-dim-border"></div>
+
+  <div class="inner-section">
+    <SectionHeader
+      title={eyebrowText}
+      heading={heading}
+      description={descriptionText}
+      className="text-section"
+      headingClassName="mb-6"
+      descriptionClassName="large-text"
+    />
+
+    <TestimonialCarousel client:visible items={safeItems} />
+
+    {shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
+      <div class="mt-12 text-center">
+        <Button
+          client:load
+          href={collectionUrl}
+          rightIcon="lu:chevron-right"
+          variant="secondary"
+        >
+          {viewAllText}
+        </Button>
+      </div>
+    )}
+  </div>
+</section>

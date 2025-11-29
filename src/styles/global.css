@@ -448,11 +448,11 @@ body {
   }
 
   .icon-medium {
-    @apply w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold;
+    @apply w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold;
   }
 
   .icon-small {
-    @apply relative rounded-full w-10 h-10 flex items-center justify-center text-xl;
+    @apply relative rounded-full w-8 h-8 lg:w-12 lg:h-12 flex items-center justify-center text-lg lg:text-xl;
   }
 
   .icon-xsmall {
