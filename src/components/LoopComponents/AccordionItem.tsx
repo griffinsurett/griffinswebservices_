@@ -1,5 +1,6 @@
 // src/components/LoopComponents/AccordionItem.tsx
 import type { ReactNode } from "react";
+import type { IconType } from "@/content/schema";
 import AnimatedBorder from "@/components/AnimatedBorder/AnimatedBorder";
 import IconListItem from "@/components/LoopComponents/IconListItem";
 import Icon from "@/components/Icon";
@@ -15,6 +16,10 @@ export interface AccordionItemProps {
   headerClassName?: string;
   headerSlot?: ReactNode;
   showIndicator?: boolean;
+  indicatorIcons?: {
+    expanded?: IconType;
+    collapsed?: IconType;
+  };
 }
 
 export default function AccordionItem({
@@ -28,7 +33,11 @@ export default function AccordionItem({
   headerClassName = "",
   headerSlot,
   showIndicator = true,
+  indicatorIcons,
 }: AccordionItemProps) {
+  const expandedIcon = indicatorIcons?.expanded ?? "lucide:minus";
+  const collapsedIcon = indicatorIcons?.collapsed ?? "lucide:plus";
+
   return (
     <div
       className={`group relative ${className}`.trim()}
@@ -73,7 +82,7 @@ export default function AccordionItem({
               aria-hidden="true"
             >
               <Icon
-                icon={isExpanded ? "lucide:minus" : "lucide:plus"}
+                icon={isExpanded ? expandedIcon : collapsedIcon}
                 size="sm"
                 className="w-4 h-4"
               />

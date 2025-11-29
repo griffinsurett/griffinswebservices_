@@ -108,11 +108,8 @@ export default function LanguageDropdown() {
         }
         className={buttonClasses}
       >
-        <div className="relative flex items-center justify-center">
-          <Icon icon="lucide:languages" size="sm" aria-label="Language picker" />
-          <span className="absolute -bottom-1 right-1 text-[10px] font-semibold uppercase tracking-tight">
-            {currentCode}
-          </span>
+        <div className="flex items-center justify-center">
+          <Icon icon="lucide:globe" size="sm" aria-label="Language picker" />
         </div>
       </CircleCheckbox>
 
