@@ -193,5 +193,10 @@ export default new Map([
 ["src/content/industries/web-production-support.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Findustries%2Fweb-production-support.mdx&astroContentModuleFlag=true")],
 ["src/content/industries/therapists-counselors.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Findustries%2Ftherapists-counselors.mdx&astroContentModuleFlag=true")],
 ["src/content/industries/white-label-development.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Findustries%2Fwhite-label-development.mdx&astroContentModuleFlag=true")],
-["src/content/industries/window-door-installation.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Findustries%2Fwindow-door-installation.mdx&astroContentModuleFlag=true")]]);
+["src/content/industries/window-door-installation.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Findustries%2Fwindow-door-installation.mdx&astroContentModuleFlag=true")],
+["src/content/about-highlights/_meta.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fabout-highlights%2F_meta.mdx&astroContentModuleFlag=true")],
+["src/content/about-highlights/craftsmanship.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fabout-highlights%2Fcraftsmanship.mdx&astroContentModuleFlag=true")],
+["src/content/about-highlights/performance.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fabout-highlights%2Fperformance.mdx&astroContentModuleFlag=true")],
+["src/content/about-highlights/care.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fabout-highlights%2Fcare.mdx&astroContentModuleFlag=true")],
+["src/content/about-highlights/support.mdx", () => import("astro:content-layer-deferred-module?astro%3Acontent-layer-deferred-module=&fileName=src%2Fcontent%2Fabout-highlights%2Fsupport.mdx&astroContentModuleFlag=true")]]);
 		

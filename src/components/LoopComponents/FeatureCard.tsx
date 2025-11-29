@@ -134,10 +134,16 @@ export default function FeatureCard({
     ...restListItemProps
   } = listItemProps ?? {};
 
+  const resolvedLayout = layout ?? "vertical";
+  const resolvedAlignment = alignment ?? (resolvedLayout.includes("horizontal") ? "left" : "center");
+  const defaultIconClassName = resolvedLayout.includes("horizontal")
+    ? "icon-large z-10 card-icon-color"
+    : "icon-large z-10 mb-5 card-icon-color";
+
   const listItemConfig: Omit<IconListItemProps, "data"> = {
-    layout: layout ?? "vertical",
-    alignment: alignment ?? "center",
-    iconClassName: iconClassName ?? "icon-large z-10 mb-5 card-icon-color",
+    layout: resolvedLayout,
+    alignment: resolvedAlignment,
+    iconClassName: iconClassName ?? defaultIconClassName,
     iconSize: iconSize ?? "xl",
     titleClassName: titleClassName ?? "h3 mb-3 relative z-10",
     titleTag: titleTag ?? "h3",
@@ -147,6 +153,13 @@ export default function FeatureCard({
     ...restListItemProps,
   };
 
+  const innerCardClass =
+    resolvedLayout.includes("horizontal")
+      ? "h-55 w-full px-8 py-6 relative flex flex-col justify-center items-center card-bg"
+      : "h-85 mx-auto px-10 flex flex-col justify-center items-center relative card-bg";
+
+  const wrapperTextClass = resolvedLayout.includes("horizontal") ? "text-left" : "text-center";
+
   return (
     <div className={className}>
       <AnimatedBorder
@@ -155,8 +168,8 @@ export default function FeatureCard({
         duration={ringDuration}
         borderRadius="rounded-3xl"
         borderWidth={2}
-        className="group text-center outer-card-transition outer-card-hover-transition !duration-[900ms] ease-out"
-        innerClassName="h-85 mx-auto px-10 flex flex-col justify-center items-center relative card-bg"
+        className={`group ${wrapperTextClass} outer-card-transition outer-card-hover-transition !duration-[900ms] ease-out`}
+        innerClassName={innerCardClass}
         linkProps={url ? { href: url } : undefined}
       >
         <div className="inner-card-style inner-card-transition inner-card-color" />

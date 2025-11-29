@@ -176,4 +176,8 @@ export const collections = {
         highlight: z.boolean().optional(),
       }),
   }),
+
+  "about-highlights": defineCollection({
+    schema: ({ image }) => baseSchema({ image }),
+  }),
 };

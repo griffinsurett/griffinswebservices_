@@ -15,12 +15,14 @@ const quickFacts = [
   { label: "Based in", value: siteData.location },
 ];
 
-const proofPoints = [
-  "Hand-crafted code instead of bloated templates",
-  "Performance, accessibility, and SEO baked in",
-  "Hosting, maintenance, and monitoring included",
-  "Responsive support from people who know your business",
-];
+const proofPointEntries = await query("about-highlights")
+  .orderBy(sortByOrder())
+  .get();
+
+const proofPoints = proofPointEntries.entries.map((entry) => ({
+  title: entry.data.title,
+  description: entry.data.description,
+}));
 
 const storyHighlights = [
   {
@@ -145,7 +147,13 @@ const ceoQuote = siteData.ceoQuote;
                 {proofPoints.map((point) => (
                   <li class="flex items-start gap-3 text-base leading-relaxed text-text">
                     <span class="text-accent text-lg">✓</span>
-                    <span>{point}</span>
+                    <span>
+                      {point.description && (
+                        <span class="text-muted text-sm leading-snug block">
+                          {point.description}
+                        </span>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>
