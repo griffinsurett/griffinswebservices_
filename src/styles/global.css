@@ -477,7 +477,7 @@ body {
 
   /* Typography helpers */
   .h1 {
-    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-heading;
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight text-heading;
   }
 
   .h2 {
