@@ -72,6 +72,7 @@ export default function PortfolioItemComponent({
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const diff = i - activeIndex;
   const [contentReady, setContentReady] = useState(false);
+  const [mediaReady, setMediaReady] = useState(false);
   const [scrollDurationMs, setScrollDurationMs] = useState(
     AUTO_SCROLL_DEFAULT_CYCLE_MS
   );
@@ -149,7 +150,7 @@ export default function PortfolioItemComponent({
   }, [isActive]);
 
   useEffect(() => {
-    if (!isActive) {
+    if (!isActive || !mediaReady) {
       setContentReady(false);
       setScrollDurationMs(AUTO_SCROLL_DEFAULT_CYCLE_MS);
       return;
@@ -244,7 +245,7 @@ export default function PortfolioItemComponent({
       stabilityCleanup?.();
       if (timeoutId) window.clearTimeout(timeoutId);
     };
-  }, [isActive]);
+  }, [isActive, mediaReady]);
 
   useEffect(() => {
     if (!isActive || !contentReady) {
@@ -390,6 +391,40 @@ export default function PortfolioItemComponent({
     }
     return mediaChild;
   }, [mediaChild]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setMediaReady(false);
+      return;
+    }
+    const host = viewportRef.current;
+    if (!host) return;
+
+    const imageEl =
+      (host.querySelector("picture img") as HTMLImageElement | null) ??
+      (host.querySelector("img") as HTMLImageElement | null);
+
+    if (!imageEl) {
+      setMediaReady(true);
+      return;
+    }
+
+    const markReady = () => setMediaReady(true);
+
+    if (imageEl.complete && imageEl.naturalHeight > 0) {
+      setMediaReady(true);
+      return;
+    }
+
+    setMediaReady(false);
+    imageEl.addEventListener("load", markReady, { once: false });
+    imageEl.addEventListener("error", markReady, { once: false });
+
+    return () => {
+      imageEl.removeEventListener("load", markReady);
+      imageEl.removeEventListener("error", markReady);
+    };
+  }, [isActive, providedMedia, imageSrc]);
 
   return (
     <div

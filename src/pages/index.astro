@@ -178,14 +178,6 @@ import LogoPoster from "@/assets/2dfavicons/android-chrome-192x192.png";
       </div>
     </AboutSection>
 
-    <!-- Capabilities - auto-populates from capabilities meta -->
-    <ContentRenderer
-      query={query("capabilities").orderBy(sortByOrder())}
-      variant="CardVariant"
-      columns={3}
-      gap="lg"
-    />
-
     <!-- Solutions - auto-populates from solutions meta -->
     <ContentRenderer
       query={query("solutions").orderBy(sortByOrder())}
