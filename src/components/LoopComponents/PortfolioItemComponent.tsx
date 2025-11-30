@@ -383,12 +383,11 @@ export default function PortfolioItemComponent({
   const altText = item.alt || item.title || "Project preview";
   const providedMedia = useMemo(() => {
     if (!mediaChild) return undefined;
-    if (
-      isValidElement(mediaChild) &&
-      mediaChild.props?.["data-portfolio-placeholder"]
-    ) {
-      return undefined;
-    }
+    if (!isValidElement(mediaChild)) return mediaChild;
+    const props = mediaChild.props as {
+      ["data-portfolio-placeholder"]?: unknown;
+    };
+    if (props?.["data-portfolio-placeholder"]) return undefined;
     return mediaChild;
   }, [mediaChild]);
 

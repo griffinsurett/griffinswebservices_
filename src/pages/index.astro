@@ -180,7 +180,10 @@ import LogoPoster from "@/assets/2dfavicons/android-chrome-192x192.png";
 
     <!-- Solutions - auto-populates from solutions meta -->
     <ContentRenderer
-      query={query("solutions").orderBy(sortByOrder())}
+      query={query("solutions")
+        .where(whereEquals("parent", "website-solutions"))
+        .orderBy(sortByOrder())}
+      title="Website Solutions"
       variant="CardVariant"
       columns={3}
       gap="lg"
@@ -206,14 +209,6 @@ import LogoPoster from "@/assets/2dfavicons/android-chrome-192x192.png";
     <ContentRenderer
       query={query("testimonials").where((entry) => entry.data.rating >= 4)}
       variant="TestimonialCarouselVariant"
-    />
-
-    <!-- Addon Capabilities - auto-populates from capabilities meta -->
-    <ContentRenderer
-      query={query("stats")}
-      variant="CardVariant"
-      columns={3}
-      gap="lg"
     />
 
     <!-- Addon Capabilities - auto-populates from capabilities meta -->
