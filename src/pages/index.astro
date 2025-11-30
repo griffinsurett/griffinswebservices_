@@ -130,31 +130,36 @@ import LogoPoster from "@/assets/2dfavicons/android-chrome-192x192.png";
       </div>
 
       <div slot="proof-points">
-        <ul class="space-y-3">
-          {
-            [
-              "Bespoke builds, never templates — Everything we launch is scoped for your business so it feels premium and works reliably under real traffic.",
-              "Performance, accessibility, and SEO baked in — Speed, rankings, and compliance are handled from day one so you don’t need extra vendors later.",
-              "Hosting, care, and monitoring included — We keep everything patched, protected, and online so you can focus on running the business.",
-              "Responsive humans who already know your business — You get one accountable team for strategy, builds, and support—no ticket portals or handoffs.",
-            ].map((description) => (
-              <li class="flex items-start gap-3 text-base leading-relaxed text-text">
-                <span class="flex-shrink-0">
-                  <Image
-                    src={LogoPoster}
-                    alt="Griffin's Web Services Logo"
-                    width="80"
-                    height="80"
-                    class="w-6 h-6 rounded-full object-contain"
-                  />
-                </span>
-                <span class="text-muted text-sm leading-snug block">
-                  {description}
-                </span>
-              </li>
-            ))
-          }
-        </ul>
+        <div>
+          <p class="h3">What sets us apart.</p>
+          <div class="mt-3">
+            <ul class="space-y-3">
+              {
+                [
+                  "Bespoke builds, never templates — Everything we launch is scoped for your business so it feels premium and works reliably under real traffic.",
+                  "Performance, accessibility, and SEO baked in — Speed, rankings, and compliance are handled from day one so you don’t need extra vendors later.",
+                  "Hosting, care, and monitoring included — We keep everything patched, protected, and online so you can focus on running the business.",
+                  "Responsive humans who already know your business — You get one accountable team for strategy, builds, and support—no ticket portals or handoffs.",
+                ].map((description) => (
+                  <li class="flex items-start gap-3 text-base leading-relaxed text-text">
+                    <span class="flex-shrink-0">
+                      <Image
+                        src={LogoPoster}
+                        alt="Griffin's Web Services Logo"
+                        width="32"
+                        height="32"
+                        class="w-8 h-8 rounded-full object-contain border border-accent/30 card-bg"
+                      />
+                    </span>
+                    <span class="text-muted text-sm leading-snug block">
+                      {description}
+                    </span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
       </div>
 
       <div slot="bottom-section" class="mt-16">
