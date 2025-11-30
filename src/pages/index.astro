@@ -37,18 +37,103 @@ import FrontPageHero from "@/layouts/FrontPageHero.astro";
       variant="CardVariant"
       columns={3}
       gap="lg"
-      title="Core Website Services"
+      title="Website Services"
       description="The three pillars every engagement includes: design, dependable engineering, and proactive care."
     />
 
-    <AboutSection />
+    <AboutSection>
+      <div slot="text" class="space-y-6 text-lg leading-relaxed text-text">
+        <p>
+          Griffin's Web Services builds fast, secure, professional websites for
+          businesses that want a strong, trustworthy online presence without any
+          technical headaches.
+        </p>
+        <p class="text-muted">
+          Our focus is simple: make your business look credible, make it easy for
+          customers to reach you, and keep your website running smoothly around the
+          clock.
+        </p>
+      </div>
+      <div slot="under-text" class="space-y-10">
+        <div class="grid gap-6 md:grid-cols-2">
+          <div class="rounded-2xl border border-accent/20 card-bg p-6">
+            <h3 class="text-heading text-xl font-semibold mb-2">
+              Not another template factory.
+            </h3>
+            <p class="text-text text-base leading-relaxed">
+              Unlike the bloated DIY builders flooding the internet, our
+              websites do not fall apart when real customers start using them.
+            </p>
+            <p class="text-muted text-sm leading-relaxed mt-4">
+              We scope every project around your services, operations, and goals
+              so the finished site feels tailor-made and never like a generic
+              skin.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-accent/20 card-bg p-6">
+            <h3 class="text-heading text-xl font-semibold mb-2">
+              We handle everything.
+            </h3>
+            <p class="text-text text-base leading-relaxed">
+              You do not need to manage hosting, updates, or security issues —
+              we handle the nitty-gritty so you can stay focused on the work you
+              care about.
+            </p>
+            <p class="text-muted text-sm leading-relaxed mt-4">
+              From discovery to launch to ongoing improvements, you get one
+              accountable partner who keeps your site running flawlessly.
+            </p>
+          </div>
+        </div>
 
-    <ContentRenderer
-      query={query("benefits")}
-      variant="BenefitsInlineVariant"
-      title="Built different. Built better."
-      description="Every site we build is intentionally crafted to load quickly, stay secure, and give your customers a smooth, frustration-free experience."
-    />
+        <blockquote
+          class="rounded-3xl border border-accent/15 hero-gradient-bg p-6 lg:p-8"
+        >
+          <p class="text-heading text-2xl font-semibold leading-relaxed">
+            “A website should do two things extremely well: be easy for your
+            customers to use and be structured in a way that search engines are
+            confident recommending.”
+          </p>
+          <footer class="mt-4 text-sm text-muted leading-snug space-y-2">
+            <div>
+              <span class="text-heading font-semibold block"
+                >Griffin Surett</span
+              >
+              <span>Founder &amp; CEO, Griffin's Web Services</span>
+            </div>
+          </footer>
+        </blockquote>
+      </div>
+      <div slot="quick-facts">
+        <ContentRenderer
+          query={query("about-quick-facts").orderBy(sortByOrder())}
+          variant="QuickFactsVariant"
+          columns={2}
+        />
+      </div>
+
+      <div slot="proof-points">
+        <ContentRenderer
+          query={query("about-highlights").orderBy(sortByOrder())}
+          variant="ProofPointsVariant"
+        />
+      </div>
+
+      <div slot="bottom-section" class="mt-16">
+        <ContentRenderer
+          query={query("stats").orderBy(sortByOrder())}
+          variant="StatsInlineVariant"
+          columns={4}
+        />
+
+        <ContentRenderer
+          query={query("benefits")}
+          variant="BenefitsInlineVariant"
+          title="Built different. Built better."
+          description="Every site we build is intentionally crafted to load quickly, stay secure, and give your customers a smooth, frustration-free experience."
+        />
+      </div>
+    </AboutSection>
 
     <!-- Capabilities - auto-populates from capabilities meta -->
     <ContentRenderer
@@ -57,9 +142,6 @@ import FrontPageHero from "@/layouts/FrontPageHero.astro";
       columns={3}
       gap="lg"
     />
-
-    <!-- Benefits - auto-populates from benefits meta -->
-    <ContentRenderer query={query("benefits")} variant="CardVariant" />
 
     <!-- Solutions - auto-populates from solutions meta -->
     <ContentRenderer
