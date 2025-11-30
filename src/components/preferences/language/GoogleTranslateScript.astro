@@ -2,20 +2,16 @@
 // src/components/preferences/language/GoogleTranslateScript.astro
 /**
  * Google Translate Integration Script
- * 
- * Handles lazy loading of Google Translate API and provides window.changeLanguage()
- * function for the language switcher component.
- * 
- * Uses localStorage caching to avoid unnecessary API loads on subsequent visits.
- * NOW WITH CONSENT: Only loads Google Translate API if functional consent is given.
+ *
+ * Provides a lightweight wrapper that only loads the Google Translate script
+ * when necessary and avoids full page reloads when switching languages.
  */
 ---
 <script>
-  import { setCookie, clearCookie } from '@/utils/cookies';
-  import { getStorageItem, setStorageItem, clearStorageByPrefix } from '@/utils/storage';
-  import { hasConsentFor } from '@/utils/consent/consent';
+  import { setCookie, clearCookie } from "@/utils/cookies";
+  import { getStorageItem, setStorageItem } from "@/utils/storage";
+  import { hasConsentFor } from "@/utils/consent/consent";
 
-  // Type definitions for this file only
   declare global {
     interface Window {
       initializeGoogleTranslate?: () => void;
@@ -23,101 +19,174 @@
     }
   }
 
-  // Check if we have cached translation
-  const savedLang = getStorageItem('user-language');
-  const cacheKey = `translated_body_${savedLang}_${window.location.pathname}`;
-  const hasCachedTranslation = savedLang && savedLang !== 'en' && getStorageItem(cacheKey);
-  
-  // Check for functional consent
-  const hasFunctionalConsent = hasConsentFor('functional');
-  
-  // CRITICAL: Only load Google Translate if:
-  // 1. We DON'T have cached content AND
-  // 2. User has given functional consent
-  if (!hasCachedTranslation && hasFunctionalConsent) {
-    // Initialize Google Translate
-    window.initializeGoogleTranslate = function() {
-      const google = (window as any).google;
-      if (typeof google === 'undefined' || !google?.translate) return;
+  const STORAGE_KEY = "user-language";
+  const GOOGLE_SCRIPT_ID = "google-translate-sdk";
 
-      const checkReady = setInterval(function() {
-        if (google?.translate?.TranslateElement) {
-          clearInterval(checkReady);
-          
-          new google.translate.TranslateElement({
-            pageLanguage: 'en',
-            includedLanguages: '',
-            autoDisplay: false,
-          }, 'google_translate_element');
-        }
-      }, 100);
-    };
+  interface TranslateState {
+    scriptRequested: boolean;
+    translateInitialized: boolean;
+    pendingLanguage: string | null;
+  }
 
-    // Public function for language switcher
-    window.changeLanguage = function(languageCode: string) {
-      setStorageItem('user-language', languageCode);
-      
-      // Clear translation cache when language changes
-      clearStorageByPrefix('translated_body_');
-      
-      if (languageCode === 'en') {
-        clearCookie('googtrans');
-      } else {
-        setCookie('googtrans', `/en/${languageCode}`, { expires: 365 });
+  const state: TranslateState = {
+    scriptRequested: false,
+    translateInitialized: false,
+    pendingLanguage: null,
+  };
+
+  function normalizeLanguage(code: string | null): string {
+    return code || "en";
+  }
+
+  function persistLanguagePreference(languageCode: string) {
+    setStorageItem(STORAGE_KEY, languageCode);
+
+    if (!hasConsentFor("functional")) {
+      if (languageCode === "en") {
+        clearCookie("googtrans");
       }
-      
-      // Scroll to top before reload
-      window.scrollTo(0, 0);
-      
-      // Use href assignment instead of reload()
-      window.location.href = window.location.href;
-    };
-
-    // Load Google Translate script
-    (function() {
-      const script = document.createElement('script');
-      script.src = 'https://translate.google.com/translate_a/element.js?cb=initializeGoogleTranslate';
-      script.async = true;
-      document.head.appendChild(script);
-    })();
-  } else {
-    // Log why we're not loading
-    if (!hasFunctionalConsent) {
-      console.log('❌ No functional consent - Google Translate not loaded');
-    } else {
-      console.log('🚀 Using cached translation - skipping Google Translate API load');
+      return;
     }
-    
-    // Still provide changeLanguage function even without API
-    window.changeLanguage = function(languageCode: string) {
-      setStorageItem('user-language', languageCode);
-      
-      // Clear cache
-      clearStorageByPrefix('translated_body_');
-      
-      if (languageCode === 'en') {
-        clearCookie('googtrans');
-      } else {
-        setCookie('googtrans', `/en/${languageCode}`, { expires: 365 });
-      }
-      
-      // Scroll to top before reload
-      window.scrollTo(0, 0);
-      
-      // Use href assignment instead of reload()
-      window.location.href = window.location.href;
-    };
+
+    if (languageCode === "en") {
+      clearCookie("googtrans");
+    } else {
+      setCookie("googtrans", `/en/${languageCode}`, { expires: 365, sameSite: "Lax" });
+    }
   }
 
-  // Listen for consent changes to load Google Translate dynamically
-  if (!hasCachedTranslation && !hasFunctionalConsent) {
-    window.addEventListener('consent-changed', () => {
-      if (hasConsentFor('functional')) {
-        console.log('🔄 Functional consent granted, reloading for Google Translate');
-        window.location.reload();
-      }
-    });
+  function ensureTranslateScript() {
+    if (state.scriptRequested || state.translateInitialized) {
+      return;
+    }
+
+    if (!hasConsentFor("functional")) {
+      console.warn("Functional consent required to load Google Translate");
+      return;
+    }
+
+    const existing = document.getElementById(GOOGLE_SCRIPT_ID);
+    if (existing) {
+      state.scriptRequested = true;
+      return;
+    }
+
+    state.scriptRequested = true;
+
+    const script = document.createElement("script");
+    script.id = GOOGLE_SCRIPT_ID;
+    script.src = "https://translate.google.com/translate_a/element.js?cb=initializeGoogleTranslate";
+    script.async = true;
+    script.onerror = () => {
+      state.scriptRequested = false;
+      console.error("Failed to load Google Translate script");
+    };
+
+    document.head.appendChild(script);
   }
+
+  function applyLanguage(languageCode: string): boolean {
+    const combo = document.querySelector("select.goog-te-combo");
+    if (!(combo instanceof HTMLSelectElement)) {
+      return false;
+    }
+
+    const normalized = languageCode === "en" ? "" : languageCode;
+
+    if (combo.value === normalized) {
+      state.pendingLanguage = null;
+      return true;
+    }
+
+    combo.value = normalized;
+    combo.dispatchEvent(new Event("change"));
+    if (normalized) {
+      document.documentElement.dataset.preferredLanguage = languageCode;
+    } else {
+      document.documentElement.removeAttribute("data-preferred-language");
+    }
+    state.pendingLanguage = null;
+    return true;
+  }
+
+  window.initializeGoogleTranslate = function () {
+    const google = (window as any).google;
+    if (!google?.translate?.TranslateElement) {
+      state.scriptRequested = false;
+      return;
+    }
+
+    new google.translate.TranslateElement(
+      {
+        pageLanguage: "en",
+        includedLanguages: "",
+        autoDisplay: false,
+      },
+      "google_translate_element",
+    );
+
+    state.translateInitialized = true;
+
+    const desiredLanguage = state.pendingLanguage || normalizeLanguage(getStorageItem(STORAGE_KEY));
+    if (desiredLanguage && desiredLanguage !== "en") {
+      requestAnimationFrame(() => applyLanguage(desiredLanguage));
+    }
+  };
+
+  window.changeLanguage = function (languageCode: string) {
+    const normalized = normalizeLanguage(languageCode);
+    persistLanguagePreference(normalized);
+
+    if (normalized === "en") {
+      document.documentElement.removeAttribute("data-preferred-language");
+      if (state.translateInitialized) {
+        applyLanguage("en");
+      } else {
+        state.pendingLanguage = null;
+      }
+      return;
+    }
+
+    state.pendingLanguage = normalized;
+
+    if (!hasConsentFor("functional")) {
+      console.warn("Functional consent required to change languages");
+      return;
+    }
+
+    ensureTranslateScript();
+
+    if (state.translateInitialized) {
+      applyLanguage(normalized);
+    }
+  };
+
+  const savedLanguage = normalizeLanguage(getStorageItem(STORAGE_KEY));
+  if (savedLanguage !== "en" && hasConsentFor("functional")) {
+    persistLanguagePreference(savedLanguage);
+    state.pendingLanguage = savedLanguage;
+    ensureTranslateScript();
+  }
+
+  window.addEventListener("consent-changed", () => {
+    if (!hasConsentFor("functional")) {
+      return;
+    }
+
+    const preferred = normalizeLanguage(getStorageItem(STORAGE_KEY));
+    if (preferred === "en") {
+      return;
+    }
+
+    persistLanguagePreference(preferred);
+    state.pendingLanguage = preferred;
+
+    if (state.translateInitialized) {
+      applyLanguage(preferred);
+    } else {
+      ensureTranslateScript();
+    }
+  });
 </script>
 
 <div id="google_translate_element" style="display: none;"></div>
