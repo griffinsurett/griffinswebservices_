@@ -177,15 +177,4 @@ export const collections = {
       }),
   }),
 
-  "about-highlights": defineCollection({
-    schema: ({ image }) => baseSchema({ image }),
-  }),
-
-  "about-quick-facts": defineCollection({
-    schema: ({ image }) =>
-      baseSchema({ image }).extend({
-        label: z.string().optional(),
-        value: z.string(),
-      }),
-  }),
 };

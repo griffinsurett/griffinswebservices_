@@ -4,6 +4,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import { siteData } from "@/content/siteData";
 import AboutSection from "@/layouts/AboutSection.astro";
+import { Image } from "astro:assets";
 import {
   query,
   whereArrayContains,
@@ -13,6 +14,7 @@ import {
   sortBy,
 } from "@/utils/query";
 import FrontPageHero from "@/layouts/FrontPageHero.astro";
+import LogoPoster from "@/assets/2dfavicons/android-chrome-192x192.png";
 ---
 
 <BaseLayout title="Home" description={siteData.description}>
@@ -49,9 +51,9 @@ import FrontPageHero from "@/layouts/FrontPageHero.astro";
           technical headaches.
         </p>
         <p class="text-muted">
-          Our focus is simple: make your business look credible, make it easy for
-          customers to reach you, and keep your website running smoothly around the
-          clock.
+          Our focus is simple: make your business look credible, make it easy
+          for customers to reach you, and keep your website running smoothly
+          around the clock.
         </p>
       </div>
       <div slot="under-text" class="space-y-10">
@@ -104,19 +106,55 @@ import FrontPageHero from "@/layouts/FrontPageHero.astro";
           </footer>
         </blockquote>
       </div>
-      <div slot="quick-facts">
-        <ContentRenderer
-          query={query("about-quick-facts").orderBy(sortByOrder())}
-          variant="QuickFactsVariant"
-          columns={2}
-        />
+      <div slot="quick-facts" class="grid gap-4 sm:grid-cols-2">
+        {
+          [
+            { label: "Average turnaround", value: "4-6 weeks" },
+            {
+              label: "Engagement model",
+              value: "Strategy, build, and care plan",
+            },
+            { label: "Client satisfaction", value: "98% would hire us again" },
+            { label: "Based in", value: siteData.location },
+          ].map((fact) => (
+            <div class="rounded-2xl border card-bg border-accent/25 p-4">
+              <p class="text-xs uppercase tracking-[0.2em] text-muted">
+                {fact.label}
+              </p>
+              <p class="text-heading text-xl font-semibold mt-2">
+                {fact.value}
+              </p>
+            </div>
+          ))
+        }
       </div>
 
       <div slot="proof-points">
-        <ContentRenderer
-          query={query("about-highlights").orderBy(sortByOrder())}
-          variant="ProofPointsVariant"
-        />
+        <ul class="space-y-3">
+          {
+            [
+              "Bespoke builds, never templates — Everything we launch is scoped for your business so it feels premium and works reliably under real traffic.",
+              "Performance, accessibility, and SEO baked in — Speed, rankings, and compliance are handled from day one so you don’t need extra vendors later.",
+              "Hosting, care, and monitoring included — We keep everything patched, protected, and online so you can focus on running the business.",
+              "Responsive humans who already know your business — You get one accountable team for strategy, builds, and support—no ticket portals or handoffs.",
+            ].map((description) => (
+              <li class="flex items-start gap-3 text-base leading-relaxed text-text">
+                <span class="flex-shrink-0">
+                  <Image
+                    src={LogoPoster}
+                    alt="Griffin's Web Services Logo"
+                    width="80"
+                    height="80"
+                    class="w-6 h-6 rounded-full object-contain"
+                  />
+                </span>
+                <span class="text-muted text-sm leading-snug block">
+                  {description}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
       </div>
 
       <div slot="bottom-section" class="mt-16">
