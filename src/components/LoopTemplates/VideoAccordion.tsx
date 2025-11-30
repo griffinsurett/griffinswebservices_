@@ -1,0 +1,214 @@
+// src/components/LoopTemplates/VideoAccordion.tsx
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import EnhancedAccordionItem from "@/components/LoopComponents/EnhancedAccordionItem";
+import VideoPlayer from "@/components/VideoPlayer";
+import { useAnimatedElement } from "@/hooks/animations/useViewAnimation";
+import useEngagementAutoplay from "@/hooks/autoplay/useEngagementAutoplay";
+import type { WebsiteType } from "@/constants/websiteTypes";
+
+export interface VideoAccordionItem extends WebsiteType {}
+
+interface VideoAccordionProps {
+  items: VideoAccordionItem[];
+  className?: string;
+  autoAdvanceDelay?: number;
+}
+
+const sanitizeId = (value: string) => value.replace(/[:]/g, "");
+
+export default function VideoAccordion({
+  items,
+  className = "",
+  autoAdvanceDelay = 3000,
+}: VideoAccordionProps) {
+  const showDebug =
+    (typeof import.meta !== "undefined" && import.meta.env?.DEV) ||
+    process.env.NODE_ENV !== "production";
+
+  const safeItems = Array.isArray(items)
+    ? items.filter(
+        (entry): entry is VideoAccordionItem =>
+          !!entry && typeof entry === "object" && !!entry.title,
+      )
+    : [];
+
+  const desktopVideoRef = useRef<HTMLVideoElement | null>(null);
+  const mobileVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const rawId = useId();
+  const instanceId = useMemo(() => sanitizeId(rawId), [rawId]);
+
+  const wrapAnim = useAnimatedElement<HTMLDivElement>({
+    duration: 500,
+    delay: 0,
+    threshold: 0,
+    rootMargin: "0px 0px -20% 0px",
+  });
+
+  const autoplayTime = useMemo(
+    () => () => {
+      const video = desktopVideoRef.current || mobileVideoRef.current;
+      if (!video || !Number.isFinite(video.duration)) return autoAdvanceDelay;
+      const remaining = Math.max(0, (video.duration - video.currentTime) * 1000);
+      return remaining + autoAdvanceDelay;
+    },
+    [autoAdvanceDelay],
+  );
+
+  const {
+    engageUser,
+    beginGraceWindow,
+    isAutoplayPaused,
+    isResumeScheduled,
+    userEngaged,
+    schedule,
+  } = useEngagementAutoplay({
+    totalItems: safeItems.length,
+    currentIndex: activeIndex,
+    setIndex: (next) => setActiveIndex(next),
+    autoplayTime,
+    resumeDelay: 5000,
+    containerSelector: `[data-video-accordion="${instanceId}"]`,
+    itemSelector: `[data-video-accordion="${instanceId}"] [data-accordion-item]`,
+    inView: wrapAnim.inView,
+    engageOnlyOnActiveItem: true,
+    activeItemAttr: "data-active",
+  });
+
+  const scheduleRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    scheduleRef.current = schedule;
+  }, [schedule]);
+
+  useEffect(() => {
+    if (safeItems.length === 0) return;
+    if (activeIndex >= safeItems.length) {
+      setActiveIndex(0);
+    }
+  }, [activeIndex, safeItems.length]);
+
+  const handleSelect = useCallback(
+    (index: number) => {
+      setActiveIndex(index);
+      setProgress(0);
+      engageUser();
+      scheduleRef.current?.();
+    },
+    [engageUser],
+  );
+
+  const handleTimeUpdate = useCallback(() => {
+    const video = desktopVideoRef.current || mobileVideoRef.current;
+    if (!video || !video.duration) return;
+    setProgress((video.currentTime / video.duration) * 100);
+    scheduleRef.current?.();
+  }, []);
+
+  const handleLoadedData = useCallback(() => {
+    setProgress(0);
+    scheduleRef.current?.();
+  }, []);
+
+  const handleEnded = useCallback(() => {
+    setProgress(100);
+    beginGraceWindow();
+  }, [beginGraceWindow]);
+
+  const handleVideoClick = useCallback(() => {
+    engageUser();
+  }, [engageUser]);
+
+  const { style: animStyle, ...animProps } = wrapAnim.props;
+
+  if (safeItems.length === 0) {
+    return null;
+  }
+
+  const activeItem = safeItems[Math.min(activeIndex, safeItems.length - 1)];
+
+  return (
+    <div
+      ref={wrapAnim.ref}
+      className={`animated-element fade-in relative ${className}`.trim()}
+      data-video-accordion={instanceId}
+      {...animProps}
+      style={animStyle}
+    >
+      <div className="flex flex-col lg:flex-row lg:items-start gap-12 max-2-primary">
+        <div
+          className="min-w-0 lg:basis-[clamp(420px,40vw,560px)] lg:flex-shrink-0 flex flex-col space-y-4"
+          data-accordion-container
+        >
+          {safeItems.map((item, index) => {
+            const key = item.key || item.title || `item-${index}`;
+
+            return (
+              <EnhancedAccordionItem
+                key={key}
+                icon={item.icon}
+                title={item.title}
+                description={item.description}
+                isActive={activeIndex === index}
+                progress={progress}
+                onToggle={() => handleSelect(index)}
+              >
+                {activeIndex === index && (
+                  <div className="lg:hidden mt-4">
+                    <VideoPlayer
+                      key={`mobile-${key}`}
+                      ref={(node) => {
+                        mobileVideoRef.current = node;
+                      }}
+                      src={item.videoSrc}
+                      onTimeUpdate={handleTimeUpdate}
+                      onEnded={handleEnded}
+                      onLoadedData={handleLoadedData}
+                      onClick={handleVideoClick}
+                      desktop={false}
+                    />
+                  </div>
+                )}
+              </EnhancedAccordionItem>
+            );
+          })}
+        </div>
+
+        <div className="hidden lg:block lg:flex-1 min-w-0 lg:sticky lg:top-0">
+            <VideoPlayer
+              key={`desktop-${activeItem?.key ?? activeIndex}`}
+              ref={desktopVideoRef}
+              src={activeItem?.videoSrc}
+              onTimeUpdate={handleTimeUpdate}
+              onEnded={handleEnded}
+              onLoadedData={handleLoadedData}
+              onClick={handleVideoClick}
+              desktop
+              wrapperClassName="shadow-2xl shadow-accent/15 bg-card/40"
+            />
+
+            {showDebug && (
+              <div className="mt-4 text-xs text-white/80 bg-zinc-900/70 p-3 rounded-xl space-y-1">
+                <div>⏸️ Autoplay Paused: {isAutoplayPaused ? "✅" : "❌"}</div>
+                <div>👤 Engaged: {userEngaged ? "✅" : "❌"}</div>
+                <div>
+                  ⏲️ Resume Scheduled: {isResumeScheduled ? "✅" : "❌"}
+                </div>
+                <div>🎪 Active Index: {activeIndex}</div>
+                <div>📊 Progress: {Math.round(progress)}%</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+  );
+}

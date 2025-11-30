@@ -1,0 +1,104 @@
+---
+// src/components/ContentRenderer/variants/VideoAccordionVariant.astro
+/**
+ * VideoAccordionVariant
+ * Recreates the legacy Website Types accordion with synced video playback.
+ */
+
+import type { BaseVariantProps } from "../ContentRenderer.types";
+import SectionHeader from "@/components/SectionHeader.astro";
+import VideoAccordion from "@/components/LoopTemplates/VideoAccordion";
+import Button from "@/components/Button/Button";
+import ContentBridge from "@/components/ContentRenderer/ContentBridge/ContentBridge.astro";
+import { shouldShowCollectionCTA } from "../utils/helpers";
+import fallbackVideo from "@/assets/Black-Microwave-Earrape.mp4";
+
+interface Props extends BaseVariantProps {
+  items?: any[];
+  autoAdvanceDelay?: number;
+}
+
+const {
+  items = [],
+  title,
+  description,
+  className = "",
+  collectionUrl,
+  collectionTitle,
+  id,
+  autoAdvanceDelay = 3000,
+} = Astro.props as Props;
+
+const safeItems = Array.isArray(items) ? items : [];
+const solutionEntries = safeItems.filter(
+  (item: any) => item?.parent === "website-solutions",
+);
+const contentItems = solutionEntries.length > 0 ? solutionEntries : safeItems;
+const showHeader = Boolean(title || description);
+const viewAllText = `Explore All ${collectionTitle || ""}`.trim();
+const spacingClass = showHeader ? "mt-12" : "";
+const showCTA = shouldShowCollectionCTA(collectionUrl, contentItems.length);
+const bridgeId = id ? `${id}-accordion` : "solution-accordion";
+
+const accordionItems = contentItems.map((item: any, index: number) => {
+  const slug = item?.slug ?? `solution-${index}`;
+  const resolvedTitle = item?.title ?? "Website Solution";
+  const resolvedDescription =
+    item?.description ?? item?.summary ?? item?.excerpt ?? "";
+  const resolvedIcon = item?.icon ?? "fa6-solid:globe";
+
+  return {
+    key: slug,
+    icon: resolvedIcon,
+    title: resolvedTitle,
+    description: resolvedDescription,
+    slug,
+    contentSlotId: `${bridgeId}-slot-${index}`,
+    videoSrc: item?.videoSrc ?? fallbackVideo,
+  };
+});
+---
+
+<section
+  id={id}
+  class={`outer-section bg-bg relative ${className}`.trim()}
+>
+  <div class="section-dim-border"></div>
+
+  <div class="inner-section">
+    {showHeader && (
+      <SectionHeader
+        title={title}
+        heading={title}
+        description={description}
+        className="text-center max-w-3xl mx-auto"
+        titleClassName="tracking-[0.25em]"
+        descriptionClassName="large-text text-text/80"
+      />
+    )}
+
+    {accordionItems.length > 0 && (
+      <ContentBridge items={contentItems} bridgeId={bridgeId}>
+        <VideoAccordion
+          items={accordionItems}
+          autoAdvanceDelay={autoAdvanceDelay}
+          className={spacingClass}
+          client:visible
+        />
+      </ContentBridge>
+    )}
+
+    {showCTA && (
+      <div class="mt-12 text-center">
+        <Button
+          client:visible
+          href={collectionUrl}
+          rightIcon="lu:chevron-right"
+          variant="secondary"
+        >
+          {viewAllText}
+        </Button>
+      </div>
+    )}
+  </div>
+</section>

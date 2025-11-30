@@ -52,7 +52,7 @@ export default function useEngagementAutoplay({
     resumeDelay,
   });
 
-  const { advance } = useAutoplay({
+  const { advance, schedule } = useAutoplay({
     totalItems,
     currentIndex,
     setIndex,
@@ -200,10 +200,12 @@ export default function useEngagementAutoplay({
       resume,
       engageUser,
       advance,
+      schedule,
       beginGraceWindow,
     }),
     [
       advance,
+      schedule,
       beginGraceWindow,
       engageUser,
       isPaused,
