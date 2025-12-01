@@ -16,7 +16,7 @@ export default function ThemeControls({ className = "" }: ThemeControlsProps) {
       ref={ref}
       className={[
         "flex items-center gap-1.5",
-        "transition-opacity duration-300 ease-in-out",
+        "transition-opacity duration-300 ease-in-out z-999999",
         hidden
           ? "opacity-0 pointer-events-none"
           : "opacity-100 pointer-events-auto",
