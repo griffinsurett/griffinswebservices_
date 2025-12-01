@@ -39,7 +39,8 @@ const showHeader = Boolean(title || description);
 const viewAllText = `Explore All ${collectionTitle || ""}`.trim();
 const spacingClass = showHeader ? "mt-12" : "";
 const showCTA =
-  showButtonSection && shouldShowCollectionCTA(collectionUrl, contentItems.length);
+  showButtonSection &&
+  shouldShowCollectionCTA(collectionUrl, contentItems.length);
 const bridgeId = id ? `${id}-accordion` : "solution-accordion";
 
 const accordionItems = contentItems.map((item: any, index: number) => {
@@ -65,46 +66,49 @@ const accordionItems = contentItems.map((item: any, index: number) => {
 });
 ---
 
-<section
-  id={id}
-  class={`outer-section bg-bg relative ${className}`.trim()}
->
-  <div class="section-dim-border"></div>
+<section id={id} class={`outer-section bg-bg relative ${className}`.trim()}>
+  <!-- <div class="section-dim-border"></div> -->
 
   <div class="inner-section">
-    {showHeader && (
-      <SectionHeader
-        title={title}
-        heading={title}
-        description={description}
-        className="text-center max-w-3xl mx-auto"
-        titleClassName="tracking-[0.25em]"
-        descriptionClassName="large-text text-text/80"
-      />
-    )}
-
-    {accordionItems.length > 0 && (
-      <ContentBridge items={contentItems} bridgeId={bridgeId}>
-        <VideoAccordion
-          items={accordionItems}
-          autoAdvanceDelay={autoAdvanceDelay}
-          className={spacingClass}
-          client:visible
+    {
+      showHeader && (
+        <SectionHeader
+          title={title}
+          heading={title}
+          description={description}
+          className="text-center max-w-3xl mx-auto"
+          titleClassName="tracking-[0.25em]"
+          descriptionClassName="large-text text-text/80"
         />
-      </ContentBridge>
-    )}
+      )
+    }
 
-    {showCTA && (
-      <div class="mt-12 text-center">
-        <Button
-          client:visible
-          href={collectionUrl}
-          rightIcon="lu:chevron-right"
-          variant="secondary"
-        >
-          {viewAllText}
-        </Button>
-      </div>
-    )}
+    {
+      accordionItems.length > 0 && (
+        <ContentBridge items={contentItems} bridgeId={bridgeId}>
+          <VideoAccordion
+            items={accordionItems}
+            autoAdvanceDelay={autoAdvanceDelay}
+            className={spacingClass}
+            client:visible
+          />
+        </ContentBridge>
+      )
+    }
+
+    {
+      showCTA && (
+        <div class="buttons-section-center">
+          <Button
+            client:visible
+            href={collectionUrl}
+            rightIcon="lu:chevron-right"
+            variant="secondary"
+          >
+            {viewAllText}
+          </Button>
+        </div>
+      )
+    }
   </div>
 </section>

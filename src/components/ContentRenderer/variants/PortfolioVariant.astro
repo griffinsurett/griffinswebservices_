@@ -43,12 +43,12 @@ const isImageMetadata = (img: unknown): img is AstroImageMetadata => {
       typeof img === "object" &&
       "width" in img &&
       "height" in img &&
-      "src" in img
+      "src" in img,
   );
 };
 
 const resolveImageMetadata = (
-  img?: ImageInput | null
+  img?: ImageInput | null,
 ): AstroImageMetadata | undefined => {
   if (!img) return undefined;
 
@@ -75,7 +75,7 @@ const processedItems = safeItems.map((item, index) => {
   const metadata = resolveImageMetadata(primaryImage);
   const altText = primaryImage
     ? getImageAlt(primaryImage, item.title ?? "Project preview")
-    : item.title ?? "Project preview";
+    : (item.title ?? "Project preview");
 
   return {
     data: {
@@ -126,36 +126,40 @@ const viewAllText = `View All ${ctaLabelSource}`.trim();
       autoAdvanceDelay={autoAdvanceDelay}
       className={`${showHeader ? "mt-12" : ""}`.trim()}
     >
-      {carouselMedia.map((media) =>
-        media ? (
-          <Image
-            data-portfolio-media
-            src={media.metadata}
-            alt={media.alt}
-            loading="lazy"
-            widths={[480, 640, 860, 1024, 1280, 1600]}
-            sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 860px"
-            class="block w-full h-auto min-h-full select-none object-cover object-top"
-            draggable="false"
-          />
-        ) : (
-          <span data-portfolio-placeholder class="hidden" />
+      {
+        carouselMedia.map((media) =>
+          media ? (
+            <Image
+              data-portfolio-media
+              src={media.metadata}
+              alt={media.alt}
+              loading="lazy"
+              widths={[480, 640, 860, 1024, 1280, 1600]}
+              sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 860px"
+              class="block w-full h-auto min-h-full select-none object-cover object-top"
+              draggable="false"
+            />
+          ) : (
+            <span data-portfolio-placeholder class="hidden" />
+          ),
         )
-      )}
+      }
     </PortfolioCarousel>
 
-    {showButtonSection &&
-      shouldShowCollectionCTA(collectionUrl, portfolioItems.length) && (
-      <div class="mt-12 text-center">
-        <Button
-          client:visible
-          href={collectionUrl}
-          rightIcon="lu:arrow-right"
-          variant="secondary"
-        >
-          {viewAllText}
-        </Button>
-      </div>
-    )}
+    {
+      showButtonSection &&
+        shouldShowCollectionCTA(collectionUrl, portfolioItems.length) && (
+          <div class="buttons-section-center">
+            <Button
+              client:visible
+              href={collectionUrl}
+              rightIcon="lu:arrow-right"
+              variant="secondary"
+            >
+              {viewAllText}
+            </Button>
+          </div>
+        )
+    }
   </div>
 </section>

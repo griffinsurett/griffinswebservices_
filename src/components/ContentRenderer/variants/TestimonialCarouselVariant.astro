@@ -46,17 +46,20 @@ const viewAllText = `View All ${collectionTitle || heading}`.trim();
 
     <TestimonialCarousel client:visible items={safeItems} />
 
-    {showButtonSection && shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
-      <div class="mt-12 text-center">
-        <Button
-          client:load
-          href={collectionUrl}
-          rightIcon="lu:chevron-right"
-          variant="secondary"
-        >
-          {viewAllText}
-        </Button>
-      </div>
-    )}
+    {
+      showButtonSection &&
+        shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
+          <div class="buttons-section-center">
+            <Button
+              client:load
+              href={collectionUrl}
+              rightIcon="lu:chevron-right"
+              variant="secondary"
+            >
+              {viewAllText}
+            </Button>
+          </div>
+        )
+    }
   </div>
 </section>

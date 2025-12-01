@@ -24,7 +24,6 @@ const heroTagline = {
 
 const heroDescription =
   "We design, build, and maintain credible sites that load instantly and stay cared for, so you can stay focused on the business.";
-
 ---
 
 <BaseLayout title="Home" description={siteData.description}>
@@ -46,7 +45,7 @@ const heroDescription =
       />
     </FrontPageHero>
 
-        <ContentRenderer
+    <ContentRenderer
       query={query("capabilities")
         .where((entry) => entry.data.parent === "website-services")
         .orderBy(sortByOrder())
@@ -57,9 +56,10 @@ const heroDescription =
       showButtonSection={false}
       title="Website Services"
       description="The three pillars every engagement includes: design, dependable engineering, and proactive care."
+      className="bg-bg pt-35 lg:pt-25"
     />
 
-    <ContentRenderer query={query("projects")} variant="PortfolioVariant" />
+    <!-- <ContentRenderer query={query("projects")} variant="PortfolioVariant" /> -->
 
     <ContentRenderer
       query={query("solutions")

@@ -87,16 +87,16 @@ const getRingDuration = (item: Record<string, any>) =>
   {
     showButtonSection &&
       shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
-      <div class="mt-12 text-center">
-        <Button
-          client:visible
-          href={collectionUrl}
-          rightIcon="lu:arrow-right"
-          variant="primary"
-        >
-          {viewAllText}
-        </Button>
-      </div>
-    )
+        <div class="buttons-section-center">
+          <Button
+            client:visible
+            href={collectionUrl}
+            rightIcon="lu:arrow-right"
+            variant="primary"
+          >
+            {viewAllText}
+          </Button>
+        </div>
+      )
   }
 </section>

@@ -97,7 +97,7 @@ function ComputerScreen({
     speed: resolveAutoScrollSpeed,
     loop: false,
     startDelay: AUTO_SCROLL_START_DELAY_MS,
-    resumeDelay: 1200,
+    resumeDelay: 600,
     resumeOnUserInput: true,
     threshold: 0.05,
     resetOnInactive: false,

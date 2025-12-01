@@ -358,7 +358,7 @@ body {
   }
 
   .inner-section {
-    @apply w-9/10 lg:max-w-6xl mx-auto;
+    @apply w-9/10 lg:max-w-7xl lg:px-2 mx-auto;
   }
 
   .inner-section-sm {
@@ -367,6 +367,10 @@ body {
 
   .section-box {
     @apply rounded-3xl p-8 lg:p-12 relative overflow-hidden;
+  }
+
+  .buttons-section-center {
+    @apply text-center mt-12 w-2/3 lg:w-1/2 mx-auto;
   }
 
   .section-dim-border {

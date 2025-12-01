@@ -73,7 +73,7 @@ export const ButtonBase = forwardRef<HTMLButtonElement | HTMLAnchorElement, Butt
       fullWidth: _fullWidth,
       leftIcon,
       rightIcon,
-      size = 'md',
+      size = 'lg',
       children,
       unstyled = false,
       animated: _animated,

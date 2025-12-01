@@ -20,7 +20,7 @@ const {
   items = [],
   title,
   description,
-  className = "",
+  className = "outer-section bg-bg",
   columns = 3,
   collectionUrl,
   collectionTitle,
@@ -36,11 +36,15 @@ const safeItems: FeatureCardData[] = Array.isArray(items)
 const itemToRecord = (item: FeatureCardData): Record<string, any> | null =>
   item && typeof item === "object" ? (item as Record<string, any>) : null;
 
-const resolveCardClassName = (item: FeatureCardData, _index: number): string => {
+const resolveCardClassName = (
+  item: FeatureCardData,
+  _index: number,
+): string => {
   const record = itemToRecord(item);
   if (!record) return "";
   const classes = [record.class, record.className].filter(
-    (value): value is string => typeof value === "string" && value.trim().length > 0
+    (value): value is string =>
+      typeof value === "string" && value.trim().length > 0,
   );
   return classes.join(" ");
 };
@@ -56,18 +60,20 @@ const gridMarginClass = showHeader ? "mt-12" : "";
 
 <section
   id={id}
-  class={`outer-section bg-bg2 relative overflow-hidden ${className}`.trim()}
+  class={`relative overflow-hidden ${className}`.trim()}
 >
-  <!-- <div class="section-dim-border"></div> -->
+  <div class="section-dim-border"></div>
 
   <div class="inner-section">
-    {showHeader && (
-      <SectionHeader
-        title={title}
-        heading={title}
-        description={description}
-      />
-    )}
+    {
+      showHeader && (
+        <SectionHeader
+          title={title}
+          heading={title}
+          description={description}
+        />
+      )
+    }
 
     <CardRenderer
       items={safeItems}
@@ -77,17 +83,20 @@ const gridMarginClass = showHeader ? "mt-12" : "";
       getRingDuration={resolveRingDuration}
     />
 
-    {showButtonSection && shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
-      <div class="mt-12 text-center">
-        <Button
-          client:visible
-          href={collectionUrl}
-          rightIcon="lu:chevron-right"
-          variant="secondary"
-        >
-          {viewAllText}
-        </Button>
-      </div>
-    )}
+    {
+      showButtonSection &&
+        shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
+          <div class="buttons-section-center">
+            <Button
+              client:visible
+              href={collectionUrl}
+              rightIcon="lu:chevron-right"
+              variant="secondary"
+            >
+              {viewAllText}
+            </Button>
+          </div>
+        )
+    }
   </div>
 </section>
