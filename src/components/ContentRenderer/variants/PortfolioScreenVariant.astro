@@ -89,13 +89,13 @@ const showcaseOptimizedMedia = processedItems.map((entry) => entry.mediaMetadata
 
 <section
   id={id}
-  class={`relative rounded-lg overflow-hidden ${className}`.trim()}
+  class={`relative rounded-lg overflow-hidden p-6 ${className}`.trim()}
 >
   <PortfolioScreenShowcase
     client:idle
     items={portfolioItems}
     mediaEntries={showcaseMedia}
-    className="max-w-5xl mx-auto"
+    className="w-full mx-auto"
   >
     {showcaseOptimizedMedia.map((metadata, index) =>
       metadata ? (
