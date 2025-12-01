@@ -4,6 +4,7 @@ import Counter from "@/components/Counter";
 import Heading from "@/components/Heading";
 import Placeholder from "@/assets/placeholder.jpg";
 import type { BaseVariantProps } from "../ContentRenderer.types";
+import { toArray } from "@/utils/array";
 
 interface Props extends BaseVariantProps {
   counterStart?: number;
@@ -32,7 +33,8 @@ const {
   id,
 } = Astro.props as Props;
 
-const faces = items.slice(0, 3);
+const safeItems = toArray(items);
+const faces = safeItems.slice(0, 3);
 if (faces.length === 0) {
   return;
 }

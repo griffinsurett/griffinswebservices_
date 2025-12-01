@@ -6,6 +6,7 @@ import type { BaseVariantProps } from "../ContentRenderer.types";
 import PortfolioScreenShowcase from "@/components/LoopTemplates/PortfolioScreenShowcase";
 import type { ImageInput } from "@/content/schema";
 import { getImageAlt } from "@/utils/images";
+import { toArray } from "@/utils/array";
 
 interface Props extends BaseVariantProps {}
 
@@ -19,7 +20,7 @@ const {
   id,
 } = Astro.props as Props;
 
-const safeItems = Array.isArray(items) ? (items as Record<string, any>[]) : [];
+const safeItems = toArray(items);
 
 if (!safeItems.length) {
   return;

@@ -1,8 +1,8 @@
 ---
 // src/components/ContentRenderer/variants/TechnologiesVariant.astro
 import type { BaseVariantProps } from "../ContentRenderer.types";
-import SectionHeader from "@/components/SectionHeader.astro";
 import TechStackSection from "@/components/LoopTemplates/TechStackSection";
+import { toArray } from "@/utils/array";
 
 interface Props extends BaseVariantProps {}
 
@@ -12,14 +12,10 @@ const {
   description,
   className = "",
   id,
+  collectionTitle,
 } = Astro.props as Props;
 
-const safeItems = Array.isArray(items) ? (items as Record<string, any>[]) : [];
-const heading = title ?? "Technologies We Trust";
-const eyebrowText = heading;
-const descriptionText =
-  description ??
-  "From modern frameworks to hosting infrastructure, we build with tools that scale.";
+const safeItems = toArray(items);
 ---
 
 <section
@@ -28,11 +24,13 @@ const descriptionText =
 >
   <div class="section-dim-border"></div>
 
-  <TechStackSection
-    client:visible
-    technologies={safeItems}
-    eyebrow={eyebrowText}
-    title={heading}
-    description={descriptionText}
-  />
+  {safeItems.length > 0 && (
+    <TechStackSection
+      client:visible
+      technologies={safeItems}
+      eyebrow={collectionTitle ?? title}
+      title={title ?? collectionTitle}
+      description={description}
+    />
+  )}
 </section>

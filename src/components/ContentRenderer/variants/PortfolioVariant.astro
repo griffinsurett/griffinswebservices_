@@ -14,12 +14,16 @@ import PortfolioCarousel from "@/components/LoopTemplates/PortfolioCarousel";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import type { ImageInput } from "@/content/schema";
 import { getImageAlt } from "@/utils/images";
+import { toArray } from "@/utils/array";
 
 type AstroImageMetadata = ImageMetadata & { orientation?: number };
 
 interface Props extends BaseVariantProps {
   autoplay?: boolean;
   autoAdvanceDelay?: number;
+  ctaHref?: string;
+  ctaText?: string;
+  ctaCollectionLabel?: string;
 }
 
 const {
@@ -33,9 +37,12 @@ const {
   autoplay = true,
   autoAdvanceDelay = 7000,
   showButtonSection = true,
+  ctaHref,
+  ctaText,
+  ctaCollectionLabel,
 } = Astro.props as Props;
 
-const safeItems = Array.isArray(items) ? (items as Record<string, any>[]) : [];
+const safeItems = toArray(items) as Record<string, any>[];
 
 const isImageMetadata = (img: unknown): img is AstroImageMetadata => {
   return Boolean(
@@ -94,13 +101,7 @@ const processedItems = safeItems.map((item, index) => {
 
 const portfolioItems = processedItems.map((entry) => entry.data);
 const carouselMedia = processedItems.map((entry) => entry.media);
-
-const fallbackTitle = title ?? collectionTitle ?? "Portfolio";
-const headerTitle = title ?? fallbackTitle;
-const headerEyebrow = headerTitle;
-const showHeader = Boolean(headerTitle || description);
-const ctaLabelSource = collectionTitle || headerTitle || "Projects";
-const viewAllText = `View All ${ctaLabelSource}`.trim();
+const showHeader = Boolean(title || collectionTitle || description);
 ---
 
 <section
@@ -110,24 +111,26 @@ const viewAllText = `View All ${ctaLabelSource}`.trim();
   <div class="section-dim-border"></div>
 
   <div class="">
-    <SectionHeader
-      title={headerEyebrow}
-      heading={headerTitle}
-      description={description}
-      className="text-center"
-      headingClassName="h2 mb-6"
-      descriptionClassName="large-text max-w-2xl mx-auto"
-    />
+    {showHeader && (
+      <SectionHeader
+        title={ctaCollectionLabel ?? collectionTitle ?? title}
+        heading={title ?? collectionTitle}
+        description={description}
+        className="text-center"
+        headingClassName="h2 mb-6"
+        descriptionClassName="large-text max-w-2xl mx-auto"
+      />
+    )}
 
-    <PortfolioCarousel
-      client:visible
-      items={portfolioItems}
-      autoplay={autoplay}
-      autoAdvanceDelay={autoAdvanceDelay}
-      className={`${showHeader ? "mt-12" : ""}`.trim()}
-    >
-      {
-        carouselMedia.map((media) =>
+    {portfolioItems.length > 0 && (
+      <PortfolioCarousel
+        client:visible
+        items={portfolioItems}
+        autoplay={autoplay}
+        autoAdvanceDelay={autoAdvanceDelay}
+        className={showHeader ? "mt-12" : ""}
+      >
+        {carouselMedia.map((media) =>
           media ? (
             <Image
               data-portfolio-media
@@ -142,24 +145,24 @@ const viewAllText = `View All ${ctaLabelSource}`.trim();
           ) : (
             <span data-portfolio-placeholder class="hidden" />
           ),
-        )
-      }
-    </PortfolioCarousel>
+        )}
+      </PortfolioCarousel>
+    )}
 
-    {
-      showButtonSection &&
-        shouldShowCollectionCTA(collectionUrl, portfolioItems.length) && (
-          <div class="buttons-section-center">
-            <Button
-              client:visible
-              href={collectionUrl}
-              rightIcon="lu:arrow-right"
-              variant="secondary"
-            >
-              {viewAllText}
-            </Button>
-          </div>
-        )
-    }
+    {showButtonSection &&
+      shouldShowCollectionCTA(collectionUrl, portfolioItems.length) &&
+      (ctaText || ctaCollectionLabel || collectionTitle) &&
+      (ctaHref || collectionUrl) && (
+      <div class="buttons-section-center">
+        <Button
+          client:visible
+          href={ctaHref ?? collectionUrl}
+          rightIcon="lu:arrow-right"
+          variant="secondary"
+        >
+          {ctaText ?? `View All ${(ctaCollectionLabel ?? collectionTitle ?? "").trim()}`}
+        </Button>
+      </div>
+    )}
   </div>
 </section>

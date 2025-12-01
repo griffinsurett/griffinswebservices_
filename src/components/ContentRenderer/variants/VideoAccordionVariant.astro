@@ -12,10 +12,14 @@ import Button from "@/components/Button/Button";
 import ContentBridge from "@/components/ContentRenderer/ContentBridge/ContentBridge.astro";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import fallbackVideo from "@/assets/Black-Microwave-Earrape.mp4";
+import { toArray } from "@/utils/array";
 
 interface Props extends BaseVariantProps {
   items?: any[];
   autoAdvanceDelay?: number;
+  ctaHref?: string;
+  ctaText?: string;
+  ctaCollectionLabel?: string;
 }
 
 const {
@@ -28,87 +32,74 @@ const {
   id,
   autoAdvanceDelay = 3000,
   showButtonSection = true,
+  ctaHref,
+  ctaText,
+  ctaCollectionLabel,
 } = Astro.props as Props;
 
-const safeItems = Array.isArray(items) ? items : [];
+const safeItems = toArray(items);
 const solutionEntries = safeItems.filter(
   (item: any) => item?.parent === "website-solutions",
 );
 const contentItems = solutionEntries.length > 0 ? solutionEntries : safeItems;
 const showHeader = Boolean(title || description);
-const viewAllText = `Explore All ${collectionTitle || ""}`.trim();
-const spacingClass = showHeader ? "mt-12" : "";
-const showCTA =
-  showButtonSection &&
-  shouldShowCollectionCTA(collectionUrl, contentItems.length);
-const bridgeId = id ? `${id}-accordion` : "solution-accordion";
 
 const accordionItems = contentItems.map((item: any, index: number) => {
   const slug = item?.slug ?? `solution-${index}`;
-  const resolvedTitle = item?.title ?? "Website Solution";
-  const resolvedDescription =
-    item?.description ?? item?.summary ?? item?.excerpt ?? "";
-  const resolvedIcon = item?.icon ?? "fa6-solid:globe";
   const hasPage = item?.hasPage !== false && Boolean(item?.url);
-  const url = hasPage ? item?.url : undefined;
 
   return {
     key: slug,
-    icon: resolvedIcon,
-    title: resolvedTitle,
-    description: resolvedDescription,
+    icon: item?.icon,
+    title: item?.title,
+    description: item?.description ?? item?.summary ?? item?.excerpt,
     slug,
-    contentSlotId: `${bridgeId}-slot-${index}`,
+    contentSlotId: `${id}-slot-${index}`,
     videoSrc: item?.videoSrc ?? fallbackVideo,
     hasPage,
-    url,
+    url: hasPage ? item?.url : undefined,
   };
 });
 ---
 
 <section id={id} class={`outer-section bg-bg relative ${className}`.trim()}>
-  <!-- <div class="section-dim-border"></div> -->
-
   <div class="inner-section">
-    {
-      showHeader && (
-        <SectionHeader
-          title={title}
-          heading={title}
-          description={description}
-          className="text-center max-w-3xl mx-auto"
-          titleClassName="tracking-[0.25em]"
-          descriptionClassName="large-text text-text/80"
+    {showHeader && (
+      <SectionHeader
+        title={ctaCollectionLabel ?? collectionTitle ?? title}
+        heading={title ?? collectionTitle}
+        description={description}
+        className="text-center max-w-3xl mx-auto"
+        titleClassName="tracking-[0.25em]"
+        descriptionClassName="large-text text-text/80"
+      />
+    )}
+
+    {accordionItems.length > 0 && (
+      <ContentBridge items={contentItems} bridgeId={id}>
+        <VideoAccordion
+          items={accordionItems}
+          autoAdvanceDelay={autoAdvanceDelay}
+          className={showHeader ? "mt-12" : ""}
+          client:visible
         />
-      )
-    }
+      </ContentBridge>
+    )}
 
-    {
-      accordionItems.length > 0 && (
-        <ContentBridge items={contentItems} bridgeId={bridgeId}>
-          <VideoAccordion
-            items={accordionItems}
-            autoAdvanceDelay={autoAdvanceDelay}
-            className={spacingClass}
-            client:visible
-          />
-        </ContentBridge>
-      )
-    }
-
-    {
-      showCTA && (
-        <div class="buttons-section-center">
-          <Button
-            client:visible
-            href={collectionUrl}
-            rightIcon="lu:arrow-right"
-            variant="secondary"
-          >
-            {viewAllText}
-          </Button>
-        </div>
-      )
-    }
+    {showButtonSection &&
+      shouldShowCollectionCTA(collectionUrl, contentItems.length) &&
+      (ctaText || ctaCollectionLabel || collectionTitle) &&
+      (ctaHref || collectionUrl) && (
+      <div class="buttons-section-center">
+        <Button
+          client:visible
+          href={ctaHref ?? collectionUrl}
+          rightIcon="lu:arrow-right"
+          variant="secondary"
+        >
+          {ctaText ?? `View All ${(ctaCollectionLabel ?? collectionTitle ?? "").trim()}`}
+        </Button>
+      </div>
+    )}
   </div>
 </section>

@@ -1,5 +1,5 @@
 ---
-// src/components/ContentRenderer/variants/CardVariant.astro
+// src/components/ContentRenderer/variants/MasonryVariant.astro
 /**
  * Masonry Variant - Pinterest-style CSS columns layout
  * Features: Variable height items, 1-4 responsive columns, compact layout
@@ -9,8 +9,13 @@ import type { BaseVariantProps } from "../ContentRenderer.types";
 import FeatureCard from "@/components/LoopComponents/FeatureCard";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import Button from "@/components/Button/Button";
+import { toArray } from "@/utils/array";
 
-type Props = BaseVariantProps;
+interface Props extends BaseVariantProps {
+  ctaHref?: string;
+  ctaText?: string;
+  ctaCollectionLabel?: string;
+}
 
 const {
   items = [],
@@ -21,17 +26,14 @@ const {
   collectionTitle,
   id,
   showButtonSection = true,
+  ctaHref,
+  ctaText,
+  ctaCollectionLabel,
 } = Astro.props as Props;
 
-const viewAllText = collectionTitle?.toLowerCase().includes("testimonial")
-  ? "Read More Reviews"
-  : collectionTitle?.toLowerCase().includes("projects")
-    ? "View Full Gallery"
-    : `Browse All ${collectionTitle || ""}`.trim();
+const safeItems = toArray(items);
 
-const safeItems = Array.isArray(items) ? (items as Record<string, any>[]) : [];
-
-const getCardClassName = (item: any = "") =>
+const getCardClassName = (item: any) =>
   ["break-inside-avoid mb-6", item?.class ?? item?.className ?? ""]
     .filter(Boolean)
     .join(" ");
@@ -41,58 +43,46 @@ const getRingDuration = (item: Record<string, any>) =>
 ---
 
 <section id={id} class={`py-16 ${className}`}>
-  {
-    (title || description) && (
-      <div class="text-center mb-12">
-        {title && <h2 class="text-4xl text-heading font-bold mb-4">{title}</h2>}
-        {description && (
-          <p class="text-lg text-text max-w-2xl mx-auto">{description}</p>
-        )}
-      </div>
-    )
-  }
+  {(title || description) && (
+    <div class="text-center mb-12">
+      {title && <h2 class="text-4xl text-heading font-bold mb-4">{title}</h2>}
+      {description && (
+        <p class="text-lg text-text max-w-2xl mx-auto">{description}</p>
+      )}
+    </div>
+  )}
 
-  {
-    safeItems.length > 0 && (
-      <ul class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 list-none">
-        {safeItems.map(
-          (item) =>
-            item && (
-              <li class="inline-block w-full">
-                <FeatureCard
-                  client:visible
-                  data={item}
-                  ringDuration={getRingDuration(item)}
-                  className={getCardClassName(item)}
-                />
-              </li>
-            ),
-        )}
-      </ul>
-    )
-  }
-
-  {
-    showButtonSection &&
-      shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
-        <div class="buttons-section-center">
-          <Button client:visible href={collectionUrl} variant="primary">
-            {viewAllText}
-            <svg
-              class="ml-2 w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
+  {safeItems.length > 0 && (
+    <ul class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 list-none">
+      {safeItems.map(
+        (item) =>
+          item && (
+            <li class="inline-block w-full">
+              <FeatureCard
+                client:visible
+                data={item}
+                ringDuration={getRingDuration(item)}
+                className={getCardClassName(item)}
               />
-            </svg>
-          </Button>
-        </div>
-      )
-  }
+            </li>
+          ),
+      )}
+    </ul>
+  )}
+
+  {showButtonSection &&
+    shouldShowCollectionCTA(collectionUrl, safeItems.length) &&
+    (ctaText || ctaCollectionLabel || collectionTitle) &&
+    (ctaHref || collectionUrl) && (
+    <div class="buttons-section-center">
+      <Button
+        client:visible
+        href={ctaHref ?? collectionUrl}
+        rightIcon="lu:arrow-right"
+        variant="primary"
+      >
+        {ctaText ?? `View All ${(ctaCollectionLabel ?? collectionTitle ?? "").trim()}`}
+      </Button>
+    </div>
+  )}
 </section>

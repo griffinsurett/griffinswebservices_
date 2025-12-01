@@ -2,7 +2,7 @@
 // src/components/ContentRenderer/variants/MenuVariant.astro
 /**
  * Menu Variant - Responsive Navigation Menu
- * 
+ *
  * Now expects items to be passed with potential parent relationships.
  * Builds tree structure from flat items.
  */
@@ -12,6 +12,7 @@ import MenuList from '@/components/LoopTemplates/Menu/MenuList.astro';
 import MobileMenuDrawer from '@/components/Menu/HamburgerMenuDrawer';
 import { buildMenuTree } from '@/utils/menuQueries';
 import { isTopLevelPlacement } from '@/utils/navigation/topLevelCheck';
+import { toArray } from "@/utils/array";
 
 type MenuMode = 'responsive' | 'flat-only' | 'hamburger-only';
 
@@ -32,8 +33,10 @@ const {
   hamburgerTransform = true,
 } = Astro.props as Props;
 
+const safeItems = toArray(items);
+
 // Build hierarchical tree from flat items
-const menuTree = buildMenuTree(items);
+const menuTree = buildMenuTree(safeItems);
 
 // Determine which versions to show based on mode
 const showDesktop = mode === 'responsive' || mode === 'flat-only';

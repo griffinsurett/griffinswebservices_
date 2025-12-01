@@ -4,6 +4,7 @@ import type { BaseVariantProps } from "../ContentRenderer.types";
 import type { FeatureCardData } from "@/components/LoopComponents/FeatureCard";
 import SectionHeader from "@/components/SectionHeader.astro";
 import CardRenderer from "@/components/LoopTemplates/CardRenderer.astro";
+import { toArray } from "@/utils/array";
 
 interface Props extends BaseVariantProps {
   columns?: 1 | 2 | 3 | 4;
@@ -19,13 +20,8 @@ const {
   collectionTitle,
 } = Astro.props as Props;
 
-const safeItems: FeatureCardData[] = Array.isArray(items)
-  ? (items as FeatureCardData[])
-  : [];
-
-const headingContent = title ?? collectionTitle;
-const eyebrowContent = collectionTitle;
-const showHeader = Boolean(eyebrowContent || headingContent || description);
+const safeItems = toArray(items) as FeatureCardData[];
+const showHeader = Boolean(title || collectionTitle || description);
 
 const featureCardProps = {
   listItemProps: {
@@ -45,8 +41,8 @@ const featureCardProps = {
   <div class="space-y-10">
     {showHeader && (
       <SectionHeader
-        title={eyebrowContent}
-        heading={headingContent}
+        title={collectionTitle ?? title}
+        heading={title ?? collectionTitle}
         description={description}
         className="text-center"
         headingClassName="h2 mb-4"
@@ -54,10 +50,12 @@ const featureCardProps = {
       />
     )}
 
-    <CardRenderer
-      items={safeItems}
-      columns={columns}
-      featureCardProps={featureCardProps}
-    />
+    {safeItems.length > 0 && (
+      <CardRenderer
+        items={safeItems}
+        columns={columns}
+        featureCardProps={featureCardProps}
+      />
+    )}
   </div>
 </section>

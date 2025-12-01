@@ -5,8 +5,13 @@ import SectionHeader from "@/components/SectionHeader.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import TestimonialCarousel from "@/components/LoopTemplates/TestimonialCarousel";
+import { toArray } from "@/utils/array";
 
-interface Props extends BaseVariantProps {}
+interface Props extends BaseVariantProps {
+  ctaHref?: string;
+  ctaText?: string;
+  ctaCollectionLabel?: string;
+}
 
 const {
   items = [],
@@ -17,15 +22,12 @@ const {
   collectionTitle,
   id,
   showButtonSection = true,
+  ctaHref,
+  ctaText,
+  ctaCollectionLabel,
 } = Astro.props as Props;
 
-const safeItems = Array.isArray(items) ? (items as Record<string, any>[]) : [];
-const heading = title ?? "What Our Clients Say";
-const eyebrowText = heading;
-const descriptionText =
-  description ??
-  "Don't just take our word for it—hear directly from the partners we've helped grow.";
-const viewAllText = `View All ${collectionTitle || heading}`.trim();
+const safeItems = toArray(items);
 ---
 
 <section
@@ -35,35 +37,39 @@ const viewAllText = `View All ${collectionTitle || heading}`.trim();
   <div class="section-dim-border"></div>
 
   <div class="inner-section">
-    <SectionHeader
-      title={eyebrowText}
-      heading={heading}
-      description={descriptionText}
-      className="text-section"
-      headingClassName="mb-6"
-      descriptionClassName="large-text"
-    />
+    {(title || collectionTitle || description) && (
+      <SectionHeader
+        title={ctaCollectionLabel ?? collectionTitle ?? title}
+        heading={title ?? collectionTitle}
+        description={description}
+        className="text-section"
+        headingClassName="mb-6"
+        descriptionClassName="large-text"
+      />
+    )}
 
-    <TestimonialCarousel
-      client:visible
-      items={safeItems}
-      slidesPerView={{ base: 1, lg: 2 }}
-    />
+    {safeItems.length > 0 && (
+      <TestimonialCarousel
+        client:visible
+        items={safeItems}
+        slidesPerView={{ base: 1, lg: 2 }}
+      />
+    )}
 
-    {
-      showButtonSection &&
-        shouldShowCollectionCTA(collectionUrl, safeItems.length) && (
-          <div class="buttons-section-center">
-            <Button
-              client:load
-              href={collectionUrl}
-              rightIcon="lu:arrow-right"
-              variant="secondary"
-            >
-              {viewAllText}
-            </Button>
-          </div>
-        )
-    }
+    {showButtonSection &&
+      shouldShowCollectionCTA(collectionUrl, safeItems.length) &&
+      (ctaText || ctaCollectionLabel || collectionTitle) &&
+      (ctaHref || collectionUrl) && (
+      <div class="buttons-section-center">
+        <Button
+          client:load
+          href={ctaHref ?? collectionUrl}
+          rightIcon="lu:arrow-right"
+          variant="secondary"
+        >
+          {ctaText ?? `View All ${(ctaCollectionLabel ?? collectionTitle ?? "").trim()}`}
+        </Button>
+      </div>
+    )}
   </div>
 </section>
