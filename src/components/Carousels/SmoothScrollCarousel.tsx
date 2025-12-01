@@ -2,6 +2,7 @@
 import {
   Children,
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -124,7 +125,14 @@ const SmoothScrollCarousel = forwardRef<
 
   const totalWidth = baseLength * itemWidth;
 
-  const { engageUser, isAutoplayPaused, userEngaged, isResumeScheduled } =
+  const {
+    engageUser,
+    isAutoplayPaused,
+    userEngaged,
+    isResumeScheduled,
+    pause,
+    resume,
+  } =
     useEngagementAutoplay({
       totalItems: Math.max(baseLength, 1),
       currentIndex:
@@ -180,14 +188,43 @@ const SmoothScrollCarousel = forwardRef<
     return () => cancelAnimationFrame(animationId);
   }, [canAnimate, speed, totalWidth]);
 
+  const hoverResumeTimerRef = useRef<number | null>(null);
+
+  const clearHoverResume = useCallback(() => {
+    if (hoverResumeTimerRef.current) {
+      window.clearTimeout(hoverResumeTimerRef.current);
+      hoverResumeTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleHoverResume = useCallback(() => {
+    clearHoverResume();
+    hoverResumeTimerRef.current = window.setTimeout(() => {
+      resume();
+      hoverResumeTimerRef.current = null;
+    }, resumeDelay);
+  }, [clearHoverResume, resume, resumeDelay]);
+
   const handleItemInteraction = (payload: any, index: number, type: string) => {
-    if (pauseOnEngage) engageUser();
+    if (pauseOnEngage) {
+      engageUser();
+      pause();
+    }
     onItemInteraction?.(payload, index, type);
   };
 
   const handleMouseEnterContainer = () => {
-    if (pauseOnHover) engageUser();
+    if (!pauseOnHover) return;
+    engageUser();
+    pause();
   };
+
+  const handleMouseLeaveContainer = () => {
+    if (!pauseOnHover) return;
+    scheduleHoverResume();
+  };
+
+  useEffect(() => () => clearHoverResume(), [clearHoverResume]);
 
   const [gradientPx, setGradientPx] = useState(() =>
     typeof window === "undefined"
@@ -215,6 +252,7 @@ const SmoothScrollCarousel = forwardRef<
       className={`relative w-full overflow-hidden ${className}`.trim()}
       data-smooth-carousel
       onMouseEnter={handleMouseEnterContainer}
+      onMouseLeave={handleMouseLeaveContainer}
     >
       {gradientMask && (
         <>

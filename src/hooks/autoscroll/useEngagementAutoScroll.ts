@@ -2,9 +2,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useVisibility } from "@/hooks/animations/useVisibility";
 import {
-  usePointerInteraction,
-  useScrollInteraction,
   useTouchInteraction,
+  useScrollInteraction,
+  usePointerInteraction,
 } from "@/hooks/animations/useInteractions";
 import { useAutoScroll } from "./useAutoScroll";
 
@@ -69,6 +69,7 @@ export function useEngagementAutoScroll({
   const scheduleResume = useCallback(() => {
     if (!resumeOnUserInput) return;
     if (userInteractingRef.current) return;
+
     clearResume();
     setResumeScheduled(true);
     resumeTimerRef.current = setTimeout(() => {
@@ -77,7 +78,7 @@ export function useEngagementAutoScroll({
         setPaused(false);
       }
     }, Math.max(0, resumeDelay));
-  }, [clearResume, resumeDelay, resumeOnUserInput]);
+  }, [resumeOnUserInput, resumeDelay, clearResume]);
 
   const emitUserEvent = useCallback(
     (phase: "start" | "end") => {
@@ -98,7 +99,7 @@ export function useEngagementAutoScroll({
     setUserEngaged(true);
     pauseNow();
     emitUserEvent("start");
-  }, [emitUserEvent, pauseNow]);
+  }, [pauseNow, emitUserEvent]);
 
   const handleInteractionEnd = useCallback(() => {
     userInteractingRef.current = false;
@@ -182,6 +183,7 @@ export function useEngagementAutoScroll({
 
   useEffect(() => {
     if (!resetOnInactive) return;
+
     if (!active || !inView) {
       userInteractingRef.current = false;
       setUserEngaged(false);

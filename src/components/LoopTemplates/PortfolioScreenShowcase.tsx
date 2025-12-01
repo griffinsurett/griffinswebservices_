@@ -24,6 +24,8 @@ interface ScreenProps {
   totalSlides: number;
   activeIndex: number;
   onCycleComplete: () => void;
+  autoplayEnabled?: boolean;
+  isActive: boolean;
 }
 
 const AUTO_SCROLL_START_DELAY_MS = 700;
@@ -37,6 +39,7 @@ const CONTENT_STABLE_WINDOW_MS = 220;
 const CONTENT_STABLE_DELTA_PX = 16;
 const CONTENT_READY_TIMEOUT_MS = 2200;
 const BETWEEN_SLIDE_PAUSE_MS = 900;
+const SLIDE_TRANSITION_DURATION_MS = 750;
 
 const resolveMediaChild = (node?: ReactNode) => {
   if (!node) return undefined;
@@ -52,6 +55,8 @@ function ComputerScreen({
   totalSlides,
   activeIndex,
   onCycleComplete,
+  autoplayEnabled = true,
+  isActive,
 }: ScreenProps) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [mediaReady, setMediaReady] = useState(false);
@@ -59,6 +64,7 @@ function ComputerScreen({
   const [scrollDurationMs, setScrollDurationMs] = useState(
     AUTO_SCROLL_DEFAULT_CYCLE_MS,
   );
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const resolveAutoScrollSpeed = useCallback((host: HTMLElement) => {
     const maxScrollable = Math.max(0, host.scrollHeight - host.clientHeight);
@@ -91,18 +97,17 @@ function ComputerScreen({
     [resolveAutoScrollSpeed],
   );
 
-  useEngagementAutoScroll({
+  const autoScroll = useEngagementAutoScroll({
     ref: viewportRef,
-    active: contentReady,
+    active: autoplayEnabled && contentReady,
     speed: resolveAutoScrollSpeed,
     loop: false,
     startDelay: AUTO_SCROLL_START_DELAY_MS,
     resumeDelay: 1200,
-    resumeOnUserInput: false,
+    resumeOnUserInput: true,
     threshold: 0.05,
-    resetOnInactive: true,
+    resetOnInactive: false,
   });
-
   useEffect(() => {
     const host = viewportRef.current;
     if (!host) return;
@@ -228,7 +233,7 @@ function ComputerScreen({
   }, [mediaReady]);
 
   useEffect(() => {
-    if (!contentReady) {
+    if (!contentReady || !autoplayEnabled) {
       setScrollDurationMs(AUTO_SCROLL_DEFAULT_CYCLE_MS);
       return;
     }
@@ -250,12 +255,42 @@ function ComputerScreen({
   }, [contentReady, measureScrollDuration]);
 
   useEffect(() => {
-    if (!contentReady) return;
+    if (!contentReady || !autoplayEnabled || totalSlides <= 1 || autoScroll.paused) return;
     const totalDuration =
       AUTO_SCROLL_START_DELAY_MS + scrollDurationMs + BETWEEN_SLIDE_PAUSE_MS;
     const timer = window.setTimeout(() => onCycleComplete(), totalDuration);
     return () => window.clearTimeout(timer);
-  }, [contentReady, onCycleComplete, scrollDurationMs]);
+  }, [
+    autoplayEnabled,
+    contentReady,
+    onCycleComplete,
+    scrollDurationMs,
+    totalSlides,
+    autoScroll.paused,
+  ]);
+
+  useEffect(() => {
+    if (!contentReady) {
+      setScrollProgress(0);
+      return;
+    }
+
+    let raf: number | null = null;
+    const tick = () => {
+      const host = viewportRef.current;
+      if (host) {
+        const max = Math.max(0, host.scrollHeight - host.clientHeight);
+        const pct = max > 0 ? (host.scrollTop / max) * 100 : 0;
+        setScrollProgress(Math.round(pct));
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [contentReady]);
 
   const providedMedia = useMemo(() => resolveMediaChild(mediaChild), [mediaChild]);
 
@@ -293,8 +328,8 @@ function ComputerScreen({
   ).padStart(2, "0")}`;
 
   return (
-    <div className="relative mx-auto w-full max-w-4xl">
-      <div className="relative bg-bg3">
+    <div className="relative h-full w-full">
+      <div className="relative h-full bg-bg3">
         <div className="flex flex-col gap-3 border-b border-white/10 px-4 py-3 text-white/70 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/50">
             <span className="flex items-center gap-1.5">
@@ -306,11 +341,21 @@ function ComputerScreen({
         </div>
         <figure
           ref={viewportRef}
-          className="relative h-[420px] overflow-y-auto overscroll-contain bg-black/40 sm:h-[500px]"
+          className="relative h-full overflow-y-auto overscroll-contain bg-black/40"
           style={{ WebkitOverflowScrolling: "touch" }}
         >
           {renderMedia()}
         </figure>
+        {import.meta.env.DEV && isActive && (
+          <div className="absolute right-3 top-3 z-50 space-y-1 rounded-lg border border-white/10 bg-zinc-900/95 p-3 text-xs text-white/90 opacity-80 shadow-lg">
+            <div>Slide {activeIndex + 1} / {totalSlides}</div>
+            <div>Progress: {scrollProgress}%</div>
+            <div>In View: {autoScroll.inView ? "✅" : "❌"}</div>
+            <div>Paused: {autoScroll.paused ? "✅" : "❌"}</div>
+            <div>Engaged: {autoScroll.engaged ? "✅" : "❌"}</div>
+            <div>Resume Pending: {autoScroll.resumeScheduled ? "✅" : "❌"}</div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -325,37 +370,125 @@ export default function PortfolioScreenShowcase({
   const mediaChildren = useMemo(() => Children.toArray(children ?? []), [children]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [cycleCount, setCycleCount] = useState(0);
+  const [prevIndex, setPrevIndex] = useState<number | null>(null);
+  const [transitionStage, setTransitionStage] = useState<"idle" | "pre" | "animating">("idle");
+  const transitionTimerRef = useRef<number | null>(null);
+  const transitionFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!slides.length) {
       setActiveIndex(0);
       setCycleCount(0);
+      setPrevIndex(null);
+      setTransitionStage("idle");
       return;
     }
     setActiveIndex((prev) => (prev >= slides.length ? 0 : prev));
   }, [slides.length]);
 
+  useEffect(
+    () => () => {
+      if (transitionTimerRef.current) {
+        window.clearTimeout(transitionTimerRef.current);
+        transitionTimerRef.current = null;
+      }
+      if (transitionFrameRef.current) {
+        cancelAnimationFrame(transitionFrameRef.current);
+        transitionFrameRef.current = null;
+      }
+    },
+    [],
+  );
+
+  const startSlideTransition = useCallback(
+    (targetIndex: number) => {
+      if (typeof window === "undefined") return;
+      setPrevIndex(activeIndex);
+      setActiveIndex(targetIndex);
+      setTransitionStage("pre");
+
+      if (transitionFrameRef.current) {
+        cancelAnimationFrame(transitionFrameRef.current);
+        transitionFrameRef.current = null;
+      }
+
+      transitionFrameRef.current = requestAnimationFrame(() => {
+        transitionFrameRef.current = requestAnimationFrame(() => {
+          setTransitionStage("animating");
+        });
+      });
+
+      if (transitionTimerRef.current) {
+        window.clearTimeout(transitionTimerRef.current);
+        transitionTimerRef.current = null;
+      }
+
+      transitionTimerRef.current = window.setTimeout(() => {
+        setTransitionStage("idle");
+        setPrevIndex(null);
+        setCycleCount((count) => count + 1);
+      }, SLIDE_TRANSITION_DURATION_MS);
+    },
+    [activeIndex],
+  );
+
   const handleCycleComplete = useCallback(() => {
-    if (!slides.length) return;
-    setActiveIndex((prev) => (slides.length > 1 ? (prev + 1) % slides.length : 0));
-    setCycleCount((count) => count + 1);
-  }, [slides.length]);
+    if (!slides.length || slides.length <= 1) return;
+    if (transitionStage !== "idle") return;
+    const nextIndex = (activeIndex + 1) % slides.length;
+    startSlideTransition(nextIndex);
+  }, [activeIndex, slides.length, startSlideTransition, transitionStage]);
 
   if (!slides.length) return null;
 
   const activeItem = slides[activeIndex];
   const mediaChild = mediaChildren[activeIndex];
-  const renderKey = `${activeItem.slug ?? activeItem.id ?? `portfolio-${activeIndex}`}-${cycleCount}`;
+  const baseTransitionClass =
+    "absolute inset-0 transition-transform transition-opacity duration-[750ms] ease-[cubic-bezier(0.4,0,0.2,1)]";
+  const viewportHeightClasses = "h-[420px] sm:h-[500px]";
+
   return (
     <div className={`relative ${className}`.trim()}>
-      <ComputerScreen
-        key={renderKey}
-        item={activeItem}
-        mediaChild={mediaChild}
-        totalSlides={slides.length || 1}
-        activeIndex={activeIndex}
-        onCycleComplete={handleCycleComplete}
-      />
+      <div className={`relative mx-auto w-full max-w-4xl overflow-hidden ${viewportHeightClasses}`}>
+        {slides.map((item, slideIndex) => {
+          const isActive = slideIndex === activeIndex;
+          const isPrev = slideIndex === prevIndex;
+          const isVisible = isActive || (isPrev && transitionStage !== "idle");
+
+          let translateClass = "translate-y-full";
+          if (isPrev && transitionStage !== "idle") {
+            translateClass = "-translate-y-full";
+          } else if (isActive) {
+            if (transitionStage === "idle" || prevIndex === null) {
+              translateClass = "translate-y-0";
+            } else if (transitionStage === "pre") {
+              translateClass = "translate-y-full";
+            } else {
+              translateClass = "translate-y-0";
+            }
+          }
+
+          return (
+            <div
+              key={item.slug ?? item.id ?? slideIndex}
+              className={`${baseTransitionClass} ${translateClass} ${
+                isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+              aria-hidden={isActive ? "false" : "true"}
+            >
+              <ComputerScreen
+                item={item}
+                mediaChild={mediaChildren[slideIndex]}
+                totalSlides={slides.length || 1}
+                activeIndex={slideIndex}
+                onCycleComplete={handleCycleComplete}
+                autoplayEnabled={isActive && transitionStage === "idle"}
+                isActive={isActive}
+              />
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

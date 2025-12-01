@@ -124,12 +124,15 @@ export function useAutoScroll({
     clearRAF();
   }, [clearRAF]);
 
-  const resetPosition = useCallback(() => {
-    const host = ref.current;
-    if (!host) return;
-    floatTopRef.current = 0;
-    host.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [ref]);
+  const resetPosition = useCallback(
+    (toTop: number = 0) => {
+      const host = ref.current;
+      if (!host) return;
+      floatTopRef.current = toTop;
+      host.scrollTo({ top: toTop, left: 0, behavior: "auto" });
+    },
+    [ref]
+  );
 
   useEffect(() => {
     clearRAF();
