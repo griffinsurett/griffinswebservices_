@@ -12,12 +12,13 @@ import Accordion from "@/components/LoopTemplates/Accordion";
 import Button from "@/components/Button/Button";
 import SectionHeader from "@/components/SectionHeader.astro";
 import { shouldShowCollectionCTA } from "../utils/helpers";
+import { toArray } from "@/utils/array";
 
 interface Props extends BaseVariantProps {
   allowMultiple?: boolean;
   ctaHref?: string;
   ctaText?: string;
-  ctaDescription?: string;
+  ctaCollectionLabel?: string;
 }
 
 const {
@@ -31,43 +32,11 @@ const {
   id,
   ctaHref,
   ctaText,
-  ctaDescription,
+  ctaCollectionLabel,
   showButtonSection = true,
 } = Astro.props as Props;
 
-const safeItems = Array.isArray(items) ? items : [];
-const bridgeId = id || "accordion";
-const normalizedHeading =
-  title || collectionTitle || "Frequently Asked Questions";
-const headingWords = normalizedHeading.trim().split(/\s+/).filter(Boolean);
-let headingEmphasis = headingWords.pop() || normalizedHeading;
-let headingBefore = headingWords.join(" ");
-
-if (!headingBefore) {
-  headingEmphasis = normalizedHeading;
-  headingBefore = "";
-}
-
-const headingBeforeText = headingBefore ? `${headingBefore} ` : undefined;
-const headerEyebrow = title ?? collectionTitle ?? normalizedHeading;
-const headerDescription =
-  description ?? "Got questions? We've got answers...";
-const hasHeader = Boolean(headerEyebrow || normalizedHeading || headerDescription);
-
-const hasCollectionCTA =
-  showButtonSection && shouldShowCollectionCTA(collectionUrl, safeItems.length);
-const defaultCtaText = hasCollectionCTA
-  ? `View All ${collectionTitle || ""}`.trim()
-  : "Contact Us Today";
-const finalCtaText = (ctaText ?? defaultCtaText) || "Contact Us Today";
-const finalCtaHref = hasCollectionCTA ? (collectionUrl as string) : ctaHref ?? "/#contact";
-const ctaMessage = hasCollectionCTA
-  ? undefined
-  : ctaDescription ?? "Still have questions? We're here to help!";
-const shouldRenderCTA =
-  showButtonSection && Boolean(finalCtaHref && finalCtaText);
-const buttonVariant = hasCollectionCTA ? "secondary" : "primary";
-const buttonIcon = hasCollectionCTA ? "lu:arrow-right" : undefined;
+const safeItems = toArray(items);
 ---
 
 <section
@@ -77,48 +46,54 @@ const buttonIcon = hasCollectionCTA ? "lu:arrow-right" : undefined;
   <div class="section-dim-border"></div>
 
   <div class="inner-section">
-    {hasHeader && (
+    {(title || collectionTitle || description) && (
       <SectionHeader
-        title={headerEyebrow}
-        headingBefore={headingBeforeText}
-        headingEmphasis={headingEmphasis}
-        description={headerDescription}
+        title={(ctaCollectionLabel ?? collectionTitle ?? "").trim() || title || collectionTitle}
+        heading={title ?? collectionTitle}
+        description={description}
         className="text-center max-w-3xl mx-auto"
         titleClassName="tracking-[0.25em]"
-        titlePillClassName="px-5 py-2.5 text-xs"
         headingClassName="h2 mb-4 text-4xl sm:text-[2.75rem] font-semibold text-heading"
-        emphasisClassName="text-accent"
         descriptionClassName="large-text text-text/80"
       />
     )}
 
     {safeItems.length > 0 && (
-      <ContentBridge items={safeItems} bridgeId={bridgeId} className="mt-12">
-        <Accordion
-          items={safeItems.map((item, index) => ({
-            slug: item.slug,
-            title: item.title || "Untitled",
-            description: item.description,
-            contentSlotId: `${bridgeId}-slot-${index}`,
-          }))}
-          allowMultiple={allowMultiple}
-          className="space-y-4"
-          client:visible
-        />
+      <ContentBridge
+        items={safeItems}
+        bridgeId={id}
+        className="mt-12"
+      >
+        <Fragment slot="default">
+          <Accordion
+            items={safeItems.map((item, index) => ({
+              slug: item.slug,
+              title: item.title || "Untitled",
+              description: item.description,
+              contentSlotId: `${id}-slot-${index}`,
+            }))}
+            allowMultiple={allowMultiple}
+            className="space-y-4"
+            client:visible
+          />
+        </Fragment>
       </ContentBridge>
     )}
 
-    {shouldRenderCTA && (
+    {showButtonSection &&
+      shouldShowCollectionCTA(collectionUrl, safeItems.length) &&
+      (ctaText || ctaCollectionLabel || collectionTitle) &&
+      (ctaHref || collectionUrl) && (
       <div class="buttons-section-center">
-        {ctaMessage && <p class="text-text mb-6">{ctaMessage}</p>}
         <Button
           client:visible
-          href={finalCtaHref}
-          rightIcon={buttonIcon}
-          variant={buttonVariant}
+          href={ctaHref ?? collectionUrl}
+          rightIcon="lu:arrow-right"
+          variant="secondary"
           size="lg"
         >
-          {finalCtaText}
+          {ctaText ??
+            `View All ${(ctaCollectionLabel ?? collectionTitle ?? "").trim()}`}
         </Button>
       </div>
     )}
