@@ -13,26 +13,36 @@ import { query } from "@/utils/query";
       <!-- Logo -->
       <Logo loading="eager" trigger="scroll" animateOutText={true} />
       
-      <ThemeControls client:idle />
+      <ThemeControls
+        className="hidden sm:flex"
+        client:media="(min-width: 640px)"
+      />
 
-      <div class="flex items-center gap-4">
-        <!-- Navigation Menu using query -->
-        <ContentRenderer
-          query={query("menu-items")
-            .where((entry) => {
-              const menus = entry.data.menu;
-              if (Array.isArray(menus)) {
-                return menus.some((m) => m.id === "main-menu");
-              }
-              return menus?.id === "main-menu";
-            })
-            }
-          variant="MenuVariant"
-          mode="hamburger-only"
-          className="header-navigation"
-          hamburgerTransform={true}
-          closeButton={false}
+      <div class="flex items-center gap-2 sm:gap-4">
+        <ThemeControls
+          className="static sm:hidden left-auto top-auto translate-x-0 translate-y-0"
+          client:media="(max-width: 639px)"
         />
+
+        <div class="flex items-center gap-3 sm:gap-4">
+          <!-- Navigation Menu using query -->
+          <ContentRenderer
+            query={query("menu-items")
+              .where((entry) => {
+                const menus = entry.data.menu;
+                if (Array.isArray(menus)) {
+                  return menus.some((m) => m.id === "main-menu");
+                }
+                return menus?.id === "main-menu";
+              })
+              }
+            variant="MenuVariant"
+            mode="hamburger-only"
+            className="header-navigation"
+            hamburgerTransform={true}
+            closeButton={false}
+          />
+        </div>
       </div>
     </div>
 </header>
