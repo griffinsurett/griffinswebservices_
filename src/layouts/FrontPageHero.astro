@@ -10,6 +10,11 @@ import { siteData } from "@/content/siteData";
 interface CTA {
   text: string;
   link: string;
+  rightIcon?: string;
+  /**
+   * @deprecated Prefer rightIcon for consistency with Button props.
+   */
+  icon?: string;
 }
 
 export interface Props {
@@ -30,13 +35,22 @@ const {
   headingEmphasis,
   headingAfter,
   description = siteData.description ?? defaultDescription,
-  primaryCTA = {
+  primaryCTA: incomingPrimaryCTA = {
     text: "Book An Intro Call",
     link: "#contact",
+    rightIcon: "lu:arrow-right"
   },
   className = "",
   id = "hero",
 } = Astro.props as Props;
+
+const primaryCTA = {
+  ...incomingPrimaryCTA,
+  rightIcon:
+    incomingPrimaryCTA.rightIcon ??
+    incomingPrimaryCTA.icon ??
+    "lu:arrow-right",
+};
 
 const hasHeroSlot = Astro.slots.has("default");
 
@@ -85,6 +99,7 @@ if (!hasHeroSlot) {
             href={primaryCTA.link}
             variant="primary"
             size="lg"
+            rightIcon={primaryCTA.rightIcon}
           >
             {primaryCTA.text}
           </Button>

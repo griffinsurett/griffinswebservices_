@@ -58,10 +58,7 @@ const showHeader = Boolean(title || description);
 const gridMarginClass = showHeader ? "mt-12" : "";
 ---
 
-<section
-  id={id}
-  class={`relative overflow-hidden ${className}`.trim()}
->
+<section id={id} class={`relative overflow-hidden ${className}`.trim()}>
   <div class="section-dim-border"></div>
 
   <div class="inner-section">
@@ -90,7 +87,7 @@ const gridMarginClass = showHeader ? "mt-12" : "";
             <Button
               client:visible
               href={collectionUrl}
-              rightIcon="lu:chevron-right"
+              rightIcon="lu:arrow-right"
               variant="secondary"
             >
               {viewAllText}
