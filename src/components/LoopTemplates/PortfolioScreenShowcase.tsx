@@ -1,7 +1,4 @@
 import {
-  Children,
-  isValidElement,
-  type ReactNode,
   useCallback,
   useEffect,
   useMemo,
@@ -12,15 +9,28 @@ import { useEngagementAutoScroll } from "@/hooks/autoscroll/useEngagementAutoScr
 import { getImageSrc } from "@/layouts/collections/helpers/layoutHelpers";
 import type { PortfolioItemData } from "@/components/LoopComponents/PortfolioItemComponent";
 
+interface PortfolioMediaEntry {
+  src: string;
+  width?: number;
+  height?: number;
+  alt?: string;
+  srcSet?: string;
+  sizes?: string;
+  sources?: { type?: string; srcSet: string; sizes?: string }[];
+  loading?: "eager" | "lazy";
+  decoding?: "sync" | "async";
+  fetchPriority?: "high" | "low" | "auto";
+}
+
 interface PortfolioScreenShowcaseProps {
   items?: PortfolioItemData[];
   className?: string;
-  children?: ReactNode;
+  mediaEntries?: (PortfolioMediaEntry | undefined)[];
 }
 
 interface ScreenProps {
   item: PortfolioItemData;
-  mediaChild?: ReactNode;
+  mediaEntry?: PortfolioMediaEntry;
   totalSlides: number;
   activeIndex: number;
   onCycleComplete: () => void;
@@ -31,9 +41,7 @@ interface ScreenProps {
 const AUTO_SCROLL_START_DELAY_MS = 700;
 const AUTO_SCROLL_TARGET_DURATION_SEC = 14;
 const AUTO_SCROLL_DEFAULT_CYCLE_MS = AUTO_SCROLL_TARGET_DURATION_SEC * 1000;
-const AUTO_SCROLL_MAX_DURATION_MS = AUTO_SCROLL_DEFAULT_CYCLE_MS * 3;
 const AUTO_SCROLL_MIN_SPEED = 28;
-const AUTO_SCROLL_MAX_SPEED = 80;
 const MIN_SCROLL_DELTA = 4;
 const CONTENT_STABLE_WINDOW_MS = 220;
 const CONTENT_STABLE_DELTA_PX = 16;
@@ -41,17 +49,9 @@ const CONTENT_READY_TIMEOUT_MS = 2200;
 const BETWEEN_SLIDE_PAUSE_MS = 900;
 const SLIDE_TRANSITION_DURATION_MS = 750;
 
-const resolveMediaChild = (node?: ReactNode) => {
-  if (!node) return undefined;
-  if (!isValidElement(node)) return node;
-  const props = node.props as { [key: string]: unknown };
-  if (props?.["data-portfolio-placeholder"]) return undefined;
-  return node;
-};
-
 function ComputerScreen({
   item,
-  mediaChild,
+  mediaEntry,
   totalSlides,
   activeIndex,
   onCycleComplete,
@@ -73,10 +73,7 @@ function ComputerScreen({
     if (!Number.isFinite(baseline) || baseline <= 0) {
       return AUTO_SCROLL_MIN_SPEED;
     }
-    return Math.min(
-      AUTO_SCROLL_MAX_SPEED,
-      Math.max(AUTO_SCROLL_MIN_SPEED, baseline),
-    );
+    return Math.max(AUTO_SCROLL_MIN_SPEED, baseline);
   }, []);
 
   const measureScrollDuration = useCallback(
@@ -89,10 +86,7 @@ function ComputerScreen({
       if (!Number.isFinite(rawDurationMs) || rawDurationMs <= 0) {
         return AUTO_SCROLL_DEFAULT_CYCLE_MS;
       }
-      return Math.min(
-        AUTO_SCROLL_MAX_DURATION_MS,
-        Math.max(AUTO_SCROLL_DEFAULT_CYCLE_MS, rawDurationMs),
-      );
+      return Math.max(AUTO_SCROLL_DEFAULT_CYCLE_MS, rawDurationMs);
     },
     [resolveAutoScrollSpeed],
   );
@@ -108,6 +102,12 @@ function ComputerScreen({
     threshold: 0.05,
     resetOnInactive: false,
   });
+
+  useEffect(() => {
+    if (!autoplayEnabled) return;
+    autoScroll.resetPosition(0);
+    viewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [autoplayEnabled, autoScroll.resetPosition]);
   useEffect(() => {
     const host = viewportRef.current;
     if (!host) return;
@@ -135,7 +135,7 @@ function ComputerScreen({
       imageEl.removeEventListener("load", handleReady);
       imageEl.removeEventListener("error", handleReady);
     };
-  }, [mediaChild]);
+  }, [item, mediaEntry]);
 
   useEffect(() => {
     if (!mediaReady) {
@@ -292,8 +292,6 @@ function ComputerScreen({
     };
   }, [contentReady]);
 
-  const providedMedia = useMemo(() => resolveMediaChild(mediaChild), [mediaChild]);
-
   const fallbackSrc =
     getImageSrc(item.featuredImage) ||
     getImageSrc(item.bannerImage) ||
@@ -301,7 +299,50 @@ function ComputerScreen({
     "";
 
   const renderMedia = () => {
-    if (providedMedia) return providedMedia;
+    if (mediaEntry?.sources?.length) {
+      return (
+        <picture>
+          {mediaEntry.sources.map((source, idx) => (
+            <source
+              key={`${item.slug ?? item.id ?? idx}-source-${idx}`}
+              srcSet={source.srcSet}
+              sizes={source.sizes ?? mediaEntry.sizes}
+              type={source.type}
+            />
+          ))}
+          <img
+            src={mediaEntry.src}
+            srcSet={mediaEntry.srcSet}
+            sizes={mediaEntry.sizes}
+            alt={mediaEntry.alt || item.alt || item.title || "Project preview"}
+            width={mediaEntry.width}
+            height={mediaEntry.height}
+            loading={mediaEntry.loading ?? "lazy"}
+            decoding={mediaEntry.decoding ?? "async"}
+            fetchPriority={mediaEntry.fetchPriority}
+            draggable={false}
+            className="block h-auto min-h-full w-full select-none object-cover object-top"
+          />
+        </picture>
+      );
+    }
+    if (mediaEntry?.src) {
+      return (
+        <img
+          src={mediaEntry.src}
+          srcSet={mediaEntry.srcSet}
+          sizes={mediaEntry.sizes}
+          alt={mediaEntry.alt || item.alt || item.title || "Project preview"}
+          width={mediaEntry.width}
+          height={mediaEntry.height}
+          loading={mediaEntry.loading ?? "lazy"}
+          decoding={mediaEntry.decoding ?? "async"}
+          fetchPriority={mediaEntry.fetchPriority}
+          draggable={false}
+          className="block h-auto min-h-full w-full select-none object-cover object-top"
+        />
+      );
+    }
     if (!fallbackSrc) {
       return (
         <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-bg2 via-bg to-bg/80 text-white/30">
@@ -364,10 +405,13 @@ function ComputerScreen({
 export default function PortfolioScreenShowcase({
   items = [],
   className = "",
-  children,
+  mediaEntries: mediaEntriesProp = [],
 }: PortfolioScreenShowcaseProps) {
   const slides = useMemo(() => (Array.isArray(items) ? items : []), [items]);
-  const mediaChildren = useMemo(() => Children.toArray(children ?? []), [children]);
+  const mediaEntries = useMemo(
+    () => (Array.isArray(mediaEntriesProp) ? mediaEntriesProp : []),
+    [mediaEntriesProp],
+  );
   const [activeIndex, setActiveIndex] = useState(0);
   const [cycleCount, setCycleCount] = useState(0);
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
@@ -442,7 +486,6 @@ export default function PortfolioScreenShowcase({
   if (!slides.length) return null;
 
   const activeItem = slides[activeIndex];
-  const mediaChild = mediaChildren[activeIndex];
   const baseTransitionClass =
     "absolute inset-0 transition-transform transition-opacity duration-[750ms] ease-[cubic-bezier(0.4,0,0.2,1)]";
   const viewportHeightClasses = "h-[420px] sm:h-[500px]";
@@ -478,7 +521,7 @@ export default function PortfolioScreenShowcase({
             >
               <ComputerScreen
                 item={item}
-                mediaChild={mediaChildren[slideIndex]}
+                mediaEntry={mediaEntries[slideIndex]}
                 totalSlides={slides.length || 1}
                 activeIndex={slideIndex}
                 onCycleComplete={handleCycleComplete}

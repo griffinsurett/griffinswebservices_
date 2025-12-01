@@ -67,18 +67,23 @@ const processedItems = safeItems.map((item, index) => {
 
   return {
     data: item,
-    media: metadata
-      ? {
-          metadata,
-          alt: altText,
-          key: item.slug ?? item.id ?? `portfolio-${index}`,
-        }
-      : undefined,
+    mediaEntry:
+      metadata && metadata.src
+        ? {
+            src: metadata.src,
+            width: metadata.width,
+            height: metadata.height,
+            alt: altText,
+          }
+        : undefined,
+    mediaMetadata: metadata,
+    alt: altText,
   };
 });
 
 const portfolioItems = processedItems.map((entry) => entry.data);
-const showcaseMedia = processedItems.map((entry) => entry.media);
+const showcaseMedia = processedItems.map((entry) => entry.mediaEntry);
+const showcaseOptimizedMedia = processedItems.map((entry) => entry.mediaMetadata);
 
 ---
 
@@ -89,22 +94,28 @@ const showcaseMedia = processedItems.map((entry) => entry.media);
   <PortfolioScreenShowcase
     client:idle
     items={portfolioItems}
+    mediaEntries={showcaseMedia}
     className="max-w-5xl mx-auto"
   >
-    {showcaseMedia.map((media) =>
-      media ? (
+    {showcaseOptimizedMedia.map((metadata, index) =>
+      metadata ? (
         <Image
+          key={portfolioItems[index]?.slug ?? `portfolio-image-${index}`}
           data-portfolio-media
-          src={media.metadata}
-          alt={media.alt}
-          loading="lazy"
-          widths={[480, 640, 860, 1024, 1280, 1600]}
+          src={metadata}
+          alt={processedItems[index]?.alt ?? portfolioItems[index]?.title ?? "Project preview"}
+          loading={index === 0 ? "eager" : "lazy"}
+          fetchpriority={index === 0 ? "high" : "low"}
           sizes="(max-width: 640px) 90vw, (max-width: 1024px) 70vw, 860px"
           class="block w-full h-auto min-h-full select-none object-cover object-top"
           draggable="false"
         />
       ) : (
-        <span data-portfolio-placeholder class="hidden"></span>
+        <span
+          key={`portfolio-placeholder-${index}`}
+          data-portfolio-placeholder
+          class="hidden"
+        />
       )
     )}
   </PortfolioScreenShowcase>
