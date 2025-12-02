@@ -492,7 +492,7 @@ export default function PortfolioScreenShowcase({
 
   return (
     <div className={`relative ${className}`.trim()}>
-      <div className={`relative mx-auto w-full max-w-4xl overflow-hidden ${viewportHeightClasses}`}>
+      <div className={`relative mx-auto w-full max-w-4xl overflow-hidden rounded-lg ${viewportHeightClasses}`}>
         {slides.map((item, slideIndex) => {
           const isActive = slideIndex === activeIndex;
           const isPrev = slideIndex === prevIndex;
@@ -519,7 +519,7 @@ export default function PortfolioScreenShowcase({
           return (
             <div
               key={item.slug ?? item.id ?? slideIndex}
-              className={`${baseTransitionClass} ${translateClass} ${
+              className={`${baseTransitionClass} shadow-2xl ${translateClass} ${
                 isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
               }`}
               aria-hidden={isActive ? "false" : "true"}
