@@ -1,0 +1,113 @@
+---
+// src/layouts/collections/ServicesLayout.astro
+/**
+ * Services Layout - Item Page Layout for Solutions & Capabilities
+ *
+ * A specialized layout for service-type collection items.
+ * Features:
+ * - QuoteHero with title, description, and quote form
+ * - Features list display
+ * - MDX content rendering
+ * - Related services section (siblings from same parent)
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import QuoteHero from '@/layouts/QuoteHero.astro';
+import SectionHeader from '@/components/SectionHeader.astro';
+import Icon from '@/components/Icon';
+import ContentRenderer from '@/components/ContentRenderer/ContentRenderer.astro';
+import { query, sortByOrder } from '@/utils/query';
+import type { CollectionLayoutProps } from './types';
+
+const {
+  entry,
+  collection,
+  collectionMeta,
+  Content,
+  isIndexPage,
+  seoProps = {},
+  ...extraProps
+} = Astro.props as CollectionLayoutProps;
+
+const data = entry?.data || {};
+const { title, description, price, features = [], parent } = data;
+
+// Get related items (siblings with same parent, excluding current item)
+const relatedQuery = parent
+  ? query(collection as any)
+      .where((e: any) => e.data.parent === parent && e.id !== entry?.id)
+      .orderBy(sortByOrder())
+      .limit(6)
+  : null;
+
+// Build the description with price if available
+const heroDescription = price
+  ? `${description} ${price}`
+  : description;
+---
+<BaseLayout {...seoProps}>
+  <main class="flex-1">
+    {/* Quote Hero Section */}
+    <QuoteHero
+      title={title}
+      headingBefore={title}
+      description={heroDescription}
+      primaryCTA={{
+        text: `View All ${collectionMeta?.data?.title || 'Services'}`,
+        link: `/${collection}`,
+        rightIcon: "lu:arrow-left"
+      }}
+    />
+
+    {/* Features Section */}
+    {features && features.length > 0 && (
+      <section class="outer-section bg-bg">
+        <div class="inner-section">
+          <div class="max-w-4xl mx-auto">
+            <h2 class="h3 text-center mb-8">What's Included</h2>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {features.map((feature: string) => (
+                <li class="flex items-start gap-3 p-4 rounded-xl bg-bg2 border border-muted/10">
+                  <div class="flex-shrink-0 w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
+                    <Icon icon="lu:check" size="sm" className="text-accent" client:load />
+                  </div>
+                  <span class="text-text">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+    )}
+
+    {/* MDX Content */}
+    {Content && (
+      <section class="outer-section bg-bg2">
+        <div class="inner-section">
+          <article class="prose prose-lg max-w-4xl mx-auto">
+            <Content />
+          </article>
+        </div>
+      </section>
+    )}
+
+    {/* Related Services */}
+    {relatedQuery && (
+      <section class="outer-section bg-bg">
+        <div class="inner-section">
+          <SectionHeader
+            headingBefore="Related"
+            headingEmphasis={collectionMeta?.data?.title || 'Services'}
+            className="text-center mb-12"
+            headingClassName="h2"
+          />
+          <ContentRenderer
+            query={relatedQuery}
+            variant="CardVariant"
+            columns={3}
+            gap="md"
+          />
+        </div>
+      </section>
+    )}
+  </main>
+</BaseLayout>
