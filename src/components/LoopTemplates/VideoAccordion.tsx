@@ -63,15 +63,21 @@ export default function VideoAccordion({
     rootMargin: "0px 0px -20% 0px",
   });
 
-  const autoplayTime = useMemo(
-    () => () => {
-      const video = desktopVideoRef.current || mobileVideoRef.current;
-      if (!video || !Number.isFinite(video.duration)) return autoAdvanceDelay;
-      const remaining = Math.max(0, (video.duration - video.currentTime) * 1000);
-      return remaining + autoAdvanceDelay;
-    },
-    [autoAdvanceDelay],
-  );
+  const autoplayTime = useCallback(() => {
+    const desktop = desktopVideoRef.current;
+    const mobile = mobileVideoRef.current;
+    // Get the video that's actually playing
+    let video = null;
+    if (desktop && !desktop.paused && desktop.currentTime > 0) video = desktop;
+    else if (mobile && !mobile.paused && mobile.currentTime > 0) video = mobile;
+    else if (desktop && desktop.offsetParent !== null) video = desktop;
+    else if (mobile && mobile.offsetParent !== null) video = mobile;
+    else video = desktop || mobile;
+
+    if (!video || !Number.isFinite(video.duration)) return autoAdvanceDelay;
+    const remaining = Math.max(0, (video.duration - video.currentTime) * 1000);
+    return remaining + autoAdvanceDelay;
+  }, [autoAdvanceDelay]);
 
   const {
     engageUser,
@@ -116,12 +122,24 @@ export default function VideoAccordion({
     [engageUser],
   );
 
+  const getActiveVideo = useCallback(() => {
+    const desktop = desktopVideoRef.current;
+    const mobile = mobileVideoRef.current;
+    // Prefer the video that's actually playing (not paused and has time)
+    if (desktop && !desktop.paused && desktop.currentTime > 0) return desktop;
+    if (mobile && !mobile.paused && mobile.currentTime > 0) return mobile;
+    // Fallback to whichever exists and is visible
+    if (desktop && desktop.offsetParent !== null) return desktop;
+    if (mobile && mobile.offsetParent !== null) return mobile;
+    return desktop || mobile;
+  }, []);
+
   const handleTimeUpdate = useCallback(() => {
-    const video = desktopVideoRef.current || mobileVideoRef.current;
+    const video = getActiveVideo();
     if (!video || !video.duration) return;
     setProgress((video.currentTime / video.duration) * 100);
     scheduleRef.current?.();
-  }, []);
+  }, [getActiveVideo]);
 
   const handleLoadedData = useCallback(() => {
     setProgress(0);
@@ -155,7 +173,7 @@ export default function VideoAccordion({
     >
       <div className="flex flex-col lg:flex-row lg:items-start gap-12 max-2-primary">
         <div
-          className="min-w-0 lg:basis-[clamp(420px,40vw,560px)] lg:flex-shrink-0 flex flex-col space-y-4"
+          className="min-w-0 lg:w-1/2 lg:shrink-0 flex flex-col space-y-4"
           data-accordion-container
         >
           {safeItems.map((item, index) => {
@@ -203,7 +221,7 @@ export default function VideoAccordion({
           })}
         </div>
 
-        <div className="hidden lg:block lg:flex-1 min-w-0 lg:sticky lg:top-0">
+        <div className="hidden lg:block lg:w-1/2 min-w-0 lg:sticky lg:top-0">
           <VideoPlayer
             key={`desktop-${activeItem?.key ?? activeIndex}`}
             ref={desktopVideoRef}

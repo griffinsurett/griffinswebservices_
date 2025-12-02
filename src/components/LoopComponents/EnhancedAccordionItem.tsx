@@ -82,7 +82,7 @@ export default function EnhancedAccordionItem({
 
         <div
           className={`overflow-hidden transition-all duration-500 ease-in-out relative z-20 ${
-            isActive ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+            isActive ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
           }`}
         >
           <div className="px-6 pb-6">
