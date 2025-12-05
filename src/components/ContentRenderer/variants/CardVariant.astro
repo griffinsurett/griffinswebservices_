@@ -94,9 +94,10 @@ const headingString =
     : isSegmentedHeading
     ? normalizedHeading.text ?? ""
     : undefined;
-const contentHeading = isSegmentedHeading ? normalizedHeading : undefined;
-const resolvedHeading = headingString ?? (contentHeading ? contentHeading.text : undefined);
-const showHeader = Boolean(title || contentHeading || resolvedHeading || description);
+const segmentedHeading = isSegmentedHeading ? normalizedHeading : undefined;
+const resolvedHeading = headingString ?? (segmentedHeading ? segmentedHeading.text : undefined);
+const headingPayload = segmentedHeading ?? resolvedHeading;
+const showHeader = Boolean(title || headingPayload || description);
 const gridMarginClass = showHeader ? "mt-12" : "";
 const showCTA =
   showButtonSection &&
@@ -114,22 +115,23 @@ const showCTA =
       <div
         class={
           ctaInlineOnDesktop && showCTA
-            ? "flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between"
+            ? "flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between"
             : ""
         }
       >
-        <SectionHeader
-          title={title}
-          heading={contentHeading ? undefined : resolvedHeading}
-          contentHeading={contentHeading}
-          description={description}
-          className={
-            ctaInlineOnDesktop && showCTA ? "text-section lg:text-left" : undefined
-          }
-          descriptionClassName={
-            ctaInlineOnDesktop && showCTA ? "large-text lg:text-left" : undefined
-          }
-        />
+        <div class={ctaInlineOnDesktop && showCTA ? "lg:flex-1" : ""}>
+          <SectionHeader
+            title={title}
+            heading={headingPayload}
+            description={description}
+            className={
+              ctaInlineOnDesktop && showCTA ? "text-section lg:text-left" : undefined
+            }
+            descriptionClassName={
+              ctaInlineOnDesktop && showCTA ? "large-text lg:text-left" : undefined
+            }
+          />
+        </div>
 
         {ctaInlineOnDesktop && showCTA && (
           <div class="hidden lg:flex items-center">

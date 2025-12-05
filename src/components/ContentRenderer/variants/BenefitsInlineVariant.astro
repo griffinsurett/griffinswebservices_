@@ -27,12 +27,13 @@ const fallbackHeading = title ?? collectionTitle;
 const headingSource = heading ?? fallbackHeading;
 const isSegmentedHeading =
   typeof headingSource === "object" && headingSource !== null;
-const contentHeading = isSegmentedHeading ? (headingSource as HeadingContent) : undefined;
+const segmentedHeading = isSegmentedHeading ? (headingSource as HeadingContent) : undefined;
 const resolvedHeading =
   typeof headingSource === "string"
     ? headingSource
-    : contentHeading?.text ?? fallbackHeading;
-const showHeader = Boolean(collectionTitle || title || contentHeading || resolvedHeading || description);
+    : segmentedHeading?.text ?? fallbackHeading;
+const headingPayload = segmentedHeading ?? resolvedHeading;
+const showHeader = Boolean(collectionTitle || title || headingPayload || description);
 
 const featureCardProps = {
   listItemProps: {
@@ -51,14 +52,13 @@ const featureCardProps = {
 >
   <div class="space-y-10">
     {showHeader && (
-      <SectionHeader
-        title={collectionTitle ?? title}
-        heading={contentHeading ? undefined : resolvedHeading}
-        contentHeading={contentHeading}
-        description={description}
-        className="text-center"
-        headingClassName="h2 mb-4"
-        descriptionClassName="text-lg text-muted max-w-2xl mx-auto"
+        <SectionHeader
+          title={collectionTitle ?? title}
+          heading={headingPayload}
+          description={description}
+          className="text-center"
+          headingClassName="h2 mb-4"
+          descriptionClassName="text-lg text-muted max-w-2xl mx-auto"
       />
     )}
 

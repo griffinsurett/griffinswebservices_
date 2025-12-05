@@ -43,15 +43,15 @@ const fallbackHeading = title ?? collectionTitle;
 const headingSource = heading ?? fallbackHeading;
 const isSegmentedHeading =
   typeof headingSource === "object" && headingSource !== null;
-const contentHeading = isSegmentedHeading ? (headingSource as HeadingContent) : undefined;
+const segmentedHeading = isSegmentedHeading ? (headingSource as HeadingContent) : undefined;
 const resolvedHeading =
   typeof headingSource === "string"
     ? headingSource
-    : contentHeading?.text ?? fallbackHeading;
+    : segmentedHeading?.text ?? fallbackHeading;
+const headingPayload = segmentedHeading ?? resolvedHeading;
 const showHeader = Boolean(
   (ctaCollectionLabel ?? collectionTitle ?? "").trim() ||
-    resolvedHeading ||
-    contentHeading ||
+    headingPayload ||
     description,
 );
 ---
@@ -64,14 +64,13 @@ const showHeader = Boolean(
 
   <div class="inner-section">
     {showHeader && (
-      <SectionHeader
-        title={(ctaCollectionLabel ?? collectionTitle ?? "").trim() || title || collectionTitle}
-        heading={contentHeading ? undefined : resolvedHeading}
-        contentHeading={contentHeading}
-        description={description}
-        className="text-center max-w-3xl mx-auto"
-        titleClassName="tracking-[0.25em]"
-        headingClassName="h2 mb-4 text-4xl sm:text-[2.75rem] font-semibold text-heading"
+        <SectionHeader
+          title={(ctaCollectionLabel ?? collectionTitle ?? "").trim() || title || collectionTitle}
+          heading={headingPayload}
+          description={description}
+          className="text-center max-w-3xl mx-auto"
+          titleClassName="tracking-[0.25em]"
+          headingClassName="h2 mb-4 text-4xl sm:text-[2.75rem] font-semibold text-heading"
         descriptionClassName="large-text text-text/80"
       />
     )}

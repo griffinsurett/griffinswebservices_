@@ -39,7 +39,7 @@ const headingAfter = heading?.after;
 const headingDescription = heading?.description ?? description;
 const hasSegmentedHeading = Boolean(headingBefore ?? headingText ?? headingAfter);
 const fallbackHeadingText = headingText ?? headingTitle ?? collectionTitle;
-const headingValue: SchemaHeadingContent | undefined = hasSegmentedHeading
+const headingValue: SchemaHeadingContent | string | undefined = hasSegmentedHeading
   ? fallbackHeadingText
     ? {
         before: headingBefore,
@@ -84,7 +84,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
         <div class="w-full lg:w-1/3 lg:sticky lg:top-0 lg:self-start">
           <SectionHeader
             title={headingTitle}
-            contentHeading={headingValue}
+            heading={headingValue}
             description={headingDescription}
             className="space-y-4 text-left"
             headingClassName="h2 text-heading"
