@@ -61,7 +61,7 @@ export default function IconListItem({
   alignment = "center",
   className = "",
   containerClassName = "",
-  iconClassName = "icon-medium card-icon-color",
+  iconClassName = "card-icon-color",
   iconSize = "lg",
   imageClassName = "w-12 h-12 rounded-full object-cover flex-shrink-0",
   imageLoading = "lazy",
@@ -87,6 +87,20 @@ export default function IconListItem({
     left: "text-left",
     right: "text-right",
   };
+
+  const iconSizeClasses: Record<IconSize, string> = {
+    sm: "icon-small",
+    md: "icon-medium",
+    lg: "icon-large",
+    xl: "icon-large",
+  };
+
+  const resolvedIconClassName = [
+    iconSizeClasses[iconSize],
+    iconClassName,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const TitleTagComponent = titleTag as ElementType;
   const DescriptionTagComponent = descriptionTag as ElementType;
@@ -149,7 +163,7 @@ export default function IconListItem({
       const { icon: iconName, size, className: customClass = "", color, ariaLabel } =
         icon as IconRenderConfig;
       return (
-        <div className={iconClassName}>
+        <div className={resolvedIconClassName}>
           <Icon
             icon={iconName}
             size={size ?? iconSize}
@@ -163,13 +177,13 @@ export default function IconListItem({
 
     if (isRenderableIcon) {
       return (
-        <div className={iconClassName}>
+        <div className={resolvedIconClassName}>
           <Icon icon={icon as IconType} size={iconSize} />
         </div>
       );
     }
 
-    return <div className={iconClassName}>{icon}</div>;
+    return <div className={resolvedIconClassName}>{icon}</div>;
   })();
 
   return (

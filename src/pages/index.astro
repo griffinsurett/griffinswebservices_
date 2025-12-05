@@ -54,8 +54,6 @@ const heroDescription =
       columns={3}
       gap="lg"
       showButtonSection={false}
-      title="Website Services"
-      description="The three pillars every engagement includes: design, dependable engineering, and proactive care."
       className="bg-bg pt-35 lg:pt-20"
     />
 
@@ -65,9 +63,9 @@ const heroDescription =
       query={query("solutions")
         .where((entry) => entry.data.parent === "website-solutions")
         .orderBy(sortByOrder())}
-      variant="VideoAccordionVariant"
-      title="Websites we build"
-      description="Every engagement starts with a clear website outcome. Explore the most common builds we ship and watch a quick preview as you browse."
+      variant="IconListVariant"
+      title="Website Services"
+      description="The three pillars every engagement includes: design, dependable engineering, and proactive care. Every engagement starts with a clear website outcome, so explore the most common builds we ship and watch a quick preview as you browse."
       autoAdvanceDelay={2000}
     />
 

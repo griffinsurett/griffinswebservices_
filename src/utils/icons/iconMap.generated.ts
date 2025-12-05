@@ -2,7 +2,7 @@
 // Do not edit manually. Run "npm run generate:icons" (or node src/utils/icons/generate-icon-map.mjs) to regenerate.
 
 import type { IconType } from 'react-icons';
-import { LuArrowLeft, LuArrowRight, LuCheck, LuCode, LuContact, LuGithub, LuGlobe, LuInstagram, LuLayers, LuLinkedin, LuMail, LuMinus, LuPhone, LuPlus } from 'react-icons/lu';
+import { LuArrowLeft, LuArrowRight, LuArrowUpRight, LuCheck, LuCode, LuContact, LuGithub, LuGlobe, LuInstagram, LuLayers, LuLinkedin, LuMail, LuMinus, LuPhone, LuPlus } from 'react-icons/lu';
 import { FaArrowsRotate, FaArrowsUpToLine, FaAws, FaBellConcierge, FaBlender, FaBolt, FaBook, FaBorderAll, FaBorderTopLeft, FaBox, FaBoxArchive, FaBoxOpen, FaBoxesStacked, FaBrain, FaBriefcase, FaBroom, FaBug, FaBuilding, FaBullhorn, FaBurger, FaCakeCandles, FaCalculator, FaCalendar, FaCalendarCheck, FaCapsules, FaCartShopping, FaCashRegister, FaChampagneGlasses, FaChartLine, FaChartPie, FaClipboardCheck, FaClockRotateLeft, FaCloudflare, FaCode, FaCookieBite, FaCouch, FaCss3Alt, FaCubes, FaDatabase, FaDiagramProject, FaDoorOpen, FaDumbbell, FaEnvelope, FaExplosion, FaFaucetDrip, FaFeather, FaFigma, FaFileLines, FaGaugeHigh, FaGear, FaGears, FaGem, FaGithub, FaGlobe, FaGoogle, FaGoogleDrive, FaGraduationCap, FaHammer, FaHandHoldingHeart, FaHands, FaHandshake, FaHeadset, FaHeartPulse, FaHouse, FaHouseChimney, FaHouseChimneyWindow, FaHtml5, FaIdCard, FaJs, FaLanguage, FaLaptop, FaLayerGroup, FaLifeRing, FaLightbulb, FaLocationDot, FaMagnifyingGlass, FaMagnifyingGlassChart, FaMartiniGlassCitrus, FaMicrophone, FaMugHot, FaNetworkWired, FaNodeJs, FaPaintRoller, FaPaintbrush, FaPalette, FaPenNib, FaPenRuler, FaPenToSquare, FaPeopleGroup, FaPersonChalkboard, FaPhp, FaPlug, FaPlus, FaPuzzlePiece, FaPython, FaReact, FaRobot, FaRocket, FaRoute, FaScaleBalanced, FaScissors, FaScrewdriverWrench, FaServer, FaShareNodes, FaShieldHalved, FaShieldHeart, FaShirt, FaShopify, FaSolarPanel, FaSpa, FaSprayCanSparkles, FaStar, FaStethoscope, FaStore, FaTable, FaTags, FaTemperatureHalf, FaTree, FaTruck, FaTruckFast, FaTruckRampBox, FaUmbrella, FaUniversalAccess, FaUsers, FaUsersGear, FaUtensils, FaWandMagicSparkles, FaWarehouse, FaWordpress } from 'react-icons/fa6';
 import { SiAstro, SiElementor, SiFacebook, SiFramer, SiGatsby, SiNextdotjs, SiSvelte, SiVercel, SiWebflow } from 'react-icons/si';
 
@@ -138,6 +138,7 @@ export const iconMap = {
   'fa6:wordpress': FaWordpress,
   'lu:arrow-left': LuArrowLeft,
   'lu:arrow-right': LuArrowRight,
+  'lu:arrow-up-right': LuArrowUpRight,
   'lu:check': LuCheck,
   'lu:code': LuCode,
   'lu:contact': LuContact,

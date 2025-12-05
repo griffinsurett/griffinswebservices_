@@ -3,11 +3,13 @@
 import BorderTitle from "@/components/BorderTitle";
 import Heading from "@/components/Heading";
 import type { ReactNode } from "react";
+import type { VisibleRootMargin } from "@/components/AnimatedBorder/AnimatedBorder";
 
 interface Props {
   title?: ReactNode;
   titleClassName?: string;
   titlePillClassName?: string;
+  titleVisibleRootMargin?: VisibleRootMargin;
   heading?: ReactNode;
   headingBefore?: ReactNode;
   headingEmphasis?: ReactNode;
@@ -25,6 +27,7 @@ const {
   title,
   titleClassName = "",
   titlePillClassName,
+  titleVisibleRootMargin,
   heading,
   headingBefore,
   headingEmphasis,
@@ -50,6 +53,7 @@ const hasSegmentedHeading =
       client:visible
       className={titleClassName}
       pillClassName={titlePillClassName}
+      visibleRootMargin={titleVisibleRootMargin}
     >
       {title}
     </BorderTitle>

@@ -1,5 +1,7 @@
 // src/components/BorderTitle.tsx
-import AnimatedBorder from "@/components/AnimatedBorder/AnimatedBorder";
+import AnimatedBorder, {
+  type VisibleRootMargin,
+} from "@/components/AnimatedBorder/AnimatedBorder";
 import Heading from "@/components/Heading";
 import { useAnimatedElement } from "@/hooks/animations/useViewAnimation";
 import type { ReactNode } from "react";
@@ -10,6 +12,7 @@ export interface BorderTitleProps {
   duration?: number;
   hoverSweep?: boolean;
   pillClassName?: string;
+  visibleRootMargin?: VisibleRootMargin;
 }
 
 export default function BorderTitle({
@@ -18,6 +21,7 @@ export default function BorderTitle({
   duration = 1200,
   hoverSweep = true,
   pillClassName = "text-sm px-5 py-2.5 tracking-wider",
+  visibleRootMargin,
 }: BorderTitleProps) {
   const anim = useAnimatedElement<HTMLSpanElement>({
     duration,
@@ -38,6 +42,7 @@ export default function BorderTitle({
           color="var(--color-primary)"
           className="inline-block"
           innerClassName={`bg-transparent border-transparent ${pillClassName}`}
+          visibleRootMargin={visibleRootMargin}
         >
           <Heading
             tagName="span"
