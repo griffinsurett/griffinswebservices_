@@ -108,6 +108,7 @@ export default function LanguageDropdown() {
 
   const currentCode =
     currentLanguage.code?.split("-")[0]?.toUpperCase() || "EN";
+  const currentFlag = currentLanguage.flag;
 
   return (
     <div ref={containerRef} className="relative contents">
@@ -123,7 +124,18 @@ export default function LanguageDropdown() {
         className={buttonClasses}
       >
         <div className="flex items-center justify-center">
-          <Icon icon="lucide:globe" size="sm" aria-label="Language picker" />
+          {currentFlag ? (
+            <span className="text-xl leading-none" aria-hidden="true">
+              {currentFlag}
+            </span>
+          ) : (
+            <span
+              className="text-xs font-semibold uppercase tracking-wide"
+              aria-hidden="true"
+            >
+              {currentCode}
+            </span>
+          )}
         </div>
       </CircleCheckbox>
 
