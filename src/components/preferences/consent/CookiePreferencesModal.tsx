@@ -16,6 +16,7 @@ import type { CookieConsent, CookieCategoryInfo } from "./types";
 import Button from "@/components/Button/Button";
 import ToggleControl from "../controls/ToggleControl";
 import Accordion from "@/components/LoopTemplates/Accordion";
+import Icon from "@/components/Icon";
 
 interface CookiePreferencesModalProps {
   isOpen: boolean;
@@ -198,6 +199,18 @@ function CookiePreferencesModal({
           const toggleId = `${id}-toggle`;
           return (
             <div className="flex items-center gap-3 w-full">
+              <div
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-500 text-lg font-semibold ${
+                  expanded ? "bg-primary text-bg" : "bg-primary/20 text-accent"
+                }`}
+                aria-hidden="true"
+              >
+                <Icon
+                  icon={expanded ? "lucide:minus" : "lucide:plus"}
+                  size="sm"
+                  className="w-4 h-4"
+                />
+              </div>
               <span className="font-semibold text-heading text-base flex-1">
                 {category.title}
               </span>
