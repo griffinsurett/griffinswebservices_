@@ -17,8 +17,8 @@ import PreferencesLayout from "./PreferencesLayout.astro";
 ---
 
 <footer class="mt-auto border-t border-accent/10 bg-bg2/60">
-  <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
-    <div class="grid gap-10 text-center sm:text-left sm:grid-cols-2 lg:grid-cols-3">
+  <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-10 text-center sm:text-left sm:grid-cols-2 lg:grid-cols-3 py-10">
       {/* Column 1: Brand summary */}
       <div class="flex flex-col items-center gap-4 sm:items-start">
         <p class="text-2xl font-bold text-heading">{siteData.title}</p>
@@ -43,7 +43,7 @@ import PreferencesLayout from "./PreferencesLayout.astro";
             })
             .orderBy(sortBy("order", "asc"))}
           variant="ListVariant"
-          className="text-bg flex flex-wrap justify-center gap-3 !py-0 sm:justify-start"
+          className="text-bg flex flex-col justify-center gap-3 sm:justify-start"
         />
 
         <PreferencesLayout />
@@ -64,7 +64,7 @@ import PreferencesLayout from "./PreferencesLayout.astro";
       </div>
     </div>
 
-    <div class="mt-10 flex flex-col items-center border-t border-accent/10 pt-6 text-center text-text text-sm sm:flex-row sm:justify-between sm:text-left">
+    <div class="flex flex-col items-center border-t border-accent/10 text-center text-text text-sm sm:flex-row sm:justify-between sm:text-left py-6">
       <p>
         &copy; {new Date().getFullYear()}
         {siteData.legalName}. All rights reserved.
