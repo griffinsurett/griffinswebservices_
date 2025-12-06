@@ -5,6 +5,7 @@ import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro"
 import SectionHeader from "@/components/SectionHeader.astro";
 import { query } from "@/utils/query";
 import { siteData } from "@/content/siteData";
+import type { HeadingContent } from "@/content/schema";
 
 interface CTA {
   text: string;
@@ -12,9 +13,7 @@ interface CTA {
 }
 
 export interface Props {
-  headingBefore?: string;
-  headingEmphasis?: string;
-  headingAfter?: string;
+  heading?: HeadingContent;
   description?: string;
   primaryCTA?: CTA;
   className?: string;
@@ -25,9 +24,7 @@ const defaultDescription =
   "Hand-crafted websites, automated systems, and ongoing support so you can sell more, grow faster, and stay secure without juggling multiple vendors.";
 
 const {
-  headingBefore,
-  headingEmphasis,
-  headingAfter,
+  heading,
   description = siteData.description ?? defaultDescription,
   primaryCTA = {
     text: "Book An Intro Call",
@@ -54,9 +51,7 @@ const {
       >
         <SectionHeader
           className="text-left lg:text-center w-full hero-spacing"
-          headingBefore={headingBefore}
-          headingEmphasis={headingEmphasis}
-          headingAfter={headingAfter}
+          heading={heading}
           headingTag="h1"
           headingClassName="text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-tight"
           description={description ?? defaultDescription}

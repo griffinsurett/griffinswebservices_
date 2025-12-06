@@ -26,7 +26,7 @@ const {
     collectionTitle,
     heading,
     headingTag,
-    headingClassName = "h2 text-heading",
+    headingClassName = "text-3xl md:text-4xl lg:text-5xl leading-[1.15em] text-heading",
     description,
     className = "",
     columns = 2,
@@ -48,12 +48,6 @@ const showHeader = Boolean(
         headingAfter,
 );
 
-const gapClasses: Record<"sm" | "md" | "lg", string> = {
-    sm: "gap-8",
-    md: "gap-10",
-    lg: "gap-12",
-};
-
 const resolveItemUrl = (item: Record<string, any>): string | undefined => {
     if (!item || typeof item !== "object") return undefined;
     const candidates = [
@@ -70,10 +64,10 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
 };
 ---
 
-<section id={id} class={`py-16 ${className}`.trim()}>
+<section id={id} class={`py-16 hero-gradient-bg ${className}`.trim()}>
     <div class="mx-auto inner-section">
         <div
-            class={`flex flex-col lg:space-x-25 gap-3 ${
+            class={`flex flex-col lg:space-x-15 ${
                 showHeader ? "lg:flex-row lg:items-start" : ""
             }`.trim()}
         >
@@ -103,7 +97,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                         class={`w-full py-6 lg:py-0 ${showHeader ? "lg:w-2/3" : ""}`.trim()}
                     >
                         <ul
-                            class={`flex flex-col ${gapClasses[gap]} list-none`.trim()}
+                            class={`flex flex-col gap-4 list-none`.trim()}
                         >
                             {safeItems.map((item) => {
                                 const route = resolveItemUrl(item);
@@ -128,29 +122,29 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                                     );
 
                                 return (
-                                    <li class="relative h-full group">
-                                        {clickableWrapper(
-                                            <div
-                                                class={`${route ? "cursor-pointer hover:bg-bg3 p-10" : ""}`}
-                                            >
+                                    <li
+                                        class={`relative h-full rounded-3xl p-6 lg:p-8 flex items-center gap-6 transition-colors duration-300 group/icon-card ${route ? "cursor-pointer hover:bg-bg3 hover:shadow-xl" : ""}`.trim()}
+                                    >
+                                        <div class="flex-1 w-full">
+                                            {clickableWrapper(
                                                 <IconListItem
                                                     data={item}
                                                     layout="vertical"
                                                     alignment="left"
-                                                    className={`text-left gap-1 pr-12 ${route ? "group-hover:opacity-90 transition-opacity duration-300" : ""}`}
-                                                    iconClassName="icon-large card-icon-color mb-3"
+                                                    className={`text-left gap-1 w-full ${route ? "group-hover/icon-card:opacity-90 transition-opacity duration-300" : ""}`}
+                                                    iconClassName="icon-large card-icon-color"
                                                     iconSize="xl"
-                                                    titleClassName="text-heading h3"
-                                                    descriptionClassName="text-base text-text"
-                                                />
-                                            </div>,
-                                        )}
+                                                    titleClassName="text-heading h3 my-4"
+                                                    descriptionClassName="text-lg text-text"
+                                                />,
+                                            )}
+                                        </div>
 
                                         {route && (
                                             <Button
                                                 variant="arrowLink"
                                                 href={route}
-                                                className="absolute top-1/2 -translate-y-1/2 right-5 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300"
+                                                className="shrink-0 ml-4 flex items-center justify-center opacity-0 pointer-events-none transition-opacity transition-transform duration-300 group-hover/icon-card:opacity-100 group-hover/icon-card:pointer-events-auto group-hover/icon-card:animate-bounce"
                                                 aria-label={`Open ${linkLabel}`}
                                             />
                                         )}

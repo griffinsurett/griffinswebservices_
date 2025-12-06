@@ -12,9 +12,9 @@ export default function ArrowLinkButton({
       className={`group flex items-center justify-between gap-4 text-left cursor-pointer ${className}`.trim()}
       unstyled
     >
-      <span className="flex justify-center items-center rounded-full h-10 w-10 bg-accent">   
-        <Icon icon="lu:arrow-right" size="lg" className="text-bg transition-transform duration-300 group-hover:translate-x-0.5 p-0" />
-        </span>   
+      <span className="flex justify-center items-center rounded-full h-10 w-10 bg-accent">
+        <Icon icon="lu:arrow-right" size="lg" className="text-bg p-0" />
+      </span>
     </ButtonBase>
   );
 }

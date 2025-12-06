@@ -2,8 +2,6 @@
 // src/pages/index.astro
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
-import AboutSection from "@/layouts/AboutSection.astro";
-import { Image } from "astro:assets";
 import {
   query,
   whereArrayContains,
@@ -16,10 +14,11 @@ import FrontPageHero from "@/layouts/FrontPageHero.astro";
 import { siteData } from "@/content/siteData";
 import LogoPoster from "@/assets/2dfavicons/android-chrome-192x192.png";
 import { roots } from "@/utils/query/snippets";
+import CTASection from "@/layouts/CTASection.astro";
 
-const heroTagline = {
+const heroHeading = {
   before: "Launch a website that works. ",
-  emphasized: "Fast, secure, growth-ready.",
+  text: "Fast, secure, growth-ready.",
   after: "",
 };
 
@@ -31,9 +30,7 @@ const heroDescription =
   <main class="flex-1">
     <!-- Hero ContentRenderer with static content -->
     <FrontPageHero
-      headingBefore={heroTagline.before}
-      headingEmphasis={heroTagline.emphasized}
-      headingAfter={heroTagline.after}
+      heading={heroHeading}
       description={heroDescription}
       primaryCTA={{
         text: "Get Started",
@@ -60,169 +57,34 @@ const heroDescription =
       columns={3}
       gap="lg"
       showButtonSection={false}
-      className="bg-bg pt-35 lg:pt-20"
+      className="pt-35 lg:pt-20"
     />
 
     <!-- <ContentRenderer query={query("projects")} variant="PortfolioVariant" /> -->
 
     <ContentRenderer
-      query={query("solutions")
-        .where((entry) => entry.data.parent === "website-solutions")
-        .orderBy(sortByOrder())}
+      query={query("solutions")}
       variant="IconListVariant"
       heading={{
-        before: "Websites aren't just something we do. ",
-        text: "They're our specialty.",
+        before: "Premium Websites for ",
+        text: "Any Business, ",
+        after: "Built for Your Growth"
       }}
       title="Website Services"
-      description="The three pillars every engagement includes: design, dependable engineering, and proactive care. Every engagement starts with a clear website outcome, so explore the most common builds we ship and watch a quick preview as you browse."
+      description="We design top-tier websites for businesses in every industry — from local services to global brands. Every site is custom-built for your goals, lightning-fast, secure, and easy to manage. No templates, no bloat — just a powerful online presence that looks sharp, performs flawlessly, and grows with you."
       autoAdvanceDelay={2000}
     />
 
-    <AboutSection>
-      <div slot="text" class="space-y-6 text-lg leading-relaxed text-text">
-        <p>
-          Griffin's Web Services builds fast, secure, professional websites for
-          businesses that want a strong, trustworthy online presence without any
-          technical headaches.
-        </p>
-        <p class="text-muted">
-          Our focus is simple: make your business look credible, make it easy
-          for customers to reach you, and keep your website running smoothly
-          around the clock.
-        </p>
-      </div>
-      <div slot="under-text" class="space-y-10">
-        <div class="grid gap-6 md:grid-cols-2">
-          <div class="rounded-2xl border border-accent/20 card-bg p-6">
-            <h3 class="text-heading text-xl font-semibold mb-2">
-              Not another template factory.
-            </h3>
-            <p class="text-text text-base leading-relaxed">
-              Unlike the bloated DIY builders flooding the internet, our
-              websites do not fall apart when real customers start using them.
-            </p>
-            <p class="text-muted text-sm leading-relaxed mt-4">
-              We scope every project around your services, operations, and goals
-              so the finished site feels tailor-made and never like a generic
-              skin.
-            </p>
-          </div>
-          <div class="rounded-2xl border border-accent/20 card-bg p-6">
-            <h3 class="text-heading text-xl font-semibold mb-2">
-              We handle everything.
-            </h3>
-            <p class="text-text text-base leading-relaxed">
-              You do not need to manage hosting, updates, or security issues —
-              we handle the nitty-gritty so you can stay focused on the work you
-              care about.
-            </p>
-            <p class="text-muted text-sm leading-relaxed mt-4">
-              From discovery to launch to ongoing improvements, you get one
-              accountable partner who keeps your site running flawlessly.
-            </p>
-          </div>
-        </div>
-
-        <blockquote
-          class="rounded-3xl border border-accent/15 hero-gradient-bg p-6 lg:p-8"
-        >
-          <p class="text-heading text-2xl font-semibold leading-relaxed">
-            “A website should do two things extremely well: be easy for your
-            customers to use and be structured in a way that search engines are
-            confident recommending.”
-          </p>
-          <footer class="mt-4 text-sm text-muted leading-snug space-y-2">
-            <div>
-              <span class="text-heading font-semibold block"
-                >Griffin Surett</span
-              >
-              <span>Founder &amp; CEO, Griffin's Web Services</span>
-            </div>
-          </footer>
-        </blockquote>
-      </div>
-      <div slot="quick-facts" class="grid gap-4 sm:grid-cols-2">
-        {
-          [
-            { label: "Average turnaround", value: "4-6 weeks" },
-            {
-              label: "Engagement model",
-              value: "Strategy, build, and care plan",
-            },
-            { label: "Client satisfaction", value: "98% would hire us again" },
-            { label: "Based in", value: siteData.location },
-          ].map((fact) => (
-            <div class="rounded-2xl border card-bg border-accent/25 p-4">
-              <p class="text-xs uppercase tracking-[0.2em] text-muted">
-                {fact.label}
-              </p>
-              <p class="text-heading text-xl font-semibold mt-2">
-                {fact.value}
-              </p>
-            </div>
-          ))
-        }
-      </div>
-
-      <div slot="proof-points">
-        <div>
-          <p class="h3">What sets us apart.</p>
-          <div class="mt-3">
-            <ul class="space-y-3">
-              {
-                [
-                  "Bespoke builds, never templates — Everything we launch is scoped for your business so it feels premium and works reliably under real traffic.",
-                  "Performance, accessibility, and SEO baked in — Speed, rankings, and compliance are handled from day one so you don’t need extra vendors later.",
-                  "Hosting, care, and monitoring included — We keep everything patched, protected, and online so you can focus on running the business.",
-                  "Responsive humans who already know your business — You get one accountable team for strategy, builds, and support—no ticket portals or handoffs.",
-                ].map((description) => (
-                  <li class="flex items-start gap-2 text-base leading-relaxed text-text">
-                    <span class="flex-shrink-0">
-                      <Image
-                        src={LogoPoster}
-                        alt="Griffin's Web Services Logo"
-                        width="32"
-                        height="32"
-                        class="w-6 h-6 rounded-full object-contain border border-accent/30 card-bg"
-                      />
-                    </span>
-                    <span class="text-muted text-sm leading-snug block">
-                      {description}
-                    </span>
-                  </li>
-                ))
-              }
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div slot="bottom-section" class="mt-16">
-        <ContentRenderer
-          query={query("stats").orderBy(sortByOrder())}
-          variant="StatsInlineVariant"
-          columns={4}
-        />
-
-        <ContentRenderer
-          query={query("benefits")}
-          variant="BenefitsInlineVariant"
-          title="Built different. Built better."
-          description="Every site we build is intentionally crafted to load quickly, stay secure, and give your customers a smooth, frustration-free experience."
-        />
-      </div>
-    </AboutSection>
-
-    <!-- Solutions - auto-populates from solutions meta -->
+        <!-- Testimonials with rating filter -->
     <ContentRenderer
-      query={query("solutions")
-        .where(whereEquals("parent", "website-solutions"))
-        .orderBy(sortByOrder())}
-      title="Website Solutions"
-      variant="CardVariant"
-      columns={3}
-      gap="lg"
+      query={query("testimonials").where((entry) => entry.data.rating >= 4)}
+      variant="TestimonialCarouselVariant"
+    />
+
+    <!-- Technologies -->
+        <ContentRenderer
+      query={query("technologies").orderBy(sortByOrder())}
+      variant="TechnologiesVariant"
     />
 
     <!-- Filtered query - still gets meta from authors -->
@@ -234,30 +96,19 @@ const heroDescription =
     /> -->
 
     <!-- Portfolio with sorting -->
-    <ContentRenderer
+    <!-- <ContentRenderer
       query={query("projects")
         .orderBy(sortByDate("publishDate", "desc"))}
       variant="PortfolioVariant"
-    />
-
-    <!-- Testimonials with rating filter -->
-    <ContentRenderer
-      query={query("testimonials").where((entry) => entry.data.rating >= 4)}
-      variant="TestimonialCarouselVariant"
-    />
+    /> -->
 
     <!-- Addon Capabilities - auto-populates from capabilities meta -->
-    <ContentRenderer
+    <!-- <ContentRenderer
       query={query("capabilities").orderBy(sortByOrder())}
       variant="CardVariant"
       columns={3}
       gap="lg"
-    />
-
-    <ContentRenderer
-      query={query("technologies").orderBy(sortByOrder())}
-      variant="TechnologiesVariant"
-    />
+    /> -->
 
     <!-- FAQ ContentRenderer -->
     <ContentRenderer
@@ -265,6 +116,15 @@ const heroDescription =
       variant="AccordionVariant"
       allowMultiple={false}
       ctaCollectionLabel="FAQs"
+    />
+
+    <CTASection
+      title="Get Started"
+      heading={{
+        before: "Ready to Transform Your Online Presence into a ",
+        text: "High-Performance Growth Engine?"
+      }}
+      description="Join hundreds of successful businesses who trust Griffin's Web Services. While others juggle dozens of services, we've mastered one: building lightning-fast, secure, and scalable sites that turn visitors into customers."
     />
 
     <!-- Contact ContentRenderer -->
