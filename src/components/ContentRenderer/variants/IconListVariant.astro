@@ -73,7 +73,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
 <section id={id} class={`py-16 ${className}`.trim()}>
     <div class="mx-auto inner-section">
         <div
-            class={`flex flex-col lg:space-x-25 gap-6 ${
+            class={`flex flex-col lg:space-x-25 gap-3 ${
                 showHeader ? "lg:flex-row lg:items-start" : ""
             }`.trim()}
         >
@@ -150,7 +150,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                                             <Button
                                                 variant="arrowLink"
                                                 href={route}
-                                                className="absolute top-0 right-3 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300"
+                                                className="absolute top-1/2 -translate-y-1/2 right-5 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300"
                                                 aria-label={`Open ${linkLabel}`}
                                             />
                                         )}

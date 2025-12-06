@@ -12,16 +12,9 @@ export default function ArrowLinkButton({
       className={`group flex items-center justify-between gap-4 text-left cursor-pointer ${className}`.trim()}
       unstyled
     >
-      <div className="transition-opacity duration-300 group-hover:opacity-90">
-        {children}
-      </div>
-
-      <span
-        aria-hidden="true"
-        className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/15 text-accent text-lg font-semibold border border-primary/20 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:bg-primary group-hover:text-bg"
-      >
-        <Icon icon="lu:arrow-right" size="md" className="transition-transform duration-300 group-hover:translate-x-0.5" />
-      </span>
+      <span className="flex justify-center items-center rounded-full h-10 w-10 bg-accent">   
+        <Icon icon="lu:arrow-right" size="lg" className="text-bg transition-transform duration-300 group-hover:translate-x-0.5 p-0" />
+        </span>   
     </ButtonBase>
   );
 }
