@@ -1,3 +1,4 @@
+import Icon from "@/components/Icon";
 import { ButtonBase, type ButtonProps } from "../Button";
 
 export default function ArrowLinkButton({
@@ -19,7 +20,7 @@ export default function ArrowLinkButton({
         aria-hidden="true"
         className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/15 text-accent text-lg font-semibold border border-primary/20 opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:bg-primary group-hover:text-bg"
       >
-        ↗
+        <Icon icon="lu:arrow-right" size="md" className="transition-transform duration-300 group-hover:translate-x-0.5" />
       </span>
     </ButtonBase>
   );
