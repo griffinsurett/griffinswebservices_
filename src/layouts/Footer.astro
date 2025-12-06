@@ -22,72 +22,79 @@ import Logo from "@/components/Logo/Logo.astro";
   <div class="section-color-border"></div>
   <div class="mx-auto w-full">
     <div
-      class="flex gap-10 text-left inner-section sm:text-left justify-between py-20"
+      class="flex flex-wrap gap-10 text-left inner-section sm:text-left justify-between py-20"
     >
       {/* Column 1: Brand summary */}
-      <div class="flex flex-col items-start gap-4 w-1/4">
+      <div class="flex flex-col items-start gap-4 lg:w-1/4">
         <Logo loading="lazy" trigger="scroll" animateOutText={false} />
         <p class="text-sm text-text/80 lg:text-base">
           {siteData.description}
         </p>
-          <ContentRenderer
+        <ContentRenderer
           query={query("social-media")}
           variant="SocialMediaVariant"
           size="lg"
           alignment="left"
           className="text-bg"
         />
-      </div>
-
-      {/* Column 2: Legal links & preferences */}
-      <div class="flex flex-col items-start gap-8 text-sm">
-          <ContentRenderer
-            query={roots("capabilities")}
-            variant="ListVariant"
-            showButtonSection={false}
-
-          />
-           <ContentRenderer
-            query={roots("solutions")}
-            variant="ListVariant"
-            showButtonSection={false}
-          />
-      </div>
-
-        {/* Column 2: Legal links & preferences */}
-      <div class="flex flex-col items-start gap-8 text-sm">
-        <div class="flex flex-col items-start gap-2 text-sm">
-          <ContentRenderer
-            query={query("menu-items")
-              .where((entry) => {
-                const menus = entry.data.menu;
-                if (Array.isArray(menus)) {
-                  return menus.some((m) => m.id === "footer-menu");
-                }
-                return menus?.id === "footer-menu";
-              })
-              .orderBy(sortBy("order", "asc"))}
-            variant="ListVariant"
-            title="Legal Links"
-            className="text-bg flex flex-col items-start justify-center"
-          />
-        </div>
-        <div class="flex flex-col items-start gap-2 text-sm">
-          <PreferencesLayout />
-        </div>
-      </div>
-
-      {/* Column 3: Social links */}
-      <div class="flex flex-col items-start gap-4">
+             {/* Column 3: Contact-Us */}
         <ContentRenderer
           query={query("contact-us")}
           variant="ListVariant"
           size="lg"
           alignment="left"
           className="text-bg"
-          title="Connect"
           showButtonSection={false}
+          showHeadingSection={false}
+        />
+      </div>
 
+      {/* Column 2: Legal links & preferences */}
+      <div class="flex flex-col items-start gap-8 text-sm">
+        <ContentRenderer
+          query={roots("capabilities")}
+          variant="ListVariant"
+          showButtonSection={false}
+          showHeadingDivider
+        />
+        <ContentRenderer
+          query={roots("solutions")}
+          variant="ListVariant"
+          showButtonSection={false}
+          showHeadingDivider
+        />
+      </div>
+
+      {/* Column 2: Legal links & preferences */}
+      <div class="flex flex-col items-start gap-8 text-sm">
+        <ContentRenderer
+          query={query("menu-items")
+            .where((entry) => {
+              const menus = entry.data.menu;
+              if (Array.isArray(menus)) {
+                return menus.some((m) => m.id === "footer-menu");
+              }
+              return menus?.id === "footer-menu";
+            })
+            .orderBy(sortBy("order", "asc"))}
+          variant="ListVariant"
+          title="Legal Links"
+          className="text-bg flex flex-col items-start justify-center"
+          showHeadingDivider
+        />
+        <div class="flex flex-col items-start gap-2 text-sm">
+          <PreferencesLayout />
+        </div>
+      </div>
+
+         {/* Column 2: Legal links & preferences */}
+      <div class="flex flex-col items-start gap-8 text-sm">
+        {/* Column 3: Contact-Us */}
+        <ContentRenderer
+          query={roots("industries")}
+          variant="ListVariant"
+          showButtonSection={false}
+          showHeadingDivider
         />
       </div>
     </div>
@@ -96,8 +103,8 @@ import Logo from "@/components/Logo/Logo.astro";
       class="relative flex flex-col text-center items-center border-t border-accent/10 text-text text-sm sm:flex-row justify-center py-6"
     >
       <div class="section-color-border"></div>
-        &copy; {new Date().getFullYear()}
-        {siteData.legalName}. All rights reserved.
+      &copy; {new Date().getFullYear()}
+      {siteData.legalName}. All rights reserved.
     </div>
   </div>
 </footer>

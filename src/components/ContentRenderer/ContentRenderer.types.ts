@@ -26,6 +26,8 @@ export interface BaseVariantProps {
   collectionTitle?: string;    // Display name for collection (for "View All" text)
   id?: string;                 // Manual ID override (auto-generated if not provided)
   showButtonSection?: boolean; // Allows manual control over CTA/button visibility
+  showHeadingDivider?: boolean; // Optional divider between heading and content
+  showHeadingSection?: boolean; // Toggle heading/description wrapper
 }
 
 /**

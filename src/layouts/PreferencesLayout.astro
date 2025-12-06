@@ -22,6 +22,7 @@ import "../styles/accessibility.css";
 
 import GoogleTranslateScript from "@/components/preferences/language/GoogleTranslateScript.astro";
 import "../styles/language-switcher.css";
+import DividerHeading from "@/components/DividerHeading/DividerHeading";
 ---
 
 {/* Consent Script - Inline initialization, runs immediately */}
@@ -30,7 +31,7 @@ import "../styles/language-switcher.css";
 {/* Google Translate Script - Only loads if user has language preference */}
 <GoogleTranslateScript />
 
-<h4 class="h4 text-heading">Preferences</h4>
+<DividerHeading title="Preferences" className="mb-4" />
 
 <div class="flex flex-col justify-center items-start gap-3">
 
