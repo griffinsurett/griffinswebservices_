@@ -15,20 +15,28 @@ import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro"
 import { query, sortBy } from "@/utils/query";
 import PreferencesLayout from "./PreferencesLayout.astro";
 import { roots } from "@/utils/query/snippets";
+import Logo from "@/components/Logo/Logo.astro";
 ---
 
 <footer class="mt-auto relative border-t border-accent/10 bg-bg2/60">
   <div class="section-color-border"></div>
   <div class="mx-auto w-full">
     <div
-      class="flex gap-10 text-left inner-section sm:text-left justify-between py-10"
+      class="flex gap-10 text-left inner-section sm:text-left justify-between py-20"
     >
       {/* Column 1: Brand summary */}
       <div class="flex flex-col items-start gap-4 w-1/4">
-        <p class="text-2xl font-bold text-heading">{siteData.title}</p>
+        <Logo loading="lazy" trigger="scroll" animateOutText={false} />
         <p class="text-sm text-text/80 lg:text-base">
           {siteData.description}
         </p>
+          <ContentRenderer
+          query={query("social-media")}
+          variant="SocialMediaVariant"
+          size="lg"
+          alignment="left"
+          className="text-bg"
+        />
       </div>
 
       {/* Column 2: Legal links & preferences */}
@@ -80,15 +88,6 @@ import { roots } from "@/utils/query/snippets";
           title="Connect"
           showButtonSection={false}
 
-        />
-
-         <ContentRenderer
-          query={query("social-media")}
-          variant="SocialMediaVariant"
-          size="lg"
-          alignment="left"
-          className="text-bg"
-          title="Connect"
         />
       </div>
     </div>

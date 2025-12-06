@@ -510,6 +510,9 @@
         },
         "readingTime": {
           "type": "number"
+        },
+        "$schema": {
+          "type": "string"
         }
       },
       "required": [

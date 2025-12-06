@@ -84,7 +84,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                             className="space-y-4 text-left"
                             headingTag={headingTag}
                             headingClassName={headingClassName}
-                            descriptionClassName="text-lg text-muted leading-relaxed"
+                            descriptionClassName="large-text leading-relaxed"
                             titleVisibleRootMargin={0}
                         />
                     </div>
@@ -140,14 +140,14 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                                             )}
                                         </div>
 
-                                        {route && (
+                                        {route ? (
                                             <Button
                                                 variant="arrowLink"
                                                 href={route}
                                                 className="shrink-0 ml-4 flex items-center justify-center opacity-0 pointer-events-none transition-opacity transition-transform duration-300 group-hover/icon-card:opacity-100 group-hover/icon-card:pointer-events-auto group-hover/icon-card:animate-bounce"
                                                 aria-label={`Open ${linkLabel}`}
                                             />
-                                        )}
+                                        ) : null}
                                     </li>
                                 );
                             })}

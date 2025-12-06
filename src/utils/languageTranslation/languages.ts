@@ -18,7 +18,9 @@ export const supportedLanguages: Language[] = [
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
   { code: 'iw', name: 'Hebrew', nativeName: 'עברית', flag: '🇮🇱' },
   { code: 'yi', name: 'Yiddish', nativeName: 'ייִדיש', flag: '🇮🇱' },
-  { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
+  { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },  
+  { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
+  { code: 'uk', name: 'Ukrainian', nativeName: 'Українська', flag: '🇺🇦' },
   { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
   { code: 'fa', name: 'Farsi', nativeName: 'فارسی', flag: '🇮🇷' },
   { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
@@ -29,7 +31,6 @@ export const supportedLanguages: Language[] = [
   { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
   { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
   { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
-  { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
 ];
 
 export const defaultLanguage: Language = supportedLanguages[0];
