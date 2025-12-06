@@ -16,41 +16,61 @@ import { query, sortBy } from "@/utils/query";
 import PreferencesLayout from "./PreferencesLayout.astro";
 ---
 
-<footer class="mt-auto">
-  <div class="mx-auto">
-    <div class="flex flex-col justify-between items-center gap-6 py-4 w-full">
-      {/* Legal and privacy links */}
-      <div class="flex flex-wrap items-center justify-center gap-4 text-sm">
+<footer class="mt-auto border-t border-accent/10 bg-bg2/60">
+  <div class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid gap-10 text-center sm:text-left sm:grid-cols-2 lg:grid-cols-3">
+      {/* Column 1: Brand summary */}
+      <div class="flex flex-col items-center gap-4 sm:items-start">
+        <p class="text-2xl font-bold text-heading">{siteData.title}</p>
+        <p class="text-sm text-text/80 lg:text-base">
+          {siteData.tagline}
+        </p>
+      </div>
+
+      {/* Column 2: Legal links & preferences */}
+      <div class="flex flex-col items-center gap-4 text-sm sm:items-start">
+        <p class="font-semibold uppercase tracking-wider text-muted text-xs">
+          Resources
+        </p>
         <ContentRenderer
-        query={query("menu-items")
-          .where((entry) => {
-            const menus = entry.data.menu;
-            if (Array.isArray(menus)) {
-              return menus.some((m) => m.id === "footer-menu");
-            }
-            return menus?.id === "footer-menu";
-          })
-          .orderBy(sortBy("order", "asc"))}
-        variant="ListVariant"
-        className="text-bg flex"
-      />
-          
+          query={query("menu-items")
+            .where((entry) => {
+              const menus = entry.data.menu;
+              if (Array.isArray(menus)) {
+                return menus.some((m) => m.id === "footer-menu");
+              }
+              return menus?.id === "footer-menu";
+            })
+            .orderBy(sortBy("order", "asc"))}
+          variant="ListVariant"
+          className="text-bg flex flex-wrap justify-center gap-3 !py-0 sm:justify-start"
+        />
+
         <PreferencesLayout />
       </div>
 
-      {/* Social media icons */}
-      <ContentRenderer
-        query={query("social-media")}
-        variant="SocialMediaVariant"
-        size="lg"
-        alignment="left"
-        className="text-bg"
-      />
+      {/* Column 3: Social links */}
+      <div class="flex flex-col items-center gap-4 sm:items-start">
+        <p class="font-semibold uppercase tracking-wider text-muted text-xs">
+          Connect
+        </p>
+        <ContentRenderer
+          query={query("social-media")}
+          variant="SocialMediaVariant"
+          size="lg"
+          alignment="left"
+          className="text-bg"
+        />
+      </div>
+    </div>
 
-      {/* Copyright notice */}
-      <p class="text-text text-sm">
+    <div class="mt-10 flex flex-col items-center border-t border-accent/10 pt-6 text-center text-text text-sm sm:flex-row sm:justify-between sm:text-left">
+      <p>
         &copy; {new Date().getFullYear()}
         {siteData.legalName}. All rights reserved.
+      </p>
+      <p class="text-muted">
+        Built with care in {siteData.location}.
       </p>
     </div>
   </div>
