@@ -93,26 +93,29 @@ export default function MobileMenuDrawer({
         ssr={false}
       >
         <nav
-          className={`${className} h-full w-full flex flex-col justify-center items-center overflow-y-auto p-6`}
+          className={`${className} h-full w-full flex flex-col justify-center items-center overflow-hidden p-6`}
           aria-label="Mobile navigation"
         >
-          <div className="w-full max-w-sm">
-            <div className="relative w-full overflow-hidden">
+          <div
+            className="w-full max-w-sm my-auto py-4"
+            style={{ maxHeight: "calc(100vh - 6rem)" }}
+          >
+            <div className="relative w-full h-full overflow-hidden">
               <div
-                className="flex transition-transform duration-300 ease-in-out"
+                className="flex h-full transition-transform duration-300 ease-in-out"
                 style={{ transform: `translateX(-${slideOffset}%)` }}
               >
                 {menuStack.map((level, index) => (
                   <div
                     key={`${level.title}-${index}`}
-                    className="w-full flex-shrink-0"
+                    className="w-full flex-shrink-0 h-full flex flex-col relative"
                     aria-hidden={index !== menuStack.length - 1}
                   >
                     {index > 0 && (
                       <button
                         type="button"
                         onClick={handleBack}
-                        className="flex items-center gap-2 text-text hover:underline mb-6"
+                        className="flex items-center gap-2 text-text hover:underline absolute left-0 top-0"
                         aria-label={`Go back to ${
                           menuStack[index - 1]?.title ?? "previous menu"
                         }`}
@@ -135,18 +138,24 @@ export default function MobileMenuDrawer({
                       </button>
                     )}
 
-                    <ul className="menu-item-spacing">
-                      {level.items.map((item) => (
-                        <MobileMenuItem
-                          key={item.slug || item.id}
-                          {...item}
-                          onNavigate={handleNavigate}
-                          onOpenSubmenu={(submenu) =>
-                            handleOpenSubmenu(submenu.title, submenu.items)
-                          }
-                        />
-                      ))}
-                    </ul>
+                    <div
+                      className={`flex-1 overflow-y-auto overflow-x-hidden pr-2 ${
+                        index > 0 ? "pt-12" : ""
+                      }`}
+                    >
+                      <ul className="menu-item-spacing pb-10">
+                        {level.items.map((item) => (
+                          <MobileMenuItem
+                            key={item.slug || item.id}
+                            {...item}
+                            onNavigate={handleNavigate}
+                            onOpenSubmenu={(submenu) =>
+                              handleOpenSubmenu(submenu.title, submenu.items)
+                            }
+                          />
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -23,6 +23,14 @@ if (!safeItems.length) {
 // Target widths for responsive images - max display is ~860px in the showcase
 const IMAGE_WIDTHS = [320, 480, 640, 860];
 const SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 860px";
+type OptimizedFormat = "avif" | "webp";
+const FALLBACK_FORMAT: OptimizedFormat = "webp";
+const IMAGE_FORMATS: { format: OptimizedFormat; quality: number }[] = [
+  // AVIF first for maximum compression, with a slightly lower quality target
+  { format: "avif", quality: 45 },
+  // WebP fallback keeps quality high enough for crisp UI details
+  { format: "webp", quality: 65 },
+];
 
 // Process items and generate optimized images
 const processedItems = await Promise.all(
@@ -43,30 +51,57 @@ const processedItems = await Promise.all(
       return { data: item, mediaEntry: undefined };
     }
 
-    // Generate optimized images at multiple widths
-    const optimizedImages = await Promise.all(
-      IMAGE_WIDTHS.map((width) =>
-        getImage({
-          src: metadata,
-          width,
-          format: "webp",
-        })
-      )
+    // Generate optimized images for each requested format + width combo
+    const optimizedByFormat = await Promise.all(
+      IMAGE_FORMATS.map(async ({ format, quality }) => {
+        const images = await Promise.all(
+          IMAGE_WIDTHS.map((width) =>
+            getImage({
+              src: metadata,
+              width,
+              format,
+              quality,
+            })
+          )
+        );
+
+        return { format, images };
+      })
     );
 
-    // Build srcSet from optimized images
-    const srcSet = optimizedImages
+    const fallbackFormatEntry =
+      optimizedByFormat.find((entry) => entry.format === FALLBACK_FORMAT) ??
+      optimizedByFormat[optimizedByFormat.length - 1];
+
+    if (!fallbackFormatEntry) {
+      return { data: item, mediaEntry: undefined };
+    }
+
+    const fallbackImages = fallbackFormatEntry.images;
+    if (!fallbackImages.length) {
+      return { data: item, mediaEntry: undefined };
+    }
+
+    const fallbackSrcSet = fallbackImages
       .map((img, i) => `${img.src} ${IMAGE_WIDTHS[i]}w`)
       .join(", ");
+    const defaultImage = fallbackImages[fallbackImages.length - 1];
 
-    // Use the largest optimized image as the default src
-    const defaultImage = optimizedImages[optimizedImages.length - 1];
+    const pictureSources = optimizedByFormat
+      .filter((entry) => entry.format !== FALLBACK_FORMAT)
+      .map((entry) => ({
+        type: `image/${entry.format}`,
+        srcSet: entry.images
+          .map((img, i) => `${img.src} ${IMAGE_WIDTHS[i]}w`)
+          .join(", "),
+        sizes: SIZES,
+      }));
 
     return {
       data: item,
       mediaEntry: {
         src: defaultImage.src,
-        srcSet,
+        srcSet: fallbackSrcSet,
         sizes: SIZES,
         width: defaultImage.attributes.width as number,
         height: defaultImage.attributes.height as number,
@@ -74,6 +109,7 @@ const processedItems = await Promise.all(
         loading: isFirst ? "eager" as const : "lazy" as const,
         decoding: "async" as const,
         fetchPriority: isFirst ? "high" as const : "auto" as const,
+        sources: pictureSources,
       },
     };
   })
