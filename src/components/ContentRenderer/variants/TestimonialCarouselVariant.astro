@@ -15,6 +15,7 @@ interface Props extends BaseVariantProps {
 const {
   items = [],
   title,
+  heading,
   description,
   className = "",
   collectionUrl,
@@ -35,10 +36,10 @@ const safeItems = toArray(items);
   <div class="section-color-border"></div>
 
   <div class="inner-section">
-    {(title || collectionTitle || description) && (
+    {(title || collectionTitle || description || heading) && (
       <SectionHeader
-        title={collectionTitle ?? title}
-        heading={title ?? collectionTitle}
+        title={title ?? collectionTitle}
+        heading={heading ?? title ?? collectionTitle}
         description={description}
         className="text-section"
         headingClassName="mb-6"

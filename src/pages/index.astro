@@ -4,15 +4,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import {
   query,
-  whereArrayContains,
-  whereEquals,
-  sortByDate,
   sortByOrder,
-  sortBy,
 } from "@/utils/query";
 import FrontPageHero from "@/layouts/FrontPageHero.astro";
 import { siteData } from "@/content/siteData";
-import LogoPoster from "@/assets/2dfavicons/android-chrome-192x192.png";
 import { roots } from "@/utils/query/snippets";
 import CTASection from "@/layouts/CTASection.astro";
 
@@ -44,9 +39,7 @@ const heroDescription =
     </FrontPageHero>
 
     <ContentRenderer
-      query={roots("capabilities")
-        .orderBy(sortByOrder())
-        .limit(6)}
+      query={roots("capabilities").orderBy(sortByOrder()).limit(6)}
       variant="CardVariant"
       title="Website Services"
       heading={{
@@ -68,21 +61,21 @@ const heroDescription =
       heading={{
         before: "Premium Websites for",
         text: "Any Business,",
-        after: "Built for Your Growth"
+        after: "Built for Your Growth",
       }}
       title="Website Services"
       description="We design top-tier websites for businesses in every industry — from local services to global brands. Every site is custom-built for your goals, lightning-fast, secure, and easy to manage. No templates, no bloat — just a powerful online presence that looks sharp, performs flawlessly, and grows with you."
       autoAdvanceDelay={2000}
     />
 
-        <!-- Testimonials with rating filter -->
+    <!-- Testimonials with rating filter -->
     <ContentRenderer
       query={query("testimonials").where((entry) => entry.data.rating >= 4)}
       variant="TestimonialCarouselVariant"
     />
 
     <!-- Technologies -->
-        <ContentRenderer
+    <ContentRenderer
       query={query("technologies").orderBy(sortByOrder())}
       variant="TechnologiesVariant"
     />
@@ -122,7 +115,7 @@ const heroDescription =
       title="Get Started"
       heading={{
         before: "Ready to Transform Your Online Presence into a ",
-        text: "High-Performance Growth Engine?"
+        text: "High-Performance Growth Engine?",
       }}
       description="Join hundreds of successful businesses who trust Griffin's Web Services. While others juggle dozens of services, we've mastered one: building lightning-fast, secure, and scalable sites that turn visitors into customers."
     />
