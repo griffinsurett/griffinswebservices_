@@ -23,6 +23,9 @@ if (!safeItems.length) {
 // Target widths for responsive images - max display is ~860px in the showcase
 const IMAGE_WIDTHS = [320, 480, 640, 860];
 const SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 860px";
+// Clamp extremely tall scrolling screenshots so the downloaded file
+// isn't much larger than the visible area in the showcase.
+const MAX_RENDER_HEIGHT = 3600;
 type OptimizedFormat = "avif" | "webp";
 const FALLBACK_FORMAT: OptimizedFormat = "webp";
 const IMAGE_FORMATS: { format: OptimizedFormat; quality: number }[] = [
@@ -55,14 +58,27 @@ const processedItems = await Promise.all(
     const optimizedByFormat = await Promise.all(
       IMAGE_FORMATS.map(async ({ format, quality }) => {
         const images = await Promise.all(
-          IMAGE_WIDTHS.map((width) =>
-            getImage({
+          IMAGE_WIDTHS.map((width) => {
+            const aspectRatio = metadata.height / metadata.width;
+            const naturalHeight = Math.round(aspectRatio * width);
+            const constrainedHeight = Math.min(naturalHeight, MAX_RENDER_HEIGHT);
+            const shouldConstrain = constrainedHeight < naturalHeight;
+            const resizeOptions = shouldConstrain
+              ? {
+                  height: constrainedHeight,
+                  fit: "cover" as const,
+                  position: "top" as const,
+                }
+              : {};
+
+            return getImage({
               src: metadata,
               width,
               format,
               quality,
-            })
-          )
+              ...resizeOptions,
+            });
+          })
         );
 
         return { format, images };
