@@ -71,7 +71,6 @@ const heroDescription = price
       <Content />
     )}
 
-    {/* Features Section */}
     <ContentRenderer
       query={query("projects")}
       variant="PortfolioVariant"
@@ -85,6 +84,11 @@ const heroDescription = price
       ctaHref="#services-quote-hero"
       ctaText="Get Your Free Quote"
     />
+
+      <ContentRenderer
+      query={query("testimonials")}
+      variant="TestimonialCarouselVariant"
+      />
 
       <ContentRenderer
         query={related("capabilities", "solutions", currentSlug)}
@@ -103,11 +107,11 @@ const heroDescription = price
     <CTASection
       id="services-page-cta"
       className="min-h-[60vh]"
-      title={`Ready to get started with ${title}?`}
+      title={`Ready to get started with a ${entry.slug}?`}
       heading={{
         before: "Let's build your",
-        text: title,
-        after: "solution today.",
+        text: entry.slug,
+        after: " today.",
       }}
       primaryCTA={{
         text: "Get Your Free Quote",
