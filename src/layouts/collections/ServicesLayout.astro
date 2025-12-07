@@ -12,12 +12,11 @@
  */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import QuoteHero from '@/layouts/QuoteHero.astro';
-import SectionHeader from '@/components/SectionHeader.astro';
-import Icon from '@/components/Icon';
 import ContentRenderer from '@/components/ContentRenderer/ContentRenderer.astro';
-import { query, sortByOrder } from '@/utils/query';
+import CTASection from '@/layouts/CTASection.astro';
+import { query, sortByOrder, related } from '@/utils/query';
 import type { CollectionLayoutProps } from './types';
-
+    
 const {
   entry,
   collection,
@@ -31,12 +30,20 @@ const {
 const data = entry?.data || {};
 const { title, description, price, features = [], parent, heading } = data;
 
+// Get the current entry's slug for filtering related capabilities
+const currentSlug = entry?.id;
+
 // Get related items (siblings with same parent, excluding current item)
 const relatedQuery = parent
   ? query(collection as any)
       .where((e: any) => e.data.parent === parent && e.id !== entry?.id)
       .orderBy(sortByOrder())
       .limit(6)
+  : null;
+
+// Query capabilities related to this solution using the `related` shortcut
+const relatedCapabilitiesQuery = currentSlug
+  ? related("capabilities", "solutions", currentSlug)
   : null;
 
 // Build the description with price if available
@@ -56,58 +63,56 @@ const heroDescription = price
         link: `/${collection}`,
         rightIcon: "lu:arrow-left"
       }}
+      id='services-quote-hero'
     />
-
-    {/* Features Section */}
-    {features && features.length > 0 && (
-      <section class="outer-section bg-bg">
-        <div class="inner-section">
-          <div class="max-w-4xl mx-auto">
-            <h2 class="h3 text-center mb-8">What's Included</h2>
-            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {features.map((feature: string) => (
-                <li class="flex items-start gap-3 p-4 rounded-xl bg-bg2 border border-muted/10">
-                  <div class="flex-shrink-0 w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
-                    <Icon icon="lu:check" size="sm" className="text-accent" client:load />
-                  </div>
-                  <span class="text-text">{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-    )}
 
     {/* MDX Content */}
     {Content && (
-      <section class="outer-section bg-bg2">
-        <div class="inner-section">
-          <article class="prose prose-lg max-w-4xl mx-auto">
-            <Content />
-          </article>
-        </div>
-      </section>
+      <Content />
     )}
 
-    {/* Related Services */}
-    {relatedQuery && (
-      <section class="outer-section bg-bg">
-        <div class="inner-section">
-          <SectionHeader
-            headingBefore="Related"
-            headingEmphasis={collectionMeta?.data?.title || 'Services'}
-            className="text-center mb-12"
-            headingClassName="h2"
-          />
-          <ContentRenderer
-            query={relatedQuery}
-            variant="CardVariant"
-            columns={3}
-            gap="md"
-          />
-        </div>
-      </section>
-    )}
+    {/* Features Section */}
+    <ContentRenderer
+      query={query("projects")}
+      variant="PortfolioVariant"
+      title="Our Work"
+      heading={{
+        before: "Websites we've",
+        text: "designed & built",
+        after: "for real clients.",
+      }}
+      description="Every project is custom-crafted to help businesses stand out and convert visitors into customers. Yours could be next."
+      ctaHref="#services-quote-hero"
+      ctaText="Get Your Free Quote"
+    />
+
+      <ContentRenderer
+        query={related("capabilities", "solutions", currentSlug)}
+        variant="CardVariant"
+        title="What You Get"
+        heading={{
+          before: "Everything included in your",
+          text: title,
+          after: "build.",
+        }}
+        description={`No surprises, no upsells—just the full package to get your ${title?.toLowerCase()} live and performing.`}
+        ctaHref="#services-quote-hero"
+        ctaText="Get Your Free Quote"
+      />
+
+    <CTASection
+      id="services-page-cta"
+      className="min-h-[60vh]"
+      title={`Ready to get started with ${title}?`}
+      heading={{
+        before: "Let's build your",
+        text: title,
+        after: "solution today.",
+      }}
+      primaryCTA={{
+        text: "Get Your Free Quote",
+        link: "#services-quote-hero",
+      }}
+    />
   </main>
 </BaseLayout>

@@ -130,7 +130,17 @@ export const collections = {
       baseSchema({ image }).extend({
         price: z.string().optional(),
         featured: z.boolean().optional(),
-        features: z.array(z.string()).default([]),
+        features: z
+          .array(
+            z.union([
+              z.string(),
+              z.object({
+                title: z.string(),
+                description: z.string().optional(),
+              }),
+            ]),
+          )
+          .default([]),
       }),
   }),
 
@@ -139,6 +149,7 @@ export const collections = {
     schema: ({ image }) =>
       baseSchema({ image }).extend({
         features: z.array(z.string()).default([]),
+        solutions: refSchema("solutions"),
       }),
   }),
 

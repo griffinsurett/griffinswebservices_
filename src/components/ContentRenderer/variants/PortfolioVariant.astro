@@ -24,6 +24,7 @@ interface Props extends BaseVariantProps {
 const {
   items = [],
   title,
+  heading: headingValue,
   description,
   className = "",
   collectionUrl,
@@ -66,7 +67,22 @@ const processedItems = safeItems.map((item, index) => {
 
 const portfolioItems = processedItems.map((entry) => entry.data);
 const carouselMedia = processedItems.map((entry) => entry.media);
-const showHeader = Boolean(title || collectionTitle || description);
+const sectionTitle = collectionTitle ?? title;
+const fallbackHeading = title ?? collectionTitle;
+const normalizedHeading = headingValue ?? fallbackHeading;
+const isSegmentedHeading =
+  typeof normalizedHeading === "object" && normalizedHeading !== null;
+const headingString =
+  typeof normalizedHeading === "string"
+    ? normalizedHeading
+    : isSegmentedHeading
+    ? normalizedHeading.text ?? ""
+    : undefined;
+const segmentedHeading = isSegmentedHeading ? normalizedHeading : undefined;
+const resolvedHeading =
+  headingString ?? (segmentedHeading ? segmentedHeading.text : undefined);
+const headingPayload = segmentedHeading ?? resolvedHeading;
+const showHeader = Boolean(sectionTitle || headingPayload || description);
 ---
 
 <section
@@ -78,11 +94,11 @@ const showHeader = Boolean(title || collectionTitle || description);
   <div class="">
     {showHeader && (
       <SectionHeader
-        title={collectionTitle ?? title}
-        heading={title ?? collectionTitle}
+        title={sectionTitle}
+        heading={headingPayload}
         description={description}
         className="text-center"
-        headingClassName="h2 mb-6"
+        headingClassName="h2 mb-6 heading-padding"
         descriptionClassName="large-text max-w-2xl mx-auto"
       />
     )}

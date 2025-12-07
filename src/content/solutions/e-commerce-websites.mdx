@@ -17,4 +17,86 @@ features:
   - "Order tracking"
   - "Customer accounts"
 ---
-Complete e-commerce solutions for businesses ready to sell online. Includes product management, secure payment processing, inventory tracking, and all the tools needed to run a successful online store. We organize product data, set up taxes and shipping rules, and integrate fulfillment providers or POS systems so orders flow smoothly. Conversion tracking, abandoned cart automations, and customer email journeys come standard to drive repeat revenue.
+import ContentSection from "@/layouts/ContentSection.astro";
+
+<ContentSection
+  heading={{
+    title: "Commerce builds that scale with ops",
+    before: "E-commerce stores engineered for",
+    text: "repeatable revenue",
+    after: "not just launch day.",
+    description:
+      "Catalog architecture, fulfillment workflows, and lifecycle automations are wired together so you can focus on merchandising."
+  }}
+  primaryCTA={{
+    text: "Plan my store build",
+    href: "#services-quote-hero",
+    rightIcon: "lu:arrow-right"
+  }}
+  secondaryCTA={{
+    text: "See commerce projects",
+    href: "/projects"
+  }}
+  sidebar={{
+    icon: "fa6-solid:cart-shopping",
+    title: "Checkout + operations + marketing",
+    eyebrow: "All under one roof",
+    description:
+      "We configure Shopify, custom stacks, or headless builds, connect ERPs/POS, and stand up customer journeys so marketing and operations stay in sync.",
+    footIcon: "🛒",
+    footTitle: "Zero-anxiety go-live",
+    footDescription:
+      "Launch checklists and monitoring keep payment, tax, and shipping rules tight."
+  }}
+>
+  <div slot="text" class="space-y-6 text-lg text-muted">
+    <p>
+      Together we audit SKUs, options, fulfillment steps, and customer service flows to
+      build a storefront that handles real-life complexity. Product templates and bundles
+      remain easy for your team to maintain without breaking downstream systems.
+    </p>
+    <p>
+      Performance-tuned storefronts pair with marketing automations, abandoned cart flows,
+      and loyalty campaigns so every visit is nurtured across channels. We also set up
+      analytics, data layers, and dashboards to track what messaging or promotions
+      actually drive contribution margin.
+    </p>
+  </div>
+
+  <div slot="quick-facts" class="grid gap-4 md:grid-cols-3">
+    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
+      <p class="text-xs uppercase tracking-[0.2em] text-muted">Timeline</p>
+      <p class="text-heading font-semibold">6-8 week build</p>
+    </div>
+    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
+      <p class="text-xs uppercase tracking-[0.2em] text-muted">Stack</p>
+      <p class="text-heading font-semibold">Shopify, headless, or custom</p>
+    </div>
+    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
+      <p class="text-xs uppercase tracking-[0.2em] text-muted">Automation</p>
+      <p class="text-heading font-semibold">Lifecycle email + SMS + CRM</p>
+    </div>
+  </div>
+
+  <ul slot="proof-points" class="space-y-3">
+    <li class="flex items-start gap-3">
+      <span aria-hidden="true" class="text-accent mt-1">✓</span>
+      <p class="text-sm text-muted">
+        Robust product data imports, matrix inventory, and multi-location fulfillment
+        included.
+      </p>
+    </li>
+    <li class="flex items-start gap-3">
+      <span aria-hidden="true" class="text-accent mt-1">✓</span>
+      <p class="text-sm text-muted">
+        Conversion tracking, server-side pixels, and data layers power accurate ROAS.
+      </p>
+    </li>
+    <li class="flex items-start gap-3">
+      <span aria-hidden="true" class="text-accent mt-1">✓</span>
+      <p class="text-sm text-muted">
+        CX automations for replenishment, loyalty tiers, and post-purchase surveys.
+      </p>
+    </li>
+  </ul>
+</ContentSection>

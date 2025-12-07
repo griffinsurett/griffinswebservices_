@@ -9,12 +9,86 @@ order: 3
 icon: "fa6-solid:pen-nib"
 price: "Starting from $1,500"
 features:
-  - "Content management system"
-  - "Category organization"
-  - "Author profiles"
-  - "Comment system"
-  - "Social sharing"
-  - "SEO optimized"
-  - "RSS feeds"
+  - title: "Content management system"
+    description: "Custom CMS schema built to match your editorial workflow, including approval ladders, reusable building blocks, and role-based permissions so every contributor sees exactly what they need."
+  - title: "Category organization"
+    description: "Hub pages, dynamic taxonomies, and smart recommendation loops that keep evergreen articles discoverable while surfacing related content at the exact moment readers want more."
+  - title: "Author profiles"
+    description: "Rich bio modules that highlight credentials, recent posts, and expertise filters, helping every subject-matter expert earn trust while reinforcing your brand voice."
+  - title: "Comment system"
+    description: "Moderation-ready comments with spam protection, notification hooks, and integrations into the platforms your audience prefers, so discussions stay on-brand and manageable."
+  - title: "Social sharing"
+    description: "Automated meta frameworks, per-post social cards, and curated share prompts wired into each template to make amplification effortless for both editors and readers."
+  - title: "SEO optimized"
+    description: "Performance budgets, Lighthouse-tested templates, structured data, and automated meta defaults designed to retain rankings and capture new keywords with every launch."
+  - title: "RSS feeds"
+    description: "Segmented RSS feeds, newsletter hooks, and subscription CTAs that deliver updates to the exact channels your audience follows, complete with analytics to measure reach."
 ---
-Blog websites designed for content creators, thought leaders, and businesses looking to establish authority through regular content publishing. Built with powerful content management features. We configure intuitive editorial workflows, custom taxonomies, and reusable content blocks so publishing never slows you down. Migration support, content calendar planning, and SEO-ready schemas ensure every article can attract traffic from day one.
+import ContentSection from "@/layouts/ContentSection.astro";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro"
+import {
+  query,
+} from "@/utils/query";
+
+<ContentSection
+  heading={{
+    title: "Editorial publishing systems",
+    before: "Blogs engineered to",
+    text: "ship high-signal ideas",
+    after: "with SEO superpowers.",
+    description:
+      "Give writers and SMEs a frictionless CMS while surfacing the structured data, speed, and design polish search engines reward."
+  }}
+  primaryCTA={{
+    text: "Launch your editorial hub",
+    href: "#services-quote-hero",
+    rightIcon: "lu:arrow-right"
+  }}
+  sidebar={{
+    icon: frontmatter.icon,
+    title: "Workflow-first approach",
+    eyebrow: "Editorial muscle memory",
+    description:
+      "We configure roles, approval paths, reusable modules, and content calendar views so every contributor knows exactly what to do next.",
+    footIcon: "📝",
+    footTitle: "Publish at the pace of ideas",
+    footDescription:
+      "Training, templates, and documentation make onboarding new writers painless.",
+    features: frontmatter.features
+  }}
+>
+  <div slot="text" class="space-y-6 text-lg text-muted">
+    <p>
+      From content audits to category strategy, we map how your subject-matter expertise
+      should be packaged and routed through the CMS. Custom author profiles, topic hubs,
+      and resource blocks keep readers exploring and make internal linking effortless.
+    </p>
+    <p>
+      Technical SEO is baked in: schema, XML feeds, fast image handling, and accessibility
+      testing. We also plan migration scripts or content imports so legacy articles keep
+      their rankings while benefiting from the updated design system.
+    </p>
+  </div>
+
+  <div slot="quick-facts" class="grid gap-4 md:grid-cols-3">
+    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
+      <p class="text-xs uppercase tracking-[0.2em] text-muted">Timeline</p>
+      <p class="text-heading font-semibold">4-week build</p>
+    </div>
+    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
+      <p class="text-xs uppercase tracking-[0.2em] text-muted">Editorial setup</p>
+      <p class="text-heading font-semibold">Authors, taxonomies, templates</p>
+    </div>
+    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
+      <p class="text-xs uppercase tracking-[0.2em] text-muted">Optimization</p>
+      <p class="text-heading font-semibold">Schema + RSS + newsletter capture</p>
+    </div>
+  </div>
+
+  <div slot="bottom-section">
+    <ContentRenderer
+      query={query("stats")}
+      variant="StatsVariant"
+    />
+  </div>
+</ContentSection>

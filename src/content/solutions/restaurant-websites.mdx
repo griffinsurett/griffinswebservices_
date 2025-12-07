@@ -17,4 +17,84 @@ features:
   - "Mobile optimized"
   - "Social media integration"
 ---
-Purpose-built websites for the food service industry. Featuring menu displays, online ordering capabilities, reservation systems, and everything restaurants need to serve customers online. We showcase seasonal specials, chef stories, and location details in a way that mirrors your in-person experience, while integrating with third-party delivery platforms and review widgets. Photo galleries, event promos, and easy-to-edit menus make ongoing updates painless for busy teams.
+import ContentSection from "@/layouts/ContentSection.astro";
+
+<ContentSection
+  heading={{
+    title: "Hospitality-first restaurant sites",
+    before: "Menu-forward experiences that",
+    text: "mirror the dining room",
+    after: "and convert hungry guests.",
+    description:
+      "Menus, reservations, delivery, and event spots live in one polished experience so guests instantly know how to order or visit."
+  }}
+  primaryCTA={{
+    text: "Design my restaurant site",
+    href: "#services-quote-hero",
+    rightIcon: "lu:arrow-right"
+  }}
+  secondaryCTA={{
+    text: "View hospitality work",
+    href: "/projects"
+  }}
+  sidebar={{
+    icon: "fa6-solid:utensils",
+    title: "Menus, reservations, loyalty",
+    eyebrow: "Everything hooks into your ops",
+    description:
+      "We integrate Tock, OpenTable, Toast, Square, or custom booking tools plus review widgets and promo modules so updates stay easy.",
+    footIcon: "🍽",
+    footTitle: "Put the experience online",
+    footDescription:
+      "Photography guidelines and copy decks capture the story behind every dish."
+  }}
+>
+  <div slot="text" class="space-y-6 text-lg text-muted">
+    <p>
+      We translate the ambiance of your dining room into a digital journey with the same
+      hospitality touches. Detailed menu layouts highlight seasonal items, dietary notes,
+      and chef stories while remaining effortless to edit during a busy shift.
+    </p>
+    <p>
+      Geo-targeted SEO, Google Business Profile syncs, and structured data help locals find
+      you, while events, catering inquiries, and private dining flows capture high-value
+      bookings. Delivery and pickup toggles make online ordering intuitive on mobile.
+    </p>
+  </div>
+
+  <div slot="quick-facts" class="grid gap-4 md:grid-cols-3">
+    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
+      <p class="text-xs uppercase tracking-[0.2em] text-muted">Timeline</p>
+      <p class="text-heading font-semibold">3-4 week sprint</p>
+    </div>
+    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
+      <p class="text-xs uppercase tracking-[0.2em] text-muted">Integrations</p>
+      <p class="text-heading font-semibold">Reservations, delivery, POS</p>
+    </div>
+    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
+      <p class="text-xs uppercase tracking-[0.2em] text-muted">Updates</p>
+      <p class="text-heading font-semibold">Drag-and-drop menu manager</p>
+    </div>
+  </div>
+
+  <ul slot="proof-points" class="space-y-3">
+    <li class="flex items-start gap-3">
+      <span aria-hidden="true" class="text-accent mt-1">✓</span>
+      <p class="text-sm text-muted">
+        Custom menu modules handle categories, chef notes, badges, and price toggles.
+      </p>
+    </li>
+    <li class="flex items-start gap-3">
+      <span aria-hidden="true" class="text-accent mt-1">✓</span>
+      <p class="text-sm text-muted">
+        We embed reservation widgets or dynamic booking links with uptime monitoring.
+      </p>
+    </li>
+    <li class="flex items-start gap-3">
+      <span aria-hidden="true" class="text-accent mt-1">✓</span>
+      <p class="text-sm text-muted">
+        Event pages, gift card promos, and tasting menus can be scheduled ahead of time.
+      </p>
+    </li>
+  </ul>
+</ContentSection>
