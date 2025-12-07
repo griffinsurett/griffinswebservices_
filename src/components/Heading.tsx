@@ -105,12 +105,18 @@ export default function Heading({
       ) : isPropBased ? (
         <>
           {before !== undefined && (
-            <span {...mergeProps(beforeId, beforeClass, beforeProps)}>
-              {before}
-            </span>
+            <>
+              <span {...mergeProps(beforeId, beforeClass, beforeProps)}>
+                {before}
+              </span>
+              {" "}
+            </>
           )}
           {text !== undefined && (
-            <span {...mergeProps(textId, textClass, textProps)}>{text}</span>
+            <>
+              <span {...mergeProps(textId, textClass, textProps)}>{text}</span>
+              {" "}
+            </>
           )}
           {after !== undefined && (
             <span {...mergeProps(afterId, afterClass, afterProps)}>

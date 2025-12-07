@@ -82,7 +82,7 @@ export default function MobileMenuDrawer({
         isOpen={isOpen}
         onClose={() => toggleMenu(false)}
         position="center"
-        className={`w-full max-w-full h-full bg-bg p-0 rounded-none transform transition-transform duration-300 ease-out ${
+        className={`w-full max-w-full h-full hero-gradient-bg p-0 rounded-none transform transition-transform duration-300 ease-out ${
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
         overlayClass={`bg-black/50 transition-opacity duration-300 ${
