@@ -24,7 +24,8 @@
  * - slide-up, slide-down, slide-left, slide-right
  */
 
-import type { CSSProperties } from "react";
+// Using inline type instead of importing from React to avoid SSR issues
+type CSSProperties = Record<string, string | number>;
 
 export type AnimationType =
   | "fade-in"

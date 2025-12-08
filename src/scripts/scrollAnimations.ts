@@ -13,7 +13,7 @@
  * The observer adds/removes `data-visible="true"` which CSS uses to trigger animations.
  */
 
-import { useIntersectionObserver } from "@/utils/IntersectionObserver";
+import { createIntersectionObserver } from "@/utils/IntersectionObserver";
 
 interface AnimationObserverOptions {
   defaultThreshold?: number;
@@ -58,7 +58,7 @@ class ScrollAnimationObserver {
     const once = el.dataset.animateOnce === "true";
     const delay = parseInt(el.dataset.animateDelay || "0", 10);
 
-    const { disconnect } = useIntersectionObserver(el, {
+    const { disconnect } = createIntersectionObserver(el, {
       threshold: this.defaultThreshold,
       rootMargin: this.defaultRootMargin,
       once,
