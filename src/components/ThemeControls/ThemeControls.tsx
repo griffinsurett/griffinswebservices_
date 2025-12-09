@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, type ComponentType } from "react";
 import DarkLightToggle from "./DarkLightToggle";
 import AccentPicker from "./AccentPicker";
-import LanguageDropdown from "./LanguageDropdown";
 
 interface ThemeControlsProps {
   className?: string;
@@ -10,6 +9,17 @@ interface ThemeControlsProps {
 export default function ThemeControls({ className = "" }: ThemeControlsProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [hidden] = useState(false);
+
+  // Lazy load LanguageDropdown - not needed immediately
+  const [LanguageDropdown, setLanguageDropdown] = useState<ComponentType | null>(null);
+
+  useEffect(() => {
+    // Load after a short delay to prioritize theme controls
+    const id = setTimeout(() => {
+      import("./LanguageDropdown").then((m) => setLanguageDropdown(() => m.default));
+    }, 2000);
+    return () => clearTimeout(id);
+  }, []);
 
   return (
     <div
@@ -26,10 +36,9 @@ export default function ThemeControls({ className = "" }: ThemeControlsProps) {
         .filter(Boolean)
         .join(" ")}
     >
-      <LanguageDropdown /> 
-      {/* client:load is not good for performance */}
-      <DarkLightToggle /> {/* client:load is fine */}
-      <AccentPicker /> {/* client:load is fine */}
+      {LanguageDropdown && <LanguageDropdown />}
+      <DarkLightToggle />
+      <AccentPicker />
     </div>
   );
 }
