@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, lazy, Suspense } from "react";
+import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/Icon";
 import { CircleCheckbox } from "./checkboxes/CircleCheckbox";
 import {
@@ -7,11 +7,19 @@ import {
   defaultLanguage,
   type Language,
 } from "@/utils/languageTranslation/languages";
-import { useConsent } from "@/hooks/useConsent";
 
-const CookiePreferencesModal = lazy(
-  () => import("@/components/preferences/consent/CookiePreferencesModal"),
-);
+// Quick sync check via cookie - doesn't require loading the heavy consent module
+const hasFunctionalConsentFast = () => {
+  if (typeof document === "undefined") return false;
+  const match = document.cookie.match(/cookie-consent=([^;]*)/);
+  if (!match) return false;
+  try {
+    const consent = JSON.parse(decodeURIComponent(match[1]));
+    return consent?.functional === true;
+  } catch {
+    return false;
+  }
+};
 
 const CONSENT_MESSAGE =
   "Please enable functional cookies to use the language switcher. You can manage your preferences in the cookie settings.";
@@ -22,19 +30,28 @@ function getStoredLanguage(): Language {
   return getLanguageByCode(code) || defaultLanguage;
 }
 
+// Lazy-loaded modal component
+type ModalComponent = React.ComponentType<{ isOpen: boolean; onClose: () => void }>;
+
 export default function LanguageDropdown() {
   const [open, setOpen] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(
-    getStoredLanguage,
-  );
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(getStoredLanguage);
   const [showConsentModal, setShowConsentModal] = useState(false);
+  const [ConsentModal, setConsentModal] = useState<ModalComponent | null>(null);
+  const [hasFunctionalConsent, setHasFunctionalConsent] = useState(hasFunctionalConsentFast);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { hasConsentFor } = useConsent();
-  const hasFunctionalConsent = hasConsentFor("functional");
 
   useEffect(() => {
     setCurrentLanguage(getStoredLanguage());
+    setHasFunctionalConsent(hasFunctionalConsentFast());
   }, []);
+
+  // Re-check consent when dropdown opens (user may have changed it)
+  useEffect(() => {
+    if (open) {
+      setHasFunctionalConsent(hasFunctionalConsentFast());
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -72,12 +89,22 @@ export default function LanguageDropdown() {
   }, []);
 
   const handleOpenConsentModal = () => {
-    setShowConsentModal(true);
+    // Lazy load the consent modal only when user clicks
+    if (!ConsentModal) {
+      import("@/components/preferences/consent/CookiePreferencesModal").then((m) => {
+        setConsentModal(() => m.default);
+        setShowConsentModal(true);
+      });
+    } else {
+      setShowConsentModal(true);
+    }
     setOpen(false);
   };
 
   const handleCloseConsentModal = () => {
     setShowConsentModal(false);
+    // Re-check consent after modal closes
+    setHasFunctionalConsent(hasFunctionalConsentFast());
   };
 
   const handleLanguageChange = (code: string) => {
@@ -204,13 +231,11 @@ export default function LanguageDropdown() {
         </div>
       )}
 
-      {showConsentModal && (
-        <Suspense fallback={null}>
-          <CookiePreferencesModal
-            isOpen={showConsentModal}
-            onClose={handleCloseConsentModal}
-          />
-        </Suspense>
+      {showConsentModal && ConsentModal && (
+        <ConsentModal
+          isOpen={showConsentModal}
+          onClose={handleCloseConsentModal}
+        />
       )}
     </div>
   );
