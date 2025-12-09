@@ -18,16 +18,6 @@
 
 import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 
-// Detect Lighthouse/PageSpeed
-export const isSyntheticTest = () => {
-  if (typeof navigator === "undefined" || typeof window === "undefined") return false;
-  const ua = navigator.userAgent;
-  if (/Lighthouse|Chrome-Lighthouse|Speed Insights|PTST|GTmetrix|Pingdom|HeadlessChrome/i.test(ua)) return true;
-  // @ts-expect-error - Lighthouse globals
-  if (window.__lighthouseEvaluateMode__ || window.LH_RUNNER) return true;
-  return false;
-};
-
 interface DelayOptions {
   /** Delay in ms before loading */
   delay: number;
