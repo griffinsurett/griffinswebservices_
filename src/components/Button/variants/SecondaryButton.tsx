@@ -26,9 +26,8 @@ export default function SecondaryButton({
 
   return (
     <AnimatedBorder
-      variant="progress"
+      variant="solid"
       triggers="always"
-      duration={300}
       color="var(--color-accent)"
       borderWidth={2}
       borderRadius={BORDER_RADIUS_CLASS}
