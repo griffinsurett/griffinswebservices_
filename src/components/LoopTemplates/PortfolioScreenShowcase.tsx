@@ -44,6 +44,8 @@ interface ScreenProps {
   shouldUseDesktopEager: boolean;
   /** Called when the image finishes loading (for first slide swap) */
   onImageLoad?: () => void;
+  /** Delay rendering the image until this becomes true (prevents double-loading with preview) */
+  deferImageRender?: boolean;
 }
 
 const AUTO_SCROLL_START_DELAY_MS = 700;
@@ -90,6 +92,7 @@ function ComputerScreen({
   isActive,
   shouldUseDesktopEager,
   onImageLoad,
+  deferImageRender = false,
 }: ScreenProps) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [mediaReady, setMediaReady] = useState(false);
@@ -352,6 +355,15 @@ function ComputerScreen({
     : mediaEntry?.fetchPriority ?? "auto";
 
   const renderMedia = () => {
+    // Don't render image yet if deferred - prevents double-loading with static preview
+    if (deferImageRender) {
+      return (
+        <div className="flex h-full w-full items-center justify-center bg-black/40">
+          {/* Placeholder while waiting for preview to be viewed */}
+        </div>
+      );
+    }
+
     if (mediaEntry?.sources?.length) {
       return (
         <picture>
@@ -473,6 +485,24 @@ export default function PortfolioScreenShowcase({
   // Track when the first full image has loaded and we can swap from preview
   const [firstImageLoaded, setFirstImageLoaded] = useState(false);
   const hasSwappedRef = useRef(false);
+
+  // Defer first image render until preview has had time to display
+  // This prevents both images from loading simultaneously
+  const [shouldLoadFirstImage, setShouldLoadFirstImage] = useState(false);
+
+  // Start loading carousel image after a brief delay to let preview render
+  useEffect(() => {
+    if (staticContainerId) {
+      // Small delay ensures preview is painted before we start loading carousel image
+      const timer = window.setTimeout(() => {
+        setShouldLoadFirstImage(true);
+      }, 100);
+      return () => window.clearTimeout(timer);
+    } else {
+      // No preview, load immediately
+      setShouldLoadFirstImage(true);
+    }
+  }, [staticContainerId]);
 
   // Callback when first image finishes loading - triggers the swap
   const handleFirstImageLoad = useCallback(() => {
@@ -609,6 +639,7 @@ export default function PortfolioScreenShowcase({
                 isActive={isActive}
                 shouldUseDesktopEager={preferDesktopEager}
                 onImageLoad={slideIndex === 0 ? handleFirstImageLoad : undefined}
+                deferImageRender={slideIndex === 0 && !shouldLoadFirstImage}
               />
             </div>
           );
