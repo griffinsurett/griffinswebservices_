@@ -35,8 +35,13 @@ const IMAGE_FORMATS: { format: OptimizedFormat; quality: number }[] = [
   { format: "webp", quality: 65 },
 ];
 
-// Height of the visible showcase viewport (matches h-[420px] sm:h-[500px] minus header)
-const PREVIEW_VIEWPORT_HEIGHT = 460;
+// Cropped preview dimensions - must match visible area exactly
+// Container: h-[420px] sm:h-[500px], header bar is ~48px
+// Figure visible height: mobile ~372px, desktop ~452px
+// We generate at the desktop height since it covers both cases
+// Width matches container max-w-4xl (896px) but we use common breakpoints
+const PREVIEW_HEIGHT = 452;
+const PREVIEW_WIDTHS = [320, 480, 640, 896];
 
 // Process items and generate optimized images
 const processedItems = await Promise.all(
@@ -120,22 +125,38 @@ const processedItems = await Promise.all(
     // This is a small image showing just the top portion - fast to load
     let croppedPreview = undefined;
     if (isFirst) {
-      const previewResults = await generateCroppedPreview(metadata, [
-        { width: 860, height: PREVIEW_VIEWPORT_HEIGHT, format: "avif", quality: 55 },
-        { width: 860, height: PREVIEW_VIEWPORT_HEIGHT, format: "webp", quality: 75 },
-      ]);
+      // Generate multiple widths for each format
+      const previewConfigs: { width: number; height: number; format: "avif" | "webp"; quality: number }[] = [];
+      for (const width of PREVIEW_WIDTHS) {
+        previewConfigs.push({ width, height: PREVIEW_HEIGHT, format: "avif", quality: 55 });
+        previewConfigs.push({ width, height: PREVIEW_HEIGHT, format: "webp", quality: 75 });
+      }
 
-      const avifPreview = previewResults.find(r => r.config.format === "avif");
-      const webpPreview = previewResults.find(r => r.config.format === "webp");
+      const previewResults = await generateCroppedPreview(metadata, previewConfigs);
+
+      const avifResults = previewResults.filter(r => r.config.format === "avif");
+      const webpResults = previewResults.filter(r => r.config.format === "webp");
+
+      const webpSrcSet = webpResults
+        .map(r => `${r.image.src} ${r.config.width}w`)
+        .join(", ");
+      const avifSrcSet = avifResults
+        .map(r => `${r.image.src} ${r.config.width}w`)
+        .join(", ");
+
+      const defaultWebp = webpResults[webpResults.length - 1];
 
       croppedPreview = {
-        src: webpPreview?.image.src ?? previewResults[0]?.image.src,
-        width: 860,
-        height: PREVIEW_VIEWPORT_HEIGHT,
+        src: defaultWebp?.image.src ?? previewResults[0]?.image.src,
+        srcSet: webpSrcSet,
+        sizes: SIZES,
+        width: 896,
+        height: PREVIEW_HEIGHT,
         alt: altText,
-        sources: avifPreview ? [{
+        sources: avifSrcSet ? [{
           type: "image/avif",
-          srcSet: avifPreview.image.src,
+          srcSet: avifSrcSet,
+          sizes: SIZES,
         }] : [],
       };
     }
@@ -153,7 +174,8 @@ const processedItems = await Promise.all(
         decoding: "async" as const,
         fetchPriority: "auto" as const,
         sources: pictureSources,
-        desktopEager: isFirst,
+        // No desktopEager - cropped preview handles initial load,
+        // React carousel always lazy-loads full images
       },
       croppedPreview,
     };
@@ -189,18 +211,22 @@ const firstItem = portfolioItems[0];
               </span>
             </div>
           </div>
-          <figure class="relative h-full overflow-y-auto overscroll-contain bg-black/40">
-            {/* Cropped "above the fold" preview - lightweight, loads fast */}
+          <figure class="relative h-full overflow-hidden bg-black/40">
+            {/* Cropped "above the fold" preview - exact fit, no scroll needed */}
+            {/* Simple width fill - image is pre-cropped to visible area */}
             {firstPreview?.src ? (
               <picture>
                 {firstPreview.sources?.map((source) => (
                   <source
                     srcset={source.srcSet}
+                    sizes={source.sizes}
                     type={source.type}
                   />
                 ))}
                 <img
                   src={firstPreview.src}
+                  srcset={firstPreview.srcSet}
+                  sizes={firstPreview.sizes}
                   alt={firstPreview.alt || firstItem?.title || "Project preview"}
                   width={firstPreview.width}
                   height={firstPreview.height}
@@ -208,7 +234,7 @@ const firstItem = portfolioItems[0];
                   decoding="async"
                   fetchpriority="high"
                   draggable="false"
-                  class="block h-auto min-h-full w-full select-none object-cover object-top"
+                  class="block w-full select-none"
                 />
               </picture>
             ) : null}
