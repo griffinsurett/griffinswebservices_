@@ -42,6 +42,8 @@ interface ScreenProps {
   autoplayEnabled?: boolean;
   isActive: boolean;
   shouldUseDesktopEager: boolean;
+  /** Called when the image finishes loading (for first slide swap) */
+  onImageLoad?: () => void;
 }
 
 const AUTO_SCROLL_START_DELAY_MS = 700;
@@ -87,9 +89,11 @@ function ComputerScreen({
   autoplayEnabled = true,
   isActive,
   shouldUseDesktopEager,
+  onImageLoad,
 }: ScreenProps) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [mediaReady, setMediaReady] = useState(false);
+  const hasCalledOnLoadRef = useRef(false);
   const [contentReady, setContentReady] = useState(false);
   const [scrollDurationMs, setScrollDurationMs] = useState(
     AUTO_SCROLL_DEFAULT_CYCLE_MS,
@@ -167,6 +171,14 @@ function ComputerScreen({
       imageEl.removeEventListener("error", handleReady);
     };
   }, [item, mediaEntry]);
+
+  // Notify parent when image loads (for swap from preview to full carousel)
+  useEffect(() => {
+    if (mediaReady && onImageLoad && !hasCalledOnLoadRef.current) {
+      hasCalledOnLoadRef.current = true;
+      onImageLoad();
+    }
+  }, [mediaReady, onImageLoad]);
 
   useEffect(() => {
     if (!mediaReady) {
@@ -458,14 +470,27 @@ export default function PortfolioScreenShowcase({
   const transitionFrameRef = useRef<number | null>(null);
   const preferDesktopEager = useDesktopEagerPreference();
 
-  // Handle hydration: remove static placeholder and reveal carousel
-  useEffect(() => {
+  // Track when the first full image has loaded and we can swap from preview
+  const [firstImageLoaded, setFirstImageLoaded] = useState(false);
+  const hasSwappedRef = useRef(false);
+
+  // Callback when first image finishes loading - triggers the swap
+  const handleFirstImageLoad = useCallback(() => {
+    if (hasSwappedRef.current) return;
+    hasSwappedRef.current = true;
+
+    // Remove static preview and reveal carousel
     if (staticContainerId) {
       document.getElementById(staticContainerId)?.remove();
     }
     if (carouselContainerId) {
-      document.getElementById(carouselContainerId)?.classList.remove("hidden");
+      const container = document.getElementById(carouselContainerId);
+      if (container) {
+        // Remove the hiding classes, restore to normal positioning
+        container.classList.remove("absolute", "inset-0", "opacity-0", "pointer-events-none");
+      }
     }
+    setFirstImageLoaded(true);
   }, [staticContainerId, carouselContainerId]);
 
   useEffect(() => {
@@ -575,9 +600,10 @@ export default function PortfolioScreenShowcase({
                 totalSlides={slides.length || 1}
                 activeIndex={slideIndex}
                 onCycleComplete={handleCycleComplete}
-                autoplayEnabled={isActive && transitionStage === "idle"}
+                autoplayEnabled={isActive && transitionStage === "idle" && firstImageLoaded}
                 isActive={isActive}
                 shouldUseDesktopEager={preferDesktopEager}
+                onImageLoad={slideIndex === 0 ? handleFirstImageLoad : undefined}
               />
             </div>
           );

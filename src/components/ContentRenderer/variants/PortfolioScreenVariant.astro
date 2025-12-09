@@ -35,13 +35,12 @@ const IMAGE_FORMATS: { format: OptimizedFormat; quality: number }[] = [
   { format: "webp", quality: 65 },
 ];
 
-// Cropped preview dimensions - must match visible area exactly
-// Container: h-[420px] sm:h-[500px], header bar is ~48px
-// Figure visible height: mobile ~372px, desktop ~452px
-// We generate at the desktop height since it covers both cases
-// Width matches container max-w-4xl (896px) but we use common breakpoints
-const PREVIEW_HEIGHT = 452;
-const PREVIEW_WIDTHS = [320, 480, 640, 896];
+// Container max width (from Tailwind max-w-4xl)
+const CONTAINER_MAX_WIDTH = 896;
+const PREVIEW_WIDTHS = [320, 480, 640, CONTAINER_MAX_WIDTH];
+
+// Toggle to disable carousel for debugging the static preview
+const ENABLE_CAROUSEL = false;
 
 // Process items and generate optimized images
 const processedItems = await Promise.all(
@@ -121,15 +120,18 @@ const processedItems = await Promise.all(
         sizes: SIZES,
       }));
 
-    // For the first item, generate a cropped "above the fold" preview
-    // This is a small image showing just the top portion - fast to load
+    // For the first item, generate an optimized preview at the same aspect ratio
+    // This maintains visual consistency - the preview scales identically to the full image
     let croppedPreview = undefined;
     if (isFirst) {
-      // Generate multiple widths for each format
+      const aspectRatio = metadata.height / metadata.width;
+
+      // Generate multiple widths for each format, height preserves original aspect ratio
       const previewConfigs: { width: number; height: number; format: "avif" | "webp"; quality: number }[] = [];
       for (const width of PREVIEW_WIDTHS) {
-        previewConfigs.push({ width, height: PREVIEW_HEIGHT, format: "avif", quality: 55 });
-        previewConfigs.push({ width, height: PREVIEW_HEIGHT, format: "webp", quality: 75 });
+        const height = Math.round(width * aspectRatio);
+        previewConfigs.push({ width, height, format: "avif", quality: 55 });
+        previewConfigs.push({ width, height, format: "webp", quality: 75 });
       }
 
       const previewResults = await generateCroppedPreview(metadata, previewConfigs);
@@ -145,13 +147,14 @@ const processedItems = await Promise.all(
         .join(", ");
 
       const defaultWebp = webpResults[webpResults.length - 1];
+      const defaultHeight = Math.round(CONTAINER_MAX_WIDTH * aspectRatio);
 
       croppedPreview = {
         src: defaultWebp?.image.src ?? previewResults[0]?.image.src,
         srcSet: webpSrcSet,
         sizes: SIZES,
-        width: 896,
-        height: PREVIEW_HEIGHT,
+        width: CONTAINER_MAX_WIDTH,
+        height: defaultHeight,
         alt: altText,
         sources: avifSrcSet ? [{
           type: "image/avif",
@@ -212,8 +215,7 @@ const firstItem = portfolioItems[0];
             </div>
           </div>
           <figure class="relative h-full overflow-hidden bg-black/40">
-            {/* Cropped "above the fold" preview - exact fit, no scroll needed */}
-            {/* Simple width fill - image is pre-cropped to visible area */}
+            {/* Cropped "above the fold" preview - matches full image styling exactly */}
             {firstPreview?.src ? (
               <picture>
                 {firstPreview.sources?.map((source) => (
@@ -228,8 +230,6 @@ const firstItem = portfolioItems[0];
                   srcset={firstPreview.srcSet}
                   sizes={firstPreview.sizes}
                   alt={firstPreview.alt || firstItem?.title || "Project preview"}
-                  width={firstPreview.width}
-                  height={firstPreview.height}
                   loading="eager"
                   decoding="async"
                   fetchpriority="high"
@@ -243,16 +243,19 @@ const firstItem = portfolioItems[0];
       </div>
     </div>
 
-    {/* React carousel - hidden until hydrated, loads when browser idle */}
-    <div id="portfolio-carousel-container" class="hidden">
-      <PortfolioScreenShowcase
-        client:idle
-        items={portfolioItems}
-        mediaEntries={showcaseMedia}
-        className="w-full mx-auto"
-        staticContainerId="portfolio-static-first"
-        carouselContainerId="portfolio-carousel-container"
-      />
-    </div>
+    {/* React carousel - invisible until first image loads, then swaps with preview */}
+    {/* Using absolute + opacity-0 instead of hidden so images can load in background */}
+    {ENABLE_CAROUSEL && (
+      <div id="portfolio-carousel-container" class="absolute inset-0 opacity-0 pointer-events-none">
+        <PortfolioScreenShowcase
+          client:idle
+          items={portfolioItems}
+          mediaEntries={showcaseMedia}
+          className="w-full mx-auto"
+          staticContainerId="portfolio-static-first"
+          carouselContainerId="portfolio-carousel-container"
+        />
+      </div>
+    )}
   </div>
 </section>
