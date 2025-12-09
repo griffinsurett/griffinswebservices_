@@ -1,4 +1,9 @@
-import LazyLoader from "@/components/LazyLoader";
+/**
+ * LazyPortfolioShowcase
+ * Loads after 3s delay
+ */
+
+import { useEffect, useRef, useState, type ComponentType } from "react";
 
 interface Props {
   items: any[];
@@ -8,11 +13,19 @@ interface Props {
 }
 
 export default function LazyPortfolioShowcase(props: Props) {
-  return (
-    <LazyLoader
-      component={() => import("./PortfolioScreenShowcase")}
-      props={props}
-      delay={3000}
-    />
-  );
+  const [Component, setComponent] = useState<ComponentType<Props> | null>(null);
+  const started = useRef(false);
+
+  useEffect(() => {
+    if (started.current) return;
+
+    const id = setTimeout(() => {
+      started.current = true;
+      import("./PortfolioScreenShowcase").then((m) => setComponent(() => m.default));
+    }, 3000);
+
+    return () => clearTimeout(id);
+  }, []);
+
+  return Component ? <Component {...props} /> : null;
 }

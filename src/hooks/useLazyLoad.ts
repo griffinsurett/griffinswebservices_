@@ -1,181 +1,135 @@
 /**
- * useLazyLoad - Hook for deferred component loading
+ * useLazyLoad - Universal lazy loading hook
  *
- * Works IN CONJUNCTION with Astro's client directives.
- * Supports three trigger strategies:
+ * Works with Astro's client directives. Three trigger modes:
  *
- * 1. TIME-BASED (default): Loads after a delay
- *    - Good for: Cookie consent, modals that appear automatically
+ * DELAY: Load after timeout
+ *   const { Component } = useLazyLoad(() => import("./Foo"), { delay: 3000 });
  *
- * 2. CLICK-BASED: Loads once on element click
- *    - Good for: "Show more" buttons, expandable panels
+ * CLICK: Load when element clicked (one-time)
+ *   const { Component } = useLazyLoad(() => import("./Foo"), { triggerId: "btn" });
  *
- * 3. TOGGLE-BASED: Loads on click, provides isOpen state
- *    - Good for: Menus, modals triggered by buttons
+ * TOGGLE: Load on click + manage open/close state
+ *   const { Component, isOpen, close } = useLazyLoad(() => import("./Foo"), {
+ *     triggerId: "btn",
+ *     toggle: true
+ *   });
  */
 
-import { useEffect, useState, useRef, useCallback, type ComponentType } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 
-// Detect synthetic testing environments (Lighthouse, PageSpeed, etc.)
+// Detect Lighthouse/PageSpeed
 export const isSyntheticTest = () => {
-  if (typeof navigator === "undefined" || typeof window === "undefined")
-    return false;
+  if (typeof navigator === "undefined" || typeof window === "undefined") return false;
   const ua = navigator.userAgent;
-  if (
-    /Lighthouse|Chrome-Lighthouse|Speed Insights|PTST|GTmetrix|Pingdom|HeadlessChrome/i.test(
-      ua
-    )
-  ) {
-    return true;
-  }
-  // @ts-expect-error - Lighthouse injects these
-  if (window.__lighthouseEvaluateMode__ || window.LH_RUNNER) {
-    return true;
-  }
+  if (/Lighthouse|Chrome-Lighthouse|Speed Insights|PTST|GTmetrix|Pingdom|HeadlessChrome/i.test(ua)) return true;
+  // @ts-expect-error - Lighthouse globals
+  if (window.__lighthouseEvaluateMode__ || window.LH_RUNNER) return true;
   return false;
 };
 
-interface BaseOptions<P extends object> {
-  /** Dynamic import function for the component */
-  component: () => Promise<{ default: ComponentType<P> }>;
-  /** Skip loading entirely if this returns true */
+interface DelayOptions {
+  /** Delay in ms before loading */
+  delay: number;
+  /** Skip if returns true */
   skipIf?: () => boolean;
-}
-
-interface DelayOptions<P extends object> extends BaseOptions<P> {
-  trigger?: "delay";
-  /** Delay in ms (default: 2000) */
-  delay?: number;
   triggerId?: never;
+  toggle?: never;
 }
 
-interface ClickOptions<P extends object> extends BaseOptions<P> {
-  trigger: "click";
-  /** ID of the element that triggers loading */
+interface ClickOptions {
+  /** Element ID that triggers load on click */
   triggerId: string;
+  /** If true, manages open/close state */
+  toggle?: boolean;
   delay?: never;
+  skipIf?: never;
 }
 
-interface ToggleOptions<P extends object> extends BaseOptions<P> {
-  trigger: "toggle";
-  /** ID of the element that triggers toggle */
-  triggerId: string;
-  delay?: never;
-}
+type Options = DelayOptions | ClickOptions;
 
-export type UseLazyLoadOptions<P extends object> =
-  | DelayOptions<P>
-  | ClickOptions<P>
-  | ToggleOptions<P>;
-
-interface UseLazyLoadResult<P extends object> {
-  /** The loaded component, or null if not yet loaded */
+interface Result<P> {
   Component: ComponentType<P> | null;
-  /** Whether the component has been loaded */
   isLoaded: boolean;
-  /** For toggle mode: whether the component is open */
   isOpen: boolean;
-  /** For toggle mode: close the component */
   close: () => void;
-  /** Manually trigger loading */
-  load: () => void;
 }
 
-export function useLazyLoad<P extends object>({
-  component,
-  trigger = "delay",
-  delay = 2000,
-  triggerId,
-  skipIf,
-}: UseLazyLoadOptions<P>): UseLazyLoadResult<P> {
-  const [LoadedComponent, setLoadedComponent] = useState<ComponentType<P> | null>(null);
+export function useLazyLoad<P extends object>(
+  load: () => Promise<{ default: ComponentType<P> }>,
+  options: Options
+): Result<P> {
+  const [Component, setComponent] = useState<ComponentType<P> | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const importStarted = useRef(false);
+  const started = useRef(false);
 
-  const load = useCallback(
-    (callback?: () => void) => {
-      if (importStarted.current) {
-        callback?.();
-        return;
-      }
-      if (skipIf?.()) return;
+  const triggerId = "triggerId" in options ? options.triggerId : undefined;
+  const toggle = "toggle" in options ? options.toggle : false;
+  const delay = "delay" in options ? options.delay : undefined;
+  const skipIf = "skipIf" in options ? options.skipIf : undefined;
 
-      importStarted.current = true;
-      component().then((module) => {
-        setLoadedComponent(() => module.default);
-        callback?.();
-      });
-    },
-    [component, skipIf]
-  );
+  const doLoad = useCallback((cb?: () => void) => {
+    if (started.current) {
+      cb?.();
+      return;
+    }
+    started.current = true;
+    load().then((m) => {
+      setComponent(() => m.default);
+      cb?.();
+    });
+  }, [load]);
 
   const close = useCallback(() => {
     setIsOpen(false);
     if (triggerId) {
-      const element = document.getElementById(triggerId);
-      element?.setAttribute("aria-expanded", "false");
+      document.getElementById(triggerId)?.setAttribute("aria-expanded", "false");
     }
   }, [triggerId]);
 
-  // Time-based trigger
+  // Delay trigger
   useEffect(() => {
-    if (trigger !== "delay") return;
+    if (delay === undefined) return;
     if (skipIf?.()) return;
-    if (importStarted.current) return;
+    if (started.current) return;
 
-    const timeoutId = setTimeout(() => load(), delay);
-    return () => clearTimeout(timeoutId);
-  }, [trigger, delay, skipIf, load]);
+    const id = setTimeout(() => doLoad(), delay);
+    return () => clearTimeout(id);
+  }, [delay, skipIf, doLoad]);
 
-  // Click-based trigger (one-time load)
+  // Click/Toggle trigger
   useEffect(() => {
-    if (trigger !== "click") return;
     if (!triggerId) return;
 
-    const element = document.getElementById(triggerId);
-    if (!element) return;
+    const el = document.getElementById(triggerId);
+    if (!el) return;
 
-    const handleClick = () => load();
-
-    element.addEventListener("click", handleClick);
-    return () => element.removeEventListener("click", handleClick);
-  }, [trigger, triggerId, load]);
-
-  // Toggle-based trigger (load + open/close state)
-  useEffect(() => {
-    if (trigger !== "toggle") return;
-    if (!triggerId) return;
-
-    const element = document.getElementById(triggerId);
-    if (!element) return;
-
-    const handleClick = () => {
-      if (!importStarted.current) {
-        // First click: load and open
-        load(() => {
-          setIsOpen(true);
-          element.setAttribute("aria-expanded", "true");
+    const onClick = () => {
+      if (!started.current) {
+        doLoad(() => {
+          if (toggle) {
+            setIsOpen(true);
+            el.setAttribute("aria-expanded", "true");
+          }
         });
-      } else {
-        // Subsequent clicks: toggle
+      } else if (toggle) {
         setIsOpen((prev) => {
           const next = !prev;
-          element.setAttribute("aria-expanded", String(next));
+          el.setAttribute("aria-expanded", String(next));
           return next;
         });
       }
     };
 
-    element.addEventListener("click", handleClick);
-    return () => element.removeEventListener("click", handleClick);
-  }, [trigger, triggerId, load]);
+    el.addEventListener("click", onClick);
+    return () => el.removeEventListener("click", onClick);
+  }, [triggerId, toggle, doLoad]);
 
   return {
-    Component: LoadedComponent,
-    isLoaded: LoadedComponent !== null,
+    Component,
+    isLoaded: Component !== null,
     isOpen,
     close,
-    load,
   };
 }
 
