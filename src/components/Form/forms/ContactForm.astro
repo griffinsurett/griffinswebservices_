@@ -117,16 +117,14 @@ const handleSubmit = async (values: any) => {
       checkboxClassName="h-4 w-4 rounded border-muted/60 accent-primary"
     >
       I have read and agree to the{" "}
-      <Button
-        client:load
-        variant="link"
+      <a
         href="/privacy-policy"
         target="_blank"
         rel="noopener noreferrer"
-        unstyled={true}
+        class="link-base link-md"
       >
         Privacy Policy
-      </Button>
+      </a>
     </Checkbox>
 
     <div class="text-center relative z-10 pt-4">
