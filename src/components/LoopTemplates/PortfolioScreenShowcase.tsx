@@ -599,11 +599,10 @@ export default function PortfolioScreenShowcase({
 
   const baseTransitionClass =
     "absolute inset-0 transition-transform transition-opacity duration-[750ms] ease-[cubic-bezier(0.4,0,0.2,1)]";
-  const viewportHeightClasses = "h-[420px] sm:h-[500px]";
 
   return (
-    <div className={`relative ${className}`.trim()}>
-      <div className={`relative mx-auto w-full max-w-4xl overflow-hidden rounded-lg ${viewportHeightClasses}`}>
+    <div className={`relative h-full ${className}`.trim()}>
+      <div className="relative h-full w-full overflow-hidden rounded-lg">
         {slides.map((item, slideIndex) => {
           const isActive = slideIndex === activeIndex;
           const isPrev = slideIndex === prevIndex;

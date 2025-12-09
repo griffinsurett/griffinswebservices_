@@ -37,10 +37,11 @@ const IMAGE_FORMATS: { format: OptimizedFormat; quality: number }[] = [
 
 // Container dimensions (from Tailwind classes)
 const CONTAINER_MAX_WIDTH = 896; // max-w-4xl
+const CONTAINER_HEIGHT_MOBILE = 420; // h-[420px] on mobile
 const CONTAINER_HEIGHT_DESKTOP = 500; // h-[500px] on sm+
 const HEADER_BAR_HEIGHT = 48;
-// Visible figure height on desktop (container - header)
-const VISIBLE_HEIGHT_DESKTOP = CONTAINER_HEIGHT_DESKTOP - HEADER_BAR_HEIGHT; // 452px
+// Use full container height for preview (it will use object-cover to fill)
+const VISIBLE_HEIGHT_DESKTOP = CONTAINER_HEIGHT_DESKTOP - HEADER_BAR_HEIGHT; // 452px visible in figure
 // Include 520 for ~521px displayed size on medium viewports
 const PREVIEW_WIDTHS = [320, 480, 520, 640, CONTAINER_MAX_WIDTH];
 
@@ -151,11 +152,10 @@ const processedItems = await Promise.all(
       }));
 
     // For the first item, generate a cropped "above the fold" preview
-    // This shows just the visible top portion - much smaller than the full tall image
+    // This shows the top portion - slightly taller than visible to ensure full coverage
     let croppedPreview = undefined;
     if (isFirst) {
-      // Calculate exactly how many source pixels are visible in the container
-      // This uses the actual source image dimensions for pixel-perfect cropping
+      // Calculate how many source pixels are visible in the container
       const visibleSourceHeight = calculateVisibleSourceHeight(
         metadata.width,
         metadata.height,
@@ -163,12 +163,14 @@ const processedItems = await Promise.all(
         VISIBLE_HEIGHT_DESKTOP
       );
 
-      // Generate responsive widths, each cropped to show the same visual area
+      // Add 20% extra height so CSS object-cover has enough to work with on all screen sizes
+      const paddedSourceHeight = Math.round(visibleSourceHeight * 1.2);
+
+      // Generate responsive widths, each cropped with extra padding for object-cover
       const previewConfigs: { width: number; height: number; format: "avif" | "webp"; quality: number }[] = [];
       for (const width of PREVIEW_WIDTHS) {
         // Scale the crop height proportionally for each responsive width
-        // This maintains the same aspect ratio across all breakpoints
-        const scaledCropHeight = Math.round(visibleSourceHeight * (width / CONTAINER_MAX_WIDTH));
+        const scaledCropHeight = Math.round(paddedSourceHeight * (width / CONTAINER_MAX_WIDTH));
         previewConfigs.push({ width, height: scaledCropHeight, format: "avif", quality: 55 });
         previewConfigs.push({ width, height: scaledCropHeight, format: "webp", quality: 75 });
       }
@@ -192,7 +194,7 @@ const processedItems = await Promise.all(
         srcSet: webpSrcSet,
         sizes: SIZES,
         width: CONTAINER_MAX_WIDTH,
-        height: visibleSourceHeight, // Use calculated height based on source dimensions
+        height: paddedSourceHeight, // Padded height for object-cover to work properly
         alt: altText,
         sources: avifSrcSet ? [{
           type: "image/avif",
@@ -235,7 +237,7 @@ const firstItem = portfolioItems[0];
   id={id}
   class={`relative overflow-hidden p-6 ${className}`.trim()}
 >
-  <div class="relative w-full mx-auto h-[420px] sm:h-[500px]">
+  <div class="relative w-full max-w-4xl mx-auto h-[420px] sm:h-[500px]">
     {/* React carousel - positioned behind the preview, always visible */}
     {ENABLE_CAROUSEL && (
       <div class="absolute inset-0 z-0">
@@ -252,7 +254,7 @@ const firstItem = portfolioItems[0];
     {/* Static preview - on top, fades out when carousel is ready */}
     <div
       id="portfolio-static-first"
-      class="absolute inset-0 z-10 mx-auto w-full max-w-4xl overflow-hidden rounded-lg transition-opacity duration-500"
+      class="absolute inset-0 z-10 overflow-hidden rounded-lg transition-opacity duration-500"
     >
       <div class="relative h-full w-full">
         <div class="relative h-full bg-bg3">
@@ -287,7 +289,7 @@ const firstItem = portfolioItems[0];
                   decoding="async"
                   fetchpriority="high"
                   draggable="false"
-                  class="block w-full select-none"
+                  class="block h-auto min-h-full w-full select-none object-cover object-top"
                 />
               </picture>
             ) : null}
