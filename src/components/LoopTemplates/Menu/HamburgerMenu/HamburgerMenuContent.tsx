@@ -1,5 +1,5 @@
 /**
- * MobileMenuContent - The actual menu drawer content
+ * HamburgerMenuContent - The actual menu drawer content
  *
  * This component is lazy-loaded only when the menu is opened.
  * It doesn't include the hamburger button - that's rendered statically.
@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import Modal from "@/components/Modal";
 import MobileMenuItem from "@/components/LoopComponents/Menu/MobileMenuItem";
 
-interface MobileMenuContentProps {
+interface HamburgerMenuContentProps {
   items: any[];
   isOpen: boolean;
   onClose: () => void;
@@ -22,13 +22,13 @@ interface MenuLevel {
   items: any[];
 }
 
-export default function MobileMenuContent({
+export default function HamburgerMenuContent({
   items,
   isOpen,
   onClose,
   className = "",
   closeButton = false,
-}: MobileMenuContentProps) {
+}: HamburgerMenuContentProps) {
   const [menuStack, setMenuStack] = useState<MenuLevel[]>(() => [
     { title: "Main Menu", items },
   ]);

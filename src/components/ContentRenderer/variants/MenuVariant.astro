@@ -14,7 +14,7 @@
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import MenuList from "@/components/LoopTemplates/Menu/MenuList.astro";
 import StaticHamburgerButton from "@/components/Menu/StaticHamburgerButton.astro";
-import LazyMobileMenu from "@/components/LoopTemplates/Menu/LazyMobileMenu";
+import LazyHamburgerMenu from "@/components/LoopTemplates/Menu/HamburgerMenu/Lazy";
 import { buildMenuTree } from "@/utils/menuQueries";
 import { toArray } from "@/utils/array";
 
@@ -73,7 +73,7 @@ const buttonId = id ? `${id}-menu-toggle` : "mobile-menu-toggle";
         <StaticHamburgerButton id={buttonId} />
 
         {/* Lazy-loaded menu - only hydrates on first click */}
-        <LazyMobileMenu
+        <LazyHamburgerMenu
           client:idle
           items={menuTree}
           buttonId={buttonId}

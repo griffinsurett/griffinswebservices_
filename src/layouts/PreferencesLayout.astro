@@ -13,7 +13,7 @@
 
 // Cookie Consent Preferences
 import CookiePreferencesButton from "@/components/preferences/consent/CookiePreferencesButton";
-import LazyCookieConsent from "@/components/preferences/consent/LazyCookieConsent";
+import LazyCookieConsentBanner from "@/components/preferences/consent/CookieConsentBanner/Lazy";
 import ConsentScript from "@/components/preferences/consent/ConsentScript.astro";
 
 // Accessibility Preferences
@@ -42,7 +42,7 @@ import DividerHeading from "@/components/DividerHeading/DividerHeading";
 
 {/* Cookie Preferences Button - Client-side only */}
 <CookiePreferencesButton client:visible />
-<LazyCookieConsent client:idle />
+<LazyCookieConsentBanner client:idle />
 
 {/* Accessibility Button - Client-side only */}
 <AccessibilityButton client:idle />

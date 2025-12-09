@@ -1,4 +1,4 @@
-// src/components/preferences/consent/CookieConsentBanner.tsx
+// src/components/preferences/consent/CookieConsentBanner/CookieConsentBanner.tsx
 /**
  * Cookie Consent Banner
  *
@@ -12,10 +12,10 @@ import { useState, useEffect, lazy, Suspense, useTransition } from "react";
 import { useCookieStorage } from "@/hooks/useCookieStorage";
 import { enableConsentedScripts } from "@/utils/scriptManager";
 import Modal from "@/components/Modal";
-import type { CookieConsent } from "./types";
+import type { CookieConsent } from "../types";
 import Button from "@/components/Button/Button";
 
-const CookiePreferencesModal = lazy(() => import("./CookiePreferencesModal"));
+const CookiePreferencesModal = lazy(() => import("../CookiePreferencesModal"));
 
 export default function CookieConsentBanner() {
   const [showBanner, setShowBanner] = useState(false);
