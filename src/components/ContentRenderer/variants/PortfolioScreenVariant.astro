@@ -20,9 +20,10 @@ if (!safeItems.length) {
   return;
 }
 
-// Target widths for responsive images - max display is ~860px in the showcase
-const IMAGE_WIDTHS = [320, 480, 640, 860];
-const SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 860px";
+// Target widths for responsive images - container is max-w-4xl (896px) with section p-6 padding
+const IMAGE_WIDTHS = [320, 480, 520, 640, 860];
+// Sizes: mobile full width minus padding, tablet ~80vw, desktop maxes at 896px container
+const SIZES = "(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) min(calc(100vw - 48px), 896px), 896px";
 // Clamp extremely tall scrolling screenshots so the downloaded file
 // isn't much larger than the visible area in the showcase.
 const MAX_RENDER_HEIGHT = 3600;
