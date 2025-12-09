@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useEngagementAutoScroll } from "@/hooks/autoscroll/useEngagementAutoScroll";
 import { getImageSrc } from "@/layouts/collections/helpers/layoutHelpers";
 import type { PortfolioItemData } from "@/components/LoopComponents/PortfolioItemComponent";
 
@@ -20,201 +27,414 @@ interface PortfolioScreenShowcaseProps {
   items?: PortfolioItemData[];
   className?: string;
   mediaEntries?: (PortfolioMediaEntry | undefined)[];
+  /** ID of the static placeholder to remove on hydration */
   staticContainerId?: string;
+  /** ID of this carousel's container to reveal on hydration */
   carouselContainerId?: string;
 }
 
-// Minimal autoscroll - single RAF loop, no external hooks
-function useSimpleAutoScroll(
-  ref: React.RefObject<HTMLElement | null>,
-  active: boolean,
-  onComplete: () => void
-) {
-  const rafRef = useRef<number>(0);
-  const startTimeRef = useRef(0);
-  const scrollStartRef = useRef(0);
+interface ScreenProps {
+  item: PortfolioItemData;
+  mediaEntry?: PortfolioMediaEntry;
+  totalSlides: number;
+  activeIndex: number;
+  onCycleComplete: () => void;
+  autoplayEnabled?: boolean;
+  isActive: boolean;
+  shouldUseDesktopEager: boolean;
+}
+
+const AUTO_SCROLL_START_DELAY_MS = 700;
+const AUTO_SCROLL_TARGET_DURATION_SEC = 14;
+const AUTO_SCROLL_DEFAULT_CYCLE_MS = AUTO_SCROLL_TARGET_DURATION_SEC * 1000;
+const AUTO_SCROLL_MIN_SPEED = 28;
+const MIN_SCROLL_DELTA = 4;
+const CONTENT_STABLE_WINDOW_MS = 220;
+const CONTENT_STABLE_DELTA_PX = 16;
+const CONTENT_READY_TIMEOUT_MS = 2200;
+const BETWEEN_SLIDE_PAUSE_MS = 450;
+const SLIDE_TRANSITION_DURATION_MS = 750;
+
+function useDesktopEagerPreference() {
+  const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    if (!active) {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (typeof window === "undefined" || typeof window.matchMedia === "undefined") {
+      return;
+    }
+    const matcher = window.matchMedia("(min-width: 1024px)");
+    const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
+      setIsDesktop(event.matches);
+    };
+    handleChange(matcher);
+    if (typeof matcher.addEventListener === "function") {
+      matcher.addEventListener("change", handleChange);
+      return () => matcher.removeEventListener("change", handleChange);
+    }
+    matcher.addListener(handleChange);
+    return () => matcher.removeListener(handleChange);
+  }, []);
+
+  return isDesktop;
+}
+
+function ComputerScreen({
+  item,
+  mediaEntry,
+  totalSlides,
+  activeIndex,
+  onCycleComplete,
+  autoplayEnabled = true,
+  isActive,
+  shouldUseDesktopEager,
+}: ScreenProps) {
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const [mediaReady, setMediaReady] = useState(false);
+  const [contentReady, setContentReady] = useState(false);
+  const [scrollDurationMs, setScrollDurationMs] = useState(
+    AUTO_SCROLL_DEFAULT_CYCLE_MS,
+  );
+  // Only track scroll progress in dev mode
+  const scrollProgressRef = useRef(0);
+
+  const resolveAutoScrollSpeed = useCallback((host: HTMLElement) => {
+    const maxScrollable = Math.max(0, host.scrollHeight - host.clientHeight);
+    if (maxScrollable <= 0) return 0;
+    const baseline = maxScrollable / AUTO_SCROLL_TARGET_DURATION_SEC;
+    if (!Number.isFinite(baseline) || baseline <= 0) {
+      return AUTO_SCROLL_MIN_SPEED;
+    }
+    return Math.max(AUTO_SCROLL_MIN_SPEED, baseline);
+  }, []);
+
+  const measureScrollDuration = useCallback(
+    (host: HTMLElement) => {
+      const maxScrollable = Math.max(0, host.scrollHeight - host.clientHeight);
+      if (maxScrollable <= 0) return AUTO_SCROLL_DEFAULT_CYCLE_MS;
+      const pxPerSecond = resolveAutoScrollSpeed(host);
+      if (pxPerSecond <= 0) return AUTO_SCROLL_DEFAULT_CYCLE_MS;
+      const rawDurationMs = Math.round((maxScrollable / pxPerSecond) * 1000);
+      if (!Number.isFinite(rawDurationMs) || rawDurationMs <= 0) {
+        return AUTO_SCROLL_DEFAULT_CYCLE_MS;
+      }
+      return Math.max(AUTO_SCROLL_DEFAULT_CYCLE_MS, rawDurationMs);
+    },
+    [resolveAutoScrollSpeed],
+  );
+
+  const autoScroll = useEngagementAutoScroll({
+    ref: viewportRef,
+    active: autoplayEnabled && contentReady,
+    speed: resolveAutoScrollSpeed,
+    loop: false,
+    startDelay: AUTO_SCROLL_START_DELAY_MS,
+    resumeDelay: 600,
+    resumeOnUserInput: true,
+    threshold: 0.05,
+    resetOnInactive: false,
+  });
+
+  useEffect(() => {
+    if (!autoplayEnabled) return;
+    autoScroll.resetPosition(0);
+    viewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [autoplayEnabled, autoScroll.resetPosition]);
+  useEffect(() => {
+    const host = viewportRef.current;
+    if (!host) return;
+
+    const imageEl =
+      (host.querySelector("picture img") as HTMLImageElement | null) ??
+      (host.querySelector("img") as HTMLImageElement | null);
+
+    if (!imageEl) {
+      setMediaReady(true);
       return;
     }
 
-    const el = ref.current;
-    if (!el) return;
+    if (imageEl.complete && imageEl.naturalHeight > 0) {
+      setMediaReady(true);
+      return;
+    }
 
-    // Reset scroll position for new slide
-    el.scrollTop = 0;
-    scrollStartRef.current = 0;
-
-    const SCROLL_SPEED = 35; // px/sec
-    const START_DELAY = 800;
-    const END_PAUSE = 400;
-
-    let started = false;
-    let completed = false;
-
-    const animate = (timestamp: number) => {
-      if (!started) {
-        startTimeRef.current = timestamp;
-        started = true;
-      }
-
-      const elapsed = timestamp - startTimeRef.current;
-
-      // Delay before starting scroll
-      if (elapsed < START_DELAY) {
-        rafRef.current = requestAnimationFrame(animate);
-        return;
-      }
-
-      const scrollElapsed = elapsed - START_DELAY;
-      const maxScroll = Math.max(0, el.scrollHeight - el.clientHeight);
-
-      if (maxScroll <= 0) {
-        // No scrollable content, wait then complete
-        if (!completed && scrollElapsed > 2000) {
-          completed = true;
-          setTimeout(onComplete, END_PAUSE);
-        } else {
-          rafRef.current = requestAnimationFrame(animate);
-        }
-        return;
-      }
-
-      const targetScroll = Math.min(maxScroll, (scrollElapsed / 1000) * SCROLL_SPEED);
-      el.scrollTop = targetScroll;
-
-      if (targetScroll >= maxScroll - 1) {
-        if (!completed) {
-          completed = true;
-          setTimeout(onComplete, END_PAUSE);
-        }
-        return;
-      }
-
-      rafRef.current = requestAnimationFrame(animate);
-    };
-
-    rafRef.current = requestAnimationFrame(animate);
+    setMediaReady(false);
+    const handleReady = () => setMediaReady(true);
+    imageEl.addEventListener("load", handleReady, { once: true });
+    imageEl.addEventListener("error", handleReady, { once: true });
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      imageEl.removeEventListener("load", handleReady);
+      imageEl.removeEventListener("error", handleReady);
     };
-  }, [active, ref, onComplete]);
-}
-
-// Simple visibility hook using IntersectionObserver
-function useInView(ref: React.RefObject<HTMLElement | null>, threshold = 0.3) {
-  const [inView, setInView] = useState(false);
+  }, [item, mediaEntry]);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    if (!mediaReady) {
+      setContentReady(false);
+      return;
+    }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [ref, threshold]);
+    const host = viewportRef.current;
+    if (!host) return;
 
-  return inView;
-}
+    let resolved = false;
+    let stabilityCleanup: (() => void) | null = null;
 
-interface ScreenSlideProps {
-  item: PortfolioItemData;
-  media?: PortfolioMediaEntry;
-  isActive: boolean;
-  onScrollComplete: () => void;
-  isFirst: boolean;
-}
+    const hasScrollableContent = () => {
+      const max = Math.max(0, host.scrollHeight - host.clientHeight);
+      return max > MIN_SCROLL_DELTA;
+    };
 
-function ScreenSlide({ item, media, isActive, onScrollComplete, isFirst }: ScreenSlideProps) {
-  const viewportRef = useRef<HTMLDivElement>(null);
+    const markReady = () => {
+      if (resolved) return;
+      resolved = true;
+      stabilityCleanup?.();
+      stabilityCleanup = null;
+      setContentReady(true);
+    };
 
-  useSimpleAutoScroll(viewportRef, isActive, onScrollComplete);
+    const waitForStableContent = () => {
+      if (typeof ResizeObserver === "undefined") {
+        markReady();
+        return;
+      }
+
+      let stabilityTimer: number | null = null;
+      let lastHeight = host.scrollHeight;
+
+      const scheduleReady = () => {
+        if (stabilityTimer) return;
+        stabilityTimer = window.setTimeout(() => {
+          stabilityTimer = null;
+          markReady();
+        }, CONTENT_STABLE_WINDOW_MS);
+      };
+
+      const resetReady = () => {
+        if (stabilityTimer) {
+          window.clearTimeout(stabilityTimer);
+          stabilityTimer = null;
+        }
+      };
+
+      const observer = new ResizeObserver(() => {
+        const nextHeight = host.scrollHeight;
+        if (Math.abs(nextHeight - lastHeight) > CONTENT_STABLE_DELTA_PX) {
+          lastHeight = nextHeight;
+          resetReady();
+        }
+        scheduleReady();
+      });
+
+      observer.observe(host);
+      scheduleReady();
+
+      stabilityCleanup = () => {
+        observer.disconnect();
+        if (stabilityTimer) {
+          window.clearTimeout(stabilityTimer);
+          stabilityTimer = null;
+        }
+      };
+    };
+
+    if (hasScrollableContent()) {
+      waitForStableContent();
+    } else if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(() => {
+        if (hasScrollableContent()) {
+          observer.disconnect();
+          waitForStableContent();
+        }
+      });
+      observer.observe(host);
+      stabilityCleanup = () => observer.disconnect();
+    } else {
+      markReady();
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      markReady();
+    }, CONTENT_READY_TIMEOUT_MS);
+
+    return () => {
+      stabilityCleanup?.();
+      window.clearTimeout(timeoutId);
+    };
+  }, [mediaReady]);
+
+  useEffect(() => {
+    if (!contentReady || !autoplayEnabled) {
+      setScrollDurationMs(AUTO_SCROLL_DEFAULT_CYCLE_MS);
+      return;
+    }
+
+    const host = viewportRef.current;
+    if (!host) return;
+
+    const updateDuration = () => setScrollDurationMs(measureScrollDuration(host));
+    updateDuration();
+
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => updateDuration())
+        : null;
+
+    observer?.observe(host);
+
+    return () => observer?.disconnect();
+  }, [contentReady, measureScrollDuration]);
+
+  useEffect(() => {
+    if (!contentReady || !autoplayEnabled || totalSlides <= 1 || autoScroll.paused) return;
+    const totalDuration =
+      AUTO_SCROLL_START_DELAY_MS + scrollDurationMs + BETWEEN_SLIDE_PAUSE_MS;
+    const timer = window.setTimeout(() => onCycleComplete(), totalDuration);
+    return () => window.clearTimeout(timer);
+  }, [
+    autoplayEnabled,
+    contentReady,
+    onCycleComplete,
+    scrollDurationMs,
+    totalSlides,
+    autoScroll.paused,
+  ]);
+
+  // Only track scroll progress in dev mode to avoid continuous RAF in production
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    if (!contentReady || !isActive) {
+      scrollProgressRef.current = 0;
+      return;
+    }
+
+    const host = viewportRef.current;
+    if (!host) return;
+
+    const updateProgress = () => {
+      const max = Math.max(0, host.scrollHeight - host.clientHeight);
+      const pct = max > 0 ? (host.scrollTop / max) * 100 : 0;
+      scrollProgressRef.current = Math.round(pct);
+    };
+
+    host.addEventListener("scroll", updateProgress, { passive: true });
+    updateProgress();
+
+    return () => {
+      host.removeEventListener("scroll", updateProgress);
+    };
+  }, [contentReady, isActive]);
 
   const fallbackSrc =
     getImageSrc(item.featuredImage) ||
     getImageSrc(item.bannerImage) ||
     getImageSrc(item.image) ||
     "";
+  const wantsDesktopEager =
+    Boolean(mediaEntry?.desktopEager && shouldUseDesktopEager);
+  const resolvedLoading = wantsDesktopEager
+    ? "eager"
+    : mediaEntry?.loading ?? "lazy";
+  const resolvedFetchPriority = wantsDesktopEager
+    ? "high"
+    : mediaEntry?.fetchPriority ?? "auto";
 
-  const loading = isFirst ? "eager" : (media?.loading ?? "lazy");
-  const fetchPriority = isFirst ? "high" : (media?.fetchPriority ?? "auto");
+  const renderMedia = () => {
+    if (mediaEntry?.sources?.length) {
+      return (
+        <picture>
+          {mediaEntry.sources.map((source, idx) => (
+            <source
+              key={`${item.slug ?? item.id ?? idx}-source-${idx}`}
+              srcSet={source.srcSet}
+              sizes={source.sizes ?? mediaEntry.sizes}
+              type={source.type}
+            />
+          ))}
+          <img
+            src={mediaEntry.src}
+            srcSet={mediaEntry.srcSet}
+            sizes={mediaEntry.sizes}
+            alt={mediaEntry.alt || item.alt || item.title || "Project preview"}
+            width={mediaEntry.width}
+            height={mediaEntry.height}
+            loading={resolvedLoading}
+            decoding={mediaEntry.decoding ?? "async"}
+            fetchPriority={resolvedFetchPriority}
+            draggable={false}
+            className="block h-auto min-h-full w-full select-none object-cover object-top"
+          />
+        </picture>
+      );
+    }
+    if (mediaEntry?.src) {
+      return (
+        <img
+          src={mediaEntry.src}
+          srcSet={mediaEntry.srcSet}
+          sizes={mediaEntry.sizes}
+          alt={mediaEntry.alt || item.alt || item.title || "Project preview"}
+          width={mediaEntry.width}
+          height={mediaEntry.height}
+          loading={resolvedLoading}
+          decoding={mediaEntry.decoding ?? "async"}
+          fetchPriority={resolvedFetchPriority}
+          draggable={false}
+          className="block h-auto min-h-full w-full select-none object-cover object-top"
+        />
+      );
+    }
+    if (!fallbackSrc) {
+      return (
+        <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-bg2 via-bg to-bg/80 text-white/30">
+          Preview coming soon
+        </div>
+      );
+    }
+
+    return (
+      <img
+        src={fallbackSrc}
+        alt={item.alt || item.title || "Project preview"}
+        loading={wantsDesktopEager ? "eager" : "lazy"}
+        draggable={false}
+        className="block h-auto min-h-full w-full select-none object-cover object-top"
+        decoding="async"
+        fetchPriority={wantsDesktopEager ? "high" : "auto"}
+      />
+    );
+  };
 
   return (
-    <div className="relative h-full bg-bg3">
-      {/* Browser chrome header */}
-      <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
-        <span className="flex items-center gap-1.5">
-          <span className="h-3 w-3 rounded-full bg-gray-800" />
-          <span className="h-3 w-3 rounded-full bg-gray-800" />
-          <span className="h-3 w-3 rounded-full bg-gray-800" />
-        </span>
-      </div>
-
-      {/* Scrollable viewport */}
-      <figure
-        ref={viewportRef}
-        className="h-full overflow-y-auto overscroll-contain bg-black/40"
-      >
-        {media?.sources?.length ? (
-          <picture>
-            {media.sources.map((source, idx) => (
-              <source
-                key={idx}
-                srcSet={source.srcSet}
-                sizes={source.sizes ?? media.sizes}
-                type={source.type}
-              />
-            ))}
-            <img
-              src={media.src}
-              srcSet={media.srcSet}
-              sizes={media.sizes}
-              alt={media.alt || item.title || "Project preview"}
-              width={media.width}
-              height={media.height}
-              loading={loading}
-              decoding="async"
-              fetchPriority={fetchPriority}
-              draggable={false}
-              className="block h-auto min-h-full w-full select-none object-cover object-top"
-            />
-          </picture>
-        ) : media?.src ? (
-          <img
-            src={media.src}
-            srcSet={media.srcSet}
-            sizes={media.sizes}
-            alt={media.alt || item.title || "Project preview"}
-            width={media.width}
-            height={media.height}
-            loading={loading}
-            decoding="async"
-            fetchPriority={fetchPriority}
-            draggable={false}
-            className="block h-auto min-h-full w-full select-none object-cover object-top"
-          />
-        ) : fallbackSrc ? (
-          <img
-            src={fallbackSrc}
-            alt={item.title || "Project preview"}
-            loading={loading}
-            decoding="async"
-            fetchPriority={fetchPriority}
-            draggable={false}
-            className="block h-auto min-h-full w-full select-none object-cover object-top"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-bg2 via-bg to-bg/80 text-white/30">
-            Preview coming soon
+    <div className="relative h-full w-full">
+      <div className="relative h-full bg-bg3">
+        <div className="flex flex-col gap-3 border-b border-white/10 px-4 py-3 text-white/70 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/50">
+            <span className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded-full bg-gray-800" />
+              <span className="h-3 w-3 rounded-full bg-gray-800" />
+              <span className="h-3 w-3 rounded-full bg-gray-800" />
+            </span>
+          </div>
+        </div>
+        <figure
+          ref={viewportRef}
+          className="relative h-full overflow-y-auto overscroll-contain bg-black/40"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {renderMedia()}
+        </figure>
+        {import.meta.env.DEV && isActive && (
+          <div className="absolute right-3 top-3 z-50 space-y-1 rounded-lg border border-white/10 bg-zinc-900/95 p-3 text-xs text-white/90 opacity-80 shadow-lg">
+            <div>Slide {activeIndex + 1} / {totalSlides}</div>
+            <div>Progress: {scrollProgressRef.current}%</div>
+            <div>In View: {autoScroll.inView ? "✅" : "❌"}</div>
+            <div>Paused: {autoScroll.paused ? "✅" : "❌"}</div>
+            <div>Engaged: {autoScroll.engaged ? "✅" : "❌"}</div>
+            <div>Resume Pending: {autoScroll.resumeScheduled ? "✅" : "❌"}</div>
           </div>
         )}
-      </figure>
+      </div>
     </div>
   );
 }
@@ -222,16 +442,21 @@ function ScreenSlide({ item, media, isActive, onScrollComplete, isFirst }: Scree
 export default function PortfolioScreenShowcase({
   items = [],
   className = "",
-  mediaEntries = [],
+  mediaEntries: mediaEntriesProp = [],
   staticContainerId,
   carouselContainerId,
 }: PortfolioScreenShowcaseProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const slides = useMemo(() => (Array.isArray(items) ? items : []), [items]);
+  const mediaEntries = useMemo(
+    () => (Array.isArray(mediaEntriesProp) ? mediaEntriesProp : []),
+    [mediaEntriesProp],
+  );
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const slides = Array.isArray(items) ? items : [];
-
-  const inView = useInView(containerRef, 0.2);
+  const [prevIndex, setPrevIndex] = useState<number | null>(null);
+  const [transitionStage, setTransitionStage] = useState<"idle" | "pre" | "animating">("idle");
+  const transitionTimerRef = useRef<number | null>(null);
+  const transitionFrameRef = useRef<number | null>(null);
+  const preferDesktopEager = useDesktopEagerPreference();
 
   // Handle hydration: remove static placeholder and reveal carousel
   useEffect(() => {
@@ -243,48 +468,116 @@ export default function PortfolioScreenShowcase({
     }
   }, [staticContainerId, carouselContainerId]);
 
-  const goToNext = useCallback(() => {
-    if (slides.length <= 1 || isTransitioning) return;
-
-    setIsTransitioning(true);
-    setActiveIndex((prev) => (prev + 1) % slides.length);
-
-    // Allow transition to complete
-    setTimeout(() => setIsTransitioning(false), 700);
-  }, [slides.length, isTransitioning]);
-
-  const handleScrollComplete = useCallback(() => {
-    if (inView && slides.length > 1) {
-      goToNext();
+  useEffect(() => {
+    if (!slides.length) {
+      setActiveIndex(0);
+      setPrevIndex(null);
+      setTransitionStage("idle");
+      return;
     }
-  }, [inView, slides.length, goToNext]);
+    setActiveIndex((prev) => (prev >= slides.length ? 0 : prev));
+  }, [slides.length]);
+
+  useEffect(
+    () => () => {
+      if (transitionTimerRef.current) {
+        window.clearTimeout(transitionTimerRef.current);
+        transitionTimerRef.current = null;
+      }
+      if (transitionFrameRef.current) {
+        cancelAnimationFrame(transitionFrameRef.current);
+        transitionFrameRef.current = null;
+      }
+    },
+    [],
+  );
+
+  const startSlideTransition = useCallback(
+    (targetIndex: number) => {
+      if (typeof window === "undefined") return;
+      setPrevIndex(activeIndex);
+      setActiveIndex(targetIndex);
+      setTransitionStage("pre");
+
+      if (transitionFrameRef.current) {
+        cancelAnimationFrame(transitionFrameRef.current);
+        transitionFrameRef.current = null;
+      }
+
+      transitionFrameRef.current = requestAnimationFrame(() => {
+        transitionFrameRef.current = requestAnimationFrame(() => {
+          setTransitionStage("animating");
+        });
+      });
+
+      if (transitionTimerRef.current) {
+        window.clearTimeout(transitionTimerRef.current);
+        transitionTimerRef.current = null;
+      }
+
+      transitionTimerRef.current = window.setTimeout(() => {
+        setTransitionStage("idle");
+        setPrevIndex(null);
+      }, SLIDE_TRANSITION_DURATION_MS);
+    },
+    [activeIndex],
+  );
+
+  const handleCycleComplete = useCallback(() => {
+    if (!slides.length || slides.length <= 1) return;
+    if (transitionStage !== "idle") return;
+    const nextIndex = (activeIndex + 1) % slides.length;
+    startSlideTransition(nextIndex);
+  }, [activeIndex, slides.length, startSlideTransition, transitionStage]);
 
   if (!slides.length) return null;
 
-  return (
-    <div ref={containerRef} className={`relative ${className}`.trim()}>
-      <div className="relative mx-auto w-full max-w-4xl overflow-hidden rounded-lg h-[420px] sm:h-[500px]">
-        {slides.map((item, index) => {
-          const isActive = index === activeIndex;
-          const isPrev = index === (activeIndex - 1 + slides.length) % slides.length;
+  const baseTransitionClass =
+    "absolute inset-0 transition-transform transition-opacity duration-[750ms] ease-[cubic-bezier(0.4,0,0.2,1)]";
+  const viewportHeightClasses = "h-[420px] sm:h-[500px]";
 
-          // Only render active and previous slides
-          if (!isActive && !isPrev) return null;
+  return (
+    <div className={`relative ${className}`.trim()}>
+      <div className={`relative mx-auto w-full max-w-4xl overflow-hidden rounded-lg ${viewportHeightClasses}`}>
+        {slides.map((item, slideIndex) => {
+          const isActive = slideIndex === activeIndex;
+          const isPrev = slideIndex === prevIndex;
+          const isVisible = isActive || (isPrev && transitionStage !== "idle");
+
+          // Only mount active slide and previous during transition
+          const shouldMount = isActive || (isPrev && transitionStage !== "idle");
+          if (!shouldMount) return null;
+
+          let translateClass = "translate-x-full";
+          if (isPrev && transitionStage !== "idle") {
+            translateClass = "-translate-x-full";
+          } else if (isActive) {
+            if (transitionStage === "idle" || prevIndex === null) {
+              translateClass = "translate-x-0";
+            } else if (transitionStage === "pre") {
+              translateClass = "translate-x-full";
+            } else {
+              translateClass = "translate-x-0";
+            }
+          }
 
           return (
             <div
-              key={item.slug ?? item.id ?? index}
-              className={`absolute inset-0 transition-transform duration-700 ease-out shadow-2xl ${
-                isActive ? "translate-x-0" : "-translate-x-full"
+              key={item.slug ?? item.id ?? slideIndex}
+              className={`${baseTransitionClass} shadow-2xl ${translateClass} ${
+                isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
               }`}
-              aria-hidden={!isActive}
+              aria-hidden={isActive ? "false" : "true"}
             >
-              <ScreenSlide
+              <ComputerScreen
                 item={item}
-                media={mediaEntries[index]}
-                isActive={isActive && inView && !isTransitioning}
-                onScrollComplete={handleScrollComplete}
-                isFirst={index === 0}
+                mediaEntry={mediaEntries[slideIndex]}
+                totalSlides={slides.length || 1}
+                activeIndex={slideIndex}
+                onCycleComplete={handleCycleComplete}
+                autoplayEnabled={isActive && transitionStage === "idle"}
+                isActive={isActive}
+                shouldUseDesktopEager={preferDesktopEager}
               />
             </div>
           );
