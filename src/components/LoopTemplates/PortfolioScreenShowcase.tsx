@@ -496,19 +496,10 @@ export default function PortfolioScreenShowcase({
   // This prevents both images from loading simultaneously
   const [shouldLoadFirstImage, setShouldLoadFirstImage] = useState(false);
 
-  // Start loading carousel image after minimum delay to ensure preview is LCP
-  // LCP is typically measured within ~2.5s, so we wait at least 3s
+  // Load first image immediately - the lazy wrapper handles the LCP delay
   useEffect(() => {
-    if (!staticContainerId) {
-      // No preview, load immediately
-      setShouldLoadFirstImage(true);
-      return;
-    }
-
-    // Minimum 3s delay ensures preview is measured as LCP before carousel loads
-    const timer = setTimeout(() => setShouldLoadFirstImage(true), 3000);
-    return () => clearTimeout(timer);
-  }, [staticContainerId]);
+    setShouldLoadFirstImage(true);
+  }, []);
 
   // Callback when first image finishes loading - triggers the swap
   const handleFirstImageLoad = useCallback(() => {

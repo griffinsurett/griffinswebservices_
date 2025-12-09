@@ -2,7 +2,7 @@
 // PortfolioScreenVariant.astro
 import { getImage } from "astro:assets";
 import type { BaseVariantProps } from "../ContentRenderer.types";
-import PortfolioScreenShowcase from "@/components/LoopTemplates/PortfolioScreenShowcase";
+import LazyPortfolioShowcase from "@/components/LoopTemplates/LazyPortfolioShowcase";
 import { getImageAlt, resolveImageMetadata, generateCroppedPreview } from "@/utils/images";
 import { toArray } from "@/utils/array";
 
@@ -242,8 +242,8 @@ const firstItem = portfolioItems[0];
     {/* React carousel - positioned behind the preview, always visible */}
     {ENABLE_CAROUSEL && (
       <div class="absolute inset-0 z-0">
-        <PortfolioScreenShowcase
-          client:visible
+        <LazyPortfolioShowcase
+          client:idle
           items={portfolioItems}
           mediaEntries={showcaseMedia}
           className="w-full mx-auto"
