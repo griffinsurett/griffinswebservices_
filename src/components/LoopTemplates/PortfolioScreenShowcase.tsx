@@ -147,6 +147,12 @@ function ComputerScreen({
     viewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [autoplayEnabled, autoScroll.resetPosition]);
   useEffect(() => {
+    // Don't check for image if rendering is deferred - wait until image is actually rendered
+    if (deferImageRender) {
+      setMediaReady(false);
+      return;
+    }
+
     const host = viewportRef.current;
     if (!host) return;
 
@@ -155,11 +161,12 @@ function ComputerScreen({
       (host.querySelector("img") as HTMLImageElement | null);
 
     if (!imageEl) {
-      setMediaReady(true);
+      // No image element yet, keep waiting
+      setMediaReady(false);
       return;
     }
 
-  if (imageEl.complete && imageEl.naturalHeight > 0) {
+    if (imageEl.complete && imageEl.naturalHeight > 0) {
       setMediaReady(true);
       return;
     }
@@ -173,7 +180,7 @@ function ComputerScreen({
       imageEl.removeEventListener("load", handleReady);
       imageEl.removeEventListener("error", handleReady);
     };
-  }, [item, mediaEntry]);
+  }, [item, mediaEntry, deferImageRender]);
 
   // Notify parent when image loads (for swap from preview to full carousel)
   useEffect(() => {
@@ -490,8 +497,8 @@ export default function PortfolioScreenShowcase({
   // This prevents both images from loading simultaneously
   const [shouldLoadFirstImage, setShouldLoadFirstImage] = useState(false);
 
-  // Start loading carousel image after browser idle or timeout
-  // This ensures the cropped preview is measured as LCP, not the full image
+  // Start loading carousel image after minimum delay to ensure preview is LCP
+  // LCP is typically measured within ~2.5s, so we wait at least 3s
   useEffect(() => {
     if (!staticContainerId) {
       // No preview, load immediately
@@ -499,15 +506,8 @@ export default function PortfolioScreenShowcase({
       return;
     }
 
-    const loadImage = () => setShouldLoadFirstImage(true);
-
-    // Load after browser idle or 4s max (Safari fallback)
-    const hasIdleCallback = typeof requestIdleCallback !== "undefined";
-    if (hasIdleCallback) {
-      const id = requestIdleCallback(() => loadImage(), { timeout: 4000 });
-      return () => cancelIdleCallback(id);
-    }
-    const timer = setTimeout(loadImage, 3000);
+    // Minimum 3s delay ensures preview is measured as LCP before carousel loads
+    const timer = setTimeout(() => setShouldLoadFirstImage(true), 3000);
     return () => clearTimeout(timer);
   }, [staticContainerId]);
 

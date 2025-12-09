@@ -41,7 +41,8 @@ const CONTAINER_HEIGHT_DESKTOP = 500; // h-[500px] on sm+
 const HEADER_BAR_HEIGHT = 48;
 // Visible figure height on desktop (container - header)
 const VISIBLE_HEIGHT_DESKTOP = CONTAINER_HEIGHT_DESKTOP - HEADER_BAR_HEIGHT; // 452px
-const PREVIEW_WIDTHS = [320, 480, 640, CONTAINER_MAX_WIDTH];
+// Include 520 for ~521px displayed size on medium viewports
+const PREVIEW_WIDTHS = [320, 480, 520, 640, CONTAINER_MAX_WIDTH];
 
 /**
  * Calculate the exact crop height for a preview image.
