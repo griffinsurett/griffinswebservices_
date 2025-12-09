@@ -61,7 +61,7 @@ const safeItems = toArray(items);
       (ctaHref || collectionUrl) && (
       <div class="buttons-section-center">
         <Button
-          client:load
+          client:visible
           href={ctaHref ?? collectionUrl}
           rightIcon="lu:arrow-right"
           variant="secondary"
