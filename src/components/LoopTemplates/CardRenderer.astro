@@ -78,7 +78,7 @@ const resolveFeatureCardProps = (item: FeatureCardData, index: number) => {
                   : resolveRingDuration(item, index);
               return (
                 <FeatureCard
-                  client:visible
+                  client:idle
                   data={item}
                   ringDuration={resolvedRingDuration}
                   className={resolvedClassName}
