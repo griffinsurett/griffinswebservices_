@@ -475,7 +475,6 @@ export default function PortfolioScreenShowcase({
   className = "",
   mediaEntries: mediaEntriesProp = [],
   staticContainerId,
-  carouselContainerId,
 }: PortfolioScreenShowcaseProps) {
   const slides = useMemo(() => (Array.isArray(items) ? items : []), [items]);
   const mediaEntries = useMemo(
@@ -517,23 +516,22 @@ export default function PortfolioScreenShowcase({
     hasSwappedRef.current = true;
 
     const staticEl = staticContainerId ? document.getElementById(staticContainerId) : null;
-    const carouselEl = carouselContainerId ? document.getElementById(carouselContainerId) : null;
 
-    // Use requestAnimationFrame to ensure layout is stable before swap
+    // Use requestAnimationFrame to ensure layout is stable before fade
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        // Show carousel (it's already positioned absolutely over the preview)
-        if (carouselEl) {
-          carouselEl.classList.remove("opacity-0", "pointer-events-none");
-        }
-        // Hide preview after carousel is visible
+        // Fade out the preview to reveal carousel underneath
         if (staticEl) {
-          staticEl.style.visibility = "hidden";
+          staticEl.classList.add("opacity-0", "pointer-events-none");
+          // Remove from DOM after fade completes
+          setTimeout(() => {
+            staticEl.style.display = "none";
+          }, 500);
         }
         setFirstImageLoaded(true);
       });
     });
-  }, [staticContainerId, carouselContainerId]);
+  }, [staticContainerId]);
 
   useEffect(() => {
     if (!slides.length) {

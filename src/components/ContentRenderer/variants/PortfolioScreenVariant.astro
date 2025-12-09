@@ -235,11 +235,24 @@ const firstItem = portfolioItems[0];
   id={id}
   class={`relative overflow-hidden p-6 ${className}`.trim()}
 >
-  <div class="relative w-full mx-auto">
-    {/* Static first slide - visible until JS hydrates */}
+  <div class="relative w-full mx-auto h-[420px] sm:h-[500px]">
+    {/* React carousel - positioned behind the preview, always visible */}
+    {ENABLE_CAROUSEL && (
+      <div class="absolute inset-0 z-0">
+        <PortfolioScreenShowcase
+          client:idle
+          items={portfolioItems}
+          mediaEntries={showcaseMedia}
+          className="w-full mx-auto"
+          staticContainerId="portfolio-static-first"
+        />
+      </div>
+    )}
+
+    {/* Static preview - on top, fades out when carousel is ready */}
     <div
       id="portfolio-static-first"
-      class="relative mx-auto w-full max-w-4xl overflow-hidden rounded-lg h-[420px] sm:h-[500px]"
+      class="absolute inset-0 z-10 mx-auto w-full max-w-4xl overflow-hidden rounded-lg transition-opacity duration-500"
     >
       <div class="relative h-full w-full">
         <div class="relative h-full bg-bg3">
@@ -282,20 +295,5 @@ const firstItem = portfolioItems[0];
         </div>
       </div>
     </div>
-
-    {/* React carousel - invisible until first image loads, then swaps with preview */}
-    {/* Using absolute + opacity-0 instead of hidden so images can load in background */}
-    {ENABLE_CAROUSEL && (
-      <div id="portfolio-carousel-container" class="absolute inset-0 opacity-0 pointer-events-none">
-        <PortfolioScreenShowcase
-          client:idle
-          items={portfolioItems}
-          mediaEntries={showcaseMedia}
-          className="w-full mx-auto"
-          staticContainerId="portfolio-static-first"
-          carouselContainerId="portfolio-carousel-container"
-        />
-      </div>
-    )}
   </div>
 </section>
