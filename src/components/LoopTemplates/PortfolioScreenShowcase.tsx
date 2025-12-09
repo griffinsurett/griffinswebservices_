@@ -490,18 +490,34 @@ export default function PortfolioScreenShowcase({
   // This prevents both images from loading simultaneously
   const [shouldLoadFirstImage, setShouldLoadFirstImage] = useState(false);
 
-  // Start loading carousel image after a brief delay to let preview render
+  // Start loading carousel image after user interaction or idle
+  // This ensures the cropped preview is measured as LCP, not the full image
   useEffect(() => {
-    if (staticContainerId) {
-      // Small delay ensures preview is painted before we start loading carousel image
-      const timer = window.setTimeout(() => {
-        setShouldLoadFirstImage(true);
-      }, 100);
-      return () => window.clearTimeout(timer);
-    } else {
+    if (!staticContainerId) {
       // No preview, load immediately
       setShouldLoadFirstImage(true);
+      return;
     }
+
+    // Load on any user interaction (scroll, click, touch, keypress)
+    const loadImage = () => setShouldLoadFirstImage(true);
+    const events = ["scroll", "click", "touchstart", "keydown"];
+    events.forEach((e) => window.addEventListener(e, loadImage, { once: true, passive: true }));
+
+    // Fallback: load after idle or 4s max
+    let cleanup: (() => void) | undefined;
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(() => loadImage(), { timeout: 4000 });
+      cleanup = () => window.cancelIdleCallback(id);
+    } else {
+      const timer = window.setTimeout(loadImage, 3000);
+      cleanup = () => window.clearTimeout(timer);
+    }
+
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, loadImage));
+      cleanup?.();
+    };
   }, [staticContainerId]);
 
   // Callback when first image finishes loading - triggers the swap
