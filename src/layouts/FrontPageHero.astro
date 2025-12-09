@@ -35,7 +35,7 @@ const {
   primaryCTA: incomingPrimaryCTA = {
     text: "Book An Intro Call",
     link: "#contact",
-    rightIcon: "lu:arrow-right"
+    rightIcon: "lu:arrow-right",
   },
   className = "",
   id = "hero",
@@ -44,9 +44,7 @@ const {
 const primaryCTA = {
   ...incomingPrimaryCTA,
   rightIcon:
-    incomingPrimaryCTA.rightIcon ??
-    incomingPrimaryCTA.icon ??
-    "lu:arrow-right",
+    incomingPrimaryCTA.rightIcon ?? incomingPrimaryCTA.icon ?? "lu:arrow-right",
 };
 
 const hasHeroSlot = Astro.slots.has("default");
@@ -63,7 +61,6 @@ if (!hasHeroSlot) {
     slug: entry.slug ?? entry.id ?? `hero-project-${index}`,
   }));
 }
-
 ---
 
 <section
@@ -88,7 +85,9 @@ if (!hasHeroSlot) {
           descriptionClassName="hero-text text-lg leading-relaxed mx-0 lg:mx-auto"
         />
 
-        <div class="flex flex-col lg:flex-row items-center justify-left gap-3 lg:gap-6 w-auto">
+        <div
+          class="flex flex-col lg:flex-row items-center justify-left gap-3 lg:gap-6 w-auto"
+        >
           <Button
             client:idle
             href={primaryCTA.link}
@@ -115,7 +114,10 @@ if (!hasHeroSlot) {
       </div>
 
       <div class="flex-1 w-full md:mb-0 mb-20 order-last lg:order-none">
-          <slot />
+        <ContentRenderer
+          query={query("projects")}
+          variant="PortfolioScreenVariant"
+        />
       </div>
     </div>
   </div>

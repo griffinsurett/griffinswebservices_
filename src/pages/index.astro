@@ -31,13 +31,8 @@ const heroDescription =
         text: "Get Started",
         link: "/contact-us",
       }}
-    >
-      <!-- <ContentRenderer
-        query={query("projects")}
-        variant="PortfolioScreenVariant"
-      /> -->
-    </FrontPageHero>
-
+    />
+   
     <ContentRenderer
       query={roots("capabilities").orderBy(sortByOrder()).limit(6)}
       variant="CardVariant"
