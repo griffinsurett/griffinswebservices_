@@ -1,6 +1,6 @@
 ---
 import LottieLogo from "./LottieLogo";
-import TextLogo from "./TextLogo";
+import TextLogoStatic from "./TextLogoStatic.astro";
 import { Image } from "astro:assets";
 import POSTER_SRC from "@/assets/GWS-animated.png";
 import { siteData } from "@/content/siteData";
@@ -121,12 +121,11 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
   )}
 
   <div>
-    <TextLogo
+    <TextLogoStatic
       title={siteData.title}
       className="flex flex-col p-0 m-0"
       fadeDuration={textFadeMs}
       animateOutText={animateOutText}
-      client:visible
     />
   </div>
 </a>
