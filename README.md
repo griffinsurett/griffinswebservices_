@@ -763,9 +763,9 @@ npx astro dev --host          # Start dev server (accessible on network)
 npm run build                  # Build for production
 npm run preview                # Preview production build
 
-# Maintenance
-rm -rf .astro node_modules/.astro dist  
+# Maintenance  
 # Clear all caches
+rm -rf .astro node_modules/.astro dist 
 git rm -r --cached .
 npx astro sync                 # Regenerate TypeScript types
 
