@@ -479,17 +479,17 @@ export default function PortfolioScreenShowcase({
     if (hasSwappedRef.current) return;
     hasSwappedRef.current = true;
 
-    // Remove static preview and reveal carousel
-    if (staticContainerId) {
-      document.getElementById(staticContainerId)?.remove();
+    const staticEl = staticContainerId ? document.getElementById(staticContainerId) : null;
+    const carouselEl = carouselContainerId ? document.getElementById(carouselContainerId) : null;
+
+    // Instant swap: show carousel, hide preview in same frame
+    if (carouselEl) {
+      carouselEl.classList.remove("opacity-0", "pointer-events-none", "absolute", "inset-0");
     }
-    if (carouselContainerId) {
-      const container = document.getElementById(carouselContainerId);
-      if (container) {
-        // Remove the hiding classes, restore to normal positioning
-        container.classList.remove("absolute", "inset-0", "opacity-0", "pointer-events-none");
-      }
+    if (staticEl) {
+      staticEl.style.display = "none";
     }
+
     setFirstImageLoaded(true);
   }, [staticContainerId, carouselContainerId]);
 
