@@ -134,6 +134,10 @@ const processedItems = await Promise.all(
 
 const portfolioItems = processedItems.map((entry) => entry.data);
 const showcaseMedia = processedItems.map((entry) => entry.mediaEntry);
+
+// Extract first item data for the inline script (desktop static image)
+const firstMedia = showcaseMedia[0];
+const firstItem = portfolioItems[0];
 ---
 
 <section
@@ -141,9 +145,9 @@ const showcaseMedia = processedItems.map((entry) => entry.mediaEntry);
   class={`relative overflow-hidden p-6 ${className}`.trim()}
 >
   <div class="relative w-full mx-auto">
-    {/* Static placeholder shell - no images, just the frame. React replaces this when visible. */}
+    {/* Static first slide - visible until JS hydrates */}
     <div
-      id="portfolio-static-placeholder"
+      id="portfolio-static-first"
       class="relative mx-auto w-full max-w-4xl overflow-hidden rounded-lg h-[420px] sm:h-[500px]"
     >
       <div class="relative h-full w-full">
@@ -158,23 +162,67 @@ const showcaseMedia = processedItems.map((entry) => entry.mediaEntry);
             </div>
           </div>
           <figure class="relative h-full overflow-y-auto overscroll-contain bg-black/40">
-            {/* Empty placeholder - React loads images when component enters viewport */}
-            <div class="h-full w-full bg-bg3"></div>
+            {/* Desktop: static image rendered server-side, loads eagerly */}
+            {/* Mobile: empty placeholder, no image in initial HTML */}
+            <div id="portfolio-static-image-container">
+              {/* Image injected by inline script only on desktop */}
+            </div>
           </figure>
         </div>
       </div>
     </div>
 
-    {/* React carousel - hydrates when visible in viewport, then removes placeholder */}
+    {/* React carousel - hidden until hydrated, loads when browser idle */}
     <div id="portfolio-carousel-container" class="hidden">
       <PortfolioScreenShowcase
-        client:visible
+        client:idle
         items={portfolioItems}
         mediaEntries={showcaseMedia}
         className="w-full mx-auto"
-        staticContainerId="portfolio-static-placeholder"
+        staticContainerId="portfolio-static-first"
         carouselContainerId="portfolio-carousel-container"
       />
     </div>
   </div>
+
+  {/* Inline script to inject image only on desktop - runs before paint */}
+  <script is:inline define:vars={{ firstMedia, firstItem }}>
+    (function() {
+      if (window.matchMedia('(min-width: 1024px)').matches && firstMedia?.src) {
+        const container = document.getElementById('portfolio-static-image-container');
+        if (!container) return;
+
+        const picture = document.createElement('picture');
+
+        // Add AVIF/WebP sources
+        if (firstMedia.sources) {
+          firstMedia.sources.forEach(function(source) {
+            const sourceEl = document.createElement('source');
+            sourceEl.srcset = source.srcSet;
+            if (source.sizes) sourceEl.sizes = source.sizes;
+            else if (firstMedia.sizes) sourceEl.sizes = firstMedia.sizes;
+            if (source.type) sourceEl.type = source.type;
+            picture.appendChild(sourceEl);
+          });
+        }
+
+        // Add fallback img
+        const img = document.createElement('img');
+        img.src = firstMedia.src;
+        if (firstMedia.srcSet) img.srcset = firstMedia.srcSet;
+        if (firstMedia.sizes) img.sizes = firstMedia.sizes;
+        img.alt = firstMedia.alt || (firstItem?.title) || 'Project preview';
+        if (firstMedia.width) img.width = firstMedia.width;
+        if (firstMedia.height) img.height = firstMedia.height;
+        img.loading = 'eager';
+        img.decoding = 'async';
+        img.fetchPriority = 'high';
+        img.draggable = false;
+        img.className = 'block h-auto min-h-full w-full select-none object-cover object-top';
+
+        picture.appendChild(img);
+        container.appendChild(picture);
+      }
+    })();
+  </script>
 </section>

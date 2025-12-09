@@ -459,17 +459,13 @@ export default function PortfolioScreenShowcase({
   const preferDesktopEager = useDesktopEagerPreference();
 
   // Handle hydration: remove static placeholder and reveal carousel
-  // This runs when component becomes visible (client:visible)
   useEffect(() => {
-    // Small delay to ensure smooth transition
-    requestAnimationFrame(() => {
-      if (staticContainerId) {
-        document.getElementById(staticContainerId)?.remove();
-      }
-      if (carouselContainerId) {
-        document.getElementById(carouselContainerId)?.classList.remove("hidden");
-      }
-    });
+    if (staticContainerId) {
+      document.getElementById(staticContainerId)?.remove();
+    }
+    if (carouselContainerId) {
+      document.getElementById(carouselContainerId)?.classList.remove("hidden");
+    }
   }, [staticContainerId, carouselContainerId]);
 
   useEffect(() => {
