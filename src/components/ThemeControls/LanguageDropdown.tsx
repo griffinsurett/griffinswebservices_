@@ -24,10 +24,25 @@ const hasFunctionalConsentFast = () => {
 const CONSENT_MESSAGE =
   "Please enable functional cookies to use the language switcher. You can manage your preferences in the cookie settings.";
 
-// Check if native translation is available (Chrome/Edge with Translator API)
+// Check if native translation is available AND enabled via config
 const hasNativeTranslation = () => {
   if (typeof window === "undefined") return false;
-  return "Translator" in window;
+  // Check both browser support AND config setting from BrowserTranslateScript
+  const config = (window as any).getTranslationConfig?.();
+  const enabledInConfig = config?.enableNative !== false;
+  return enabledInConfig && "Translator" in window;
+};
+
+// Check if Google Translate is enabled via config
+const isGoogleTranslateEnabled = () => {
+  if (typeof window === "undefined") return true; // Default to true for SSR
+  const config = (window as any).getTranslationConfig?.();
+  return config?.enableGoogle !== false;
+};
+
+// Check if any translation method is available
+const isTranslationAvailable = () => {
+  return hasNativeTranslation() || isGoogleTranslateEnabled();
 };
 
 function getStoredLanguage(): Language {
@@ -117,12 +132,21 @@ export default function LanguageDropdown() {
   };
 
   const handleLanguageChange = (code: string) => {
-    // Native translation (Chrome/Edge) doesn't need consent
-    // Only require consent for Google Translate fallback
-    const needsConsent = !hasNativeTranslation() && !hasFunctionalConsent;
+    // Native translation doesn't need consent
+    // Google Translate needs consent (if enabled)
+    // If neither is available, translation won't work
+    const googleEnabled = isGoogleTranslateEnabled();
+    const nativeAvailable = hasNativeTranslation();
+    const needsConsent = !nativeAvailable && googleEnabled && !hasFunctionalConsent;
 
     if (needsConsent && code !== "en") {
       alert(CONSENT_MESSAGE);
+      return;
+    }
+
+    // If no translation method is available, warn the user
+    if (!nativeAvailable && !googleEnabled && code !== "en") {
+      alert("Translation is currently disabled.");
       return;
     }
 
@@ -157,7 +181,7 @@ export default function LanguageDropdown() {
         onChange={() => setOpen((value) => !value)}
         aria-label="Choose display language"
         title={
-          hasNativeTranslation() || hasFunctionalConsent
+          hasNativeTranslation() || hasFunctionalConsent || !isGoogleTranslateEnabled()
             ? "Choose your site language"
             : "Enable functional cookies to change language"
         }
@@ -188,8 +212,8 @@ export default function LanguageDropdown() {
           }}
           onWheelCapture={(event) => event.stopPropagation()}
         >
-          {/* Only show consent banner if native translation is not available */}
-          {!hasNativeTranslation() && !hasFunctionalConsent && (
+          {/* Only show consent banner if native is not available AND Google is enabled but no consent */}
+          {!hasNativeTranslation() && isGoogleTranslateEnabled() && !hasFunctionalConsent && (
             <button
               type="button"
               onClick={handleOpenConsentModal}
@@ -213,9 +237,9 @@ export default function LanguageDropdown() {
                     isActive
                       ? "bg-primary/20 text-primary font-semibold"
                       : "hover:bg-white/5 text-text"
-                  } ${!hasNativeTranslation() && !hasFunctionalConsent ? "cursor-not-allowed opacity-60" : ""}`}
+                  } ${!hasNativeTranslation() && isGoogleTranslateEnabled() && !hasFunctionalConsent ? "cursor-not-allowed opacity-60" : ""}`}
                   onClick={() => handleLanguageChange(language.code)}
-                  disabled={!hasNativeTranslation() && !hasFunctionalConsent}
+                  disabled={!hasNativeTranslation() && isGoogleTranslateEnabled() && !hasFunctionalConsent}
                 >
                   {language.flag && (
                     <span className="text-lg" aria-hidden="true">
