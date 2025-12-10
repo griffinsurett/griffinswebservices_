@@ -421,6 +421,16 @@ body {
     @apply section-border-styles bg-gradient-to-r from-transparent via-primary to-transparent;
   }
 
+  /* Vertical gradient line for blockquotes - matches section-color-border style */
+  .blockquote-gradient-line {
+    @apply relative pl-6;
+  }
+
+  .blockquote-gradient-line::before {
+    content: "";
+    @apply absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary to-transparent;
+  }
+
   .text-section {
     @apply text-center mb-8;
   }

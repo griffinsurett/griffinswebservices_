@@ -47,9 +47,15 @@ benefits:
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import CTASection from "@/layouts/CTASection.astro";
 import SectionHeader from "@/components/SectionHeader.astro";
-import TwoColumnImageVariant from "@/components/ContentRenderer/variants/TwoColumnImageVariant.astro";
 import Button from "@/components/Button/Button";
 import { query, sortByOrder } from "@/utils/query";
+
+export const opportunityContent = [
+  { text: "You didn't start your business to become a web designer. You have customers to serve, a team to lead, a company to grow." },
+  { text: "But here's the truth: most of your competitors have terrible websites—or none at all. That's not a problem. <strong class=\"text-heading\">That's an opportunity.</strong>" },
+  { text: "A professional website instantly positions you as the credible choice. The one who shows up on Google. The one who looks established. The one customers trust before they ever call." },
+  { text: "<span class=\"text-heading font-medium text-xl\">We build that advantage for you.</span>" },
+];
 
 {/* ═══════════════════════════════════════════════════════════════════════════
     SECTION 1: THE DREAM STATE - Paint the picture of success
@@ -154,7 +160,9 @@ import { query, sortByOrder } from "@/utils/query";
     SECTION 3: THE TURNING POINT - Introduce the solution
 ═══════════════════════════════════════════════════════════════════════════ */}
 
-<TwoColumnImageVariant
+<ContentRenderer
+  variant="TwoColumnImageVariant"
+  items={opportunityContent}
   id="the-opportunity"
   title="The Opportunity"
   heading={{
@@ -166,28 +174,16 @@ import { query, sortByOrder } from "@/utils/query";
   imageAlt="Growth/results visualization"
   bgClass="bg-bg"
   borderClass="section-dim-border"
->
-  <div class="space-y-4 text-lg text-muted leading-relaxed">
-    <p>
-      You didn't start your business to become a web designer. You have customers to serve, a team to lead, a company to grow.
-    </p>
-    <p>
-      But here's the truth: most of your competitors have terrible websites—or none at all. That's not a problem. <strong class="text-heading">That's an opportunity.</strong>
-    </p>
-    <p>
-      A professional website instantly positions you as the credible choice. The one who shows up on Google. The one who looks established. The one customers trust before they ever call.
-    </p>
-    <p class="text-heading font-medium text-xl">
-      We build that advantage for you.
-    </p>
-  </div>
-</TwoColumnImageVariant>
+  contentType="text"
+/>
 
 {/* ═══════════════════════════════════════════════════════════════════════════
     SECTION 4: WHAT YOU GET - Features checklist with image
 ═══════════════════════════════════════════════════════════════════════════ */}
 
-<TwoColumnImageVariant
+<ContentRenderer
+  variant="TwoColumnImageVariant"
+  items={frontmatter.features}
   id="what-you-get"
   title="What You Get"
   heading={{
@@ -201,15 +197,8 @@ import { query, sortByOrder } from "@/utils/query";
   imageAlt="Website showcase image"
   bgClass="bg-bg2"
   borderClass="section-color-border"
->
-  <ContentRenderer
-    variant="ChecklistVariant"
-    items={frontmatter.features}
-    columns={1}
-    className="bg-transparent p-0"
-  />
-
-</TwoColumnImageVariant>
+  contentType="checklist"
+/>
 
 {/* ═══════════════════════════════════════════════════════════════════════════
     SECTION 4B: QUICK FACTS + BENEFITS

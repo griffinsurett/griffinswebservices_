@@ -39,8 +39,7 @@ export default defineConfig({
       devSourcemap: false,
     },
     optimizeDeps: {
-      include: ['react', 'react-dom'],
-      exclude: ['@astrojs/react'],
+      include: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
     },
   },
   

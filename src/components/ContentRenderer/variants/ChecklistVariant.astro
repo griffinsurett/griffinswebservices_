@@ -9,7 +9,7 @@
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import type { HeadingContent } from "@/content/schema";
 import SectionHeader from "@/components/SectionHeader.astro";
-import CheckListItem from "@/components/LoopComponents/CheckListItem.astro";
+import IconListItem from "@/components/LoopComponents/IconListItem";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import { toArray } from "@/utils/array";
@@ -19,8 +19,6 @@ interface Props extends BaseVariantProps {
   ctaHref?: string;
   ctaText?: string;
   heading?: string | HeadingContent | null;
-  checkmarkColor?: string;
-  checkmarkBgColor?: string;
 }
 
 const {
@@ -36,8 +34,6 @@ const {
   ctaHref,
   ctaText,
   heading: headingValue,
-  checkmarkColor = "text-accent",
-  checkmarkBgColor = "bg-accent/15",
 } = Astro.props as Props;
 
 const safeItems = toArray(items);
@@ -82,21 +78,32 @@ const showCTA =
     )}
 
     {safeItems.length > 0 && (
-      <ul class={`grid ${columnClasses[columns]} gap-4 mt-8 list-none`}>
-        {safeItems.map((item) => (
-          <li>
-            <CheckListItem
-              checkmarkColor={checkmarkColor}
-              checkmarkBgColor={checkmarkBgColor}
-              textClassName="text-text leading-relaxed"
-            >
-              <span class="font-medium text-heading">{item.title}</span>
-              {item.description && (
-                <span class="block text-sm text-muted mt-1">{item.description}</span>
-              )}
-            </CheckListItem>
-          </li>
-        ))}
+      <ul class={`grid ${columnClasses[columns]} gap-5 mt-8 list-none`}>
+        {safeItems.map((item) => {
+          const itemIcon = item.icon || item.data?.icon || "lu:check";
+          return (
+            <li>
+              <IconListItem
+                client:visible
+                data={{
+                  icon: itemIcon,
+                  title: item.title,
+                  description: item.description,
+                }}
+                layout="horizontal"
+                alignment="left"
+                iconClassName="icon-small card-icon-color"
+                iconSize="sm"
+                titleTag="span"
+                titleClassName="font-medium text-heading"
+                descriptionClassName="text-sm text-muted mt-1"
+                descriptionTag="span"
+                className="gap-4 items-start"
+                containerClassName="flex flex-col"
+              />
+            </li>
+          );
+        })}
       </ul>
     )}
 

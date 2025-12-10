@@ -18,7 +18,7 @@ const heroHeading = {
 };
 
 const heroDescription =
-  "We’re a US-based web development company creating fast, engaging websites built to grow your business. We handle hosting, maintenance, and security — and provide full SEO services to help you get found and stay ahead.";
+  "We're a US-based web development company creating fast, engaging websites built to grow your business. We handle hosting, maintenance, and security — and provide full SEO services to help you get found and stay ahead.";
 ---
 
 <BaseLayout title="Home" description={siteData.description}>
@@ -46,6 +46,26 @@ const heroDescription =
       gap="lg"
       showButtonSection={false}
       className="pt-35 lg:pt-20"
+    />
+
+    <!-- Website Features Two-Column Section -->
+    <ContentRenderer
+      query={query("benefits").orderBy(sortByOrder())}
+      variant="TwoColumnImageVariant"
+      imagePosition="left"
+      imagePlaceholder="🚀"
+      imageAlt="Website features showcase"
+      contentType="checklist"
+    />
+
+            <!-- About Us Two-Column Section -->
+    <ContentRenderer
+      query={query("about-us").orderBy(sortByOrder())}
+      variant="TwoColumnImageVariant"
+      imagePosition="right"
+      imagePlaceholder="👨‍💻"
+      imageAlt="Griffin Surett - Founder"
+      contentType="text"
     />
 
     <!-- <ContentRenderer query={query("projects")} variant="PortfolioVariant" /> -->
