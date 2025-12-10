@@ -37,17 +37,18 @@ import "../styles/global.css";
 <!-- Deferred theme enhancements (non-blocking) -->
 <script>
   // Update theme-color meta after paint
-  requestIdleCallback?.(() => {
-    const computed = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
-    if (computed) {
-      let meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', computed);
+  (function() {
+    function updateThemeColor() {
+      var computed = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
+      if (computed) {
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', computed);
+      }
     }
-  }) || setTimeout(() => {
-    const computed = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
-    if (computed) {
-      let meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', computed);
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(updateThemeColor);
+    } else {
+      setTimeout(updateThemeColor, 0);
     }
-  }, 0);
+  })();
 </script>
