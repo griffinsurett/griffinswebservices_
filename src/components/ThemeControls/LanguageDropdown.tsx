@@ -24,6 +24,12 @@ const hasFunctionalConsentFast = () => {
 const CONSENT_MESSAGE =
   "Please enable functional cookies to use the language switcher. You can manage your preferences in the cookie settings.";
 
+// Check if native translation is available (Chrome/Edge with Translator API)
+const hasNativeTranslation = () => {
+  if (typeof window === "undefined") return false;
+  return "Translator" in window;
+};
+
 function getStoredLanguage(): Language {
   if (typeof window === "undefined") return defaultLanguage;
   const code = localStorage.getItem("user-language") || defaultLanguage.code;
@@ -108,7 +114,11 @@ export default function LanguageDropdown() {
   };
 
   const handleLanguageChange = (code: string) => {
-    if (!hasFunctionalConsent) {
+    // Native translation (Chrome/Edge) doesn't need consent
+    // Only require consent for Google Translate fallback
+    const needsConsent = !hasNativeTranslation() && !hasFunctionalConsent;
+
+    if (needsConsent && code !== "en") {
       alert(CONSENT_MESSAGE);
       return;
     }
@@ -144,7 +154,7 @@ export default function LanguageDropdown() {
         onChange={() => setOpen((value) => !value)}
         aria-label="Choose display language"
         title={
-          hasFunctionalConsent
+          hasNativeTranslation() || hasFunctionalConsent
             ? "Choose your site language"
             : "Enable functional cookies to change language"
         }
@@ -175,7 +185,8 @@ export default function LanguageDropdown() {
           }}
           onWheelCapture={(event) => event.stopPropagation()}
         >
-          {!hasFunctionalConsent && (
+          {/* Only show consent banner if native translation is not available */}
+          {!hasNativeTranslation() && !hasFunctionalConsent && (
             <button
               type="button"
               onClick={handleOpenConsentModal}
@@ -199,9 +210,9 @@ export default function LanguageDropdown() {
                     isActive
                       ? "bg-primary/20 text-primary font-semibold"
                       : "hover:bg-white/5 text-text"
-                  } ${!hasFunctionalConsent ? "cursor-not-allowed opacity-60" : ""}`}
+                  } ${!hasNativeTranslation() && !hasFunctionalConsent ? "cursor-not-allowed opacity-60" : ""}`}
                   onClick={() => handleLanguageChange(language.code)}
-                  disabled={!hasFunctionalConsent}
+                  disabled={!hasNativeTranslation() && !hasFunctionalConsent}
                 >
                   {language.flag && (
                     <span className="text-lg" aria-hidden="true">

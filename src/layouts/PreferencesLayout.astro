@@ -20,7 +20,7 @@ import ConsentScript from "@/components/preferences/consent/ConsentScript.astro"
 import AccessibilityButton from "@/components/preferences/accessibility/AccessibilityButton";
 import "../styles/accessibility.css";
 
-import GoogleTranslateScript from "@/components/preferences/language/GoogleTranslateScript.astro";
+import BrowserTranslateScript from "@/components/preferences/language/BrowserTranslateScript.astro";
 import "../styles/language-switcher.css";
 import DividerHeading from "@/components/DividerHeading/DividerHeading";
 ---
@@ -28,8 +28,8 @@ import DividerHeading from "@/components/DividerHeading/DividerHeading";
 {/* Consent Script - Inline initialization, runs immediately */}
 <ConsentScript />
 
-{/* Google Translate Script - Only loads if user has language preference */}
-<GoogleTranslateScript />
+{/* Browser Translation Script - Uses native API when available, Google fallback otherwise */}
+<BrowserTranslateScript />
 
 <DividerHeading title="Preferences" className="mb-4" />
 
