@@ -243,5 +243,7 @@ if (!VariantComponent) {
 }
 ---
 
-<!-- Render the selected variant with all prepared data -->
-<VariantComponent {...data} />
+<!-- Render the selected variant with all prepared data and pass through slot content -->
+<VariantComponent {...data}>
+  <slot />
+</VariantComponent>

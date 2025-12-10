@@ -2,15 +2,17 @@
 // TwoColumnImageVariant.astro
 /**
  * Two Column Image Variant - Side-by-side layout with image and content
- * Features: Configurable image position (left/right), sticky image, custom image component
+ * Features: Configurable image position (left/right), sticky image, slot for custom image area
  * Perfect for feature sections, about sections, and storytelling layouts
  *
  * USAGE:
  * 1. With ContentRenderer (items array):
  *    <ContentRenderer variant="TwoColumnImageVariant" items={[...]} contentType="checklist" />
  *
- * 2. With ContentRenderer + custom image component:
- *    <ContentRenderer variant="TwoColumnImageVariant" items={[...]} ImageComponent={MyComponent} />
+ * 2. Direct with custom image slot:
+ *    <TwoColumnImageVariant items={[...]} contentType="checklist">
+ *      <video src="/video.mp4" autoplay loop muted />
+ *    </TwoColumnImageVariant>
  *
  * 3. With text content:
  *    <ContentRenderer variant="TwoColumnImageVariant" items={[...]} contentType="text" />
@@ -58,8 +60,6 @@ interface Props extends BaseVariantProps {
   contentType?: "checklist" | "text" | "custom";
   ctaHref?: string;
   ctaText?: string;
-  // Custom component to render in the image area (works with ContentRenderer)
-  ImageComponent?: any;
 }
 
 const {
@@ -84,10 +84,10 @@ const {
   showButtonSection = true,
   ctaHref,
   ctaText,
-  ImageComponent,
 } = Astro.props as Props;
 
 const safeItems = toArray(items);
+const hasSlotContent = Astro.slots.has("default");
 const hasItems = safeItems.length > 0;
 const showHeader = Boolean(title || heading || description);
 
@@ -115,8 +115,8 @@ const contentOrderClass = imagePosition === "left"
       {/* Image Column */}
       <div class={`lg:flex-1 w-full ${stickyImage ? "sticky-section" : ""} ${imageOrderClass} ${imageClassName}`.trim()}>
         <div class="aspect-[4/3] rounded-3xl bg-muted/10 border border-muted/20 flex items-center justify-center overflow-hidden">
-          {ImageComponent ? (
-            <ImageComponent />
+          {hasSlotContent ? (
+            <slot />
           ) : imageSrc ? (
             <img
               src={imageSrc}

@@ -90,6 +90,13 @@ const heroDescription =
       variant="TestimonialCarouselVariant"
     />
 
+       <!-- Portfolio with sorting -->
+    <ContentRenderer
+      query={query("projects")
+        .orderBy(sortByOrder("publishDate", "desc"))}
+      variant="PortfolioVariant"
+    />
+
     <!-- Technologies -->
     <ContentRenderer
       query={query("technologies").orderBy(sortByOrder())}
@@ -102,13 +109,6 @@ const heroDescription =
       variant="CardVariant"
       columns={3}
       gap="lg"
-    /> -->
-
-    <!-- Portfolio with sorting -->
-    <!-- <ContentRenderer
-      query={query("projects")
-        .orderBy(sortByDate("publishDate", "desc"))}
-      variant="PortfolioVariant"
     /> -->
 
     <!-- Addon Capabilities - auto-populates from capabilities meta -->
