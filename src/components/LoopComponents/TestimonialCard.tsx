@@ -1,8 +1,10 @@
 // src/components/LoopComponents/TestimonialCard.tsx
 import AnimatedBorder from "@/components/AnimatedBorder/AnimatedBorder";
 import IconListItem from "@/components/LoopComponents/IconListItem";
-import Placeholder from "@/assets/placeholder.jpg";
 import { getImageSrc } from "@/layouts/collections/helpers/layoutHelpers";
+
+// Use string path instead of import to avoid bundling 8KB image metadata into JS chunk
+const PLACEHOLDER_PATH = "/assets/placeholder.jpg";
 
 export interface TestimonialItemData {
   title?: string;
@@ -30,7 +32,7 @@ export default function TestimonialCard({
   const roleParts = [item.role, item.company].filter(Boolean).join(", ");
   const rating = Math.max(1, Math.min(5, item.rating ?? 5));
 
-  const avatarSrc = getImageSrc(item.featuredImage) || Placeholder;
+  const avatarSrc = getImageSrc(item.featuredImage) || PLACEHOLDER_PATH;
 
   return (
     <div className={className}>

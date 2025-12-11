@@ -55,9 +55,16 @@ function ComputerScreen({
   isActive,
 }: ScreenProps) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
+  // Prevent images from rendering during SSR - only show after hydration
+  const [isHydrated, setIsHydrated] = useState(false);
   const [mediaReady, setMediaReady] = useState(false);
   const [contentReady, setContentReady] = useState(false);
   const [scrollDurationMs, setScrollDurationMs] = useState(AUTO_SCROLL_DEFAULT_CYCLE_MS);
+
+  // Mark as hydrated after mount (client-side only)
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const resolveAutoScrollSpeed = useCallback((host: HTMLElement) => {
     const maxScrollable = Math.max(0, host.scrollHeight - host.clientHeight);
@@ -266,6 +273,13 @@ function ComputerScreen({
     "";
 
   const renderMedia = () => {
+    // Don't render images during SSR - prevents browser from preloading below-fold images
+    if (!isHydrated) {
+      return (
+        <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-bg2 via-bg to-bg/80" />
+      );
+    }
+
     if (mediaEntry?.sources?.length) {
       return (
         <picture>
