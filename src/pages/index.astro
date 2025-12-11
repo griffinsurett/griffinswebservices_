@@ -11,6 +11,7 @@ import FrontPageHero from "@/layouts/FrontPageHero.astro";
 import { siteData } from "@/content/siteData";
 import { roots } from "@/utils/query/snippets";
 import CTASection from "@/layouts/CTASection.astro";
+import SpeedScrollVideo from "/speed-site.mov"
 import speedScrollImage from "@/assets/speed-scroll.png";
 
 const heroHeading = {
@@ -79,13 +80,13 @@ const speedScrollPoster = await getImage({
     >
       <video
         data-animate="fade-in"
-        data-video-src="/speed-site.mov"
+        src={SpeedScrollVideo}
         poster={speedScrollPoster.src}
         muted
         loop
+        controls
         playsinline
-        preload="none"
-        class="w-full h-full object-cover"
+        class="block w-full h-full max-w-full object-cover"
         title="Speed site walkthrough"
       />
     </ContentRenderer>

@@ -767,7 +767,8 @@ npm run preview                # Preview production build
 # Clear all caches
 rm -rf .astro node_modules/.astro dist 
 git rm -r --cached .
-npx astro sync                 # Regenerate TypeScript types
+npx astro sync                
+# Regenerate TypeScript types
 
 # Utilities
 npm run log-redirects          # Show all configured redirects
