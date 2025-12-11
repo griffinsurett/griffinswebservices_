@@ -1,28 +1,35 @@
-import { useEffect, useRef, useState } from "react";
-import { useAccentColor } from "@/hooks/useAccentColor";
+import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import { CircleCheckbox } from "./checkboxes/CircleCheckbox";
-import { SquareCheckbox } from "./checkboxes/SquareCheckbox";
+
+// Lazy load the picker content (includes useAccentColor hook and SquareCheckbox)
+const AccentPickerContent = lazy(() => import("./AccentPickerContent"));
 
 export default function AccentPicker() {
   const [open, setOpen] = useState(false);
-  const { accent, setAccent, accents } = useAccentColor();
+  const [hasOpened, setHasOpened] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  // Close on outside click
   useEffect(() => {
+    if (!open) return;
     const handleClick = (event: MouseEvent) => {
       if (containerRef.current?.contains(event.target as Node)) return;
       setOpen(false);
     };
-
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+  }, [open]);
+
+  const handleToggle = () => {
+    if (!hasOpened) setHasOpened(true);
+    setOpen((v) => !v);
+  };
 
   return (
     <div ref={containerRef} className="relative inline-flex">
       <CircleCheckbox
         checked={open}
-        onChange={() => setOpen((value) => !value)}
+        onChange={handleToggle}
         aria-label="Pick accent color"
         className="faded-bg"
       >
@@ -34,23 +41,10 @@ export default function AccentPicker() {
         </svg>
       </CircleCheckbox>
 
-      {open && (
-        <div
-          className="absolute top-full mt-1 lg:mt-2 right-0 sm:left-0 sm:right-auto faded-bg rounded-xl p-2 lg:p-3 flex space-x-2 lg:space-x-3 overflow-x-auto hide-scrollbar shadow-lg z-50 w-max max-w-[calc(100vw-2.5rem)] sm:max-w-none"
-        >
-          {accents.map((color) => (
-            <SquareCheckbox
-              key={color}
-              color={color}
-              checked={accent === color}
-              onChange={() => {
-                setAccent(color);
-                setOpen(false);
-              }}
-              aria-label={`Select accent color ${color}`}
-            />
-          ))}
-        </div>
+      {hasOpened && (
+        <Suspense fallback={null}>
+          <AccentPickerContent open={open} onClose={() => setOpen(false)} />
+        </Suspense>
       )}
     </div>
   );

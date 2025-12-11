@@ -10,6 +10,21 @@ export function manualChunks(id) {
     return 'react-core';
   }
 
+  // Theme controls - split into separate chunks for each island
+  // Shared deps (CircleCheckbox, SquareCheckbox) go to theme-shared
+  if (id.includes('ThemeControls/checkboxes/')) {
+    return 'theme-shared';
+  }
+  if (id.includes('ThemeControls/DarkLightToggle')) {
+    return 'theme-toggle';
+  }
+  if (id.includes('ThemeControls/AccentPicker')) {
+    return 'theme-accent';
+  }
+  if (id.includes('ThemeControls/LanguageDropdown')) {
+    return 'theme-language';
+  }
+
   // Bundle useLazyLoad and localStorage utils together with their consumers
   // This eliminates dependency chains for lazy-loaded components
   if (
