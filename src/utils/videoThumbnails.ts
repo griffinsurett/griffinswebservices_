@@ -94,6 +94,27 @@ async function ensureDirectories() {
   }
 }
 
+async function createDeterministicHash(
+  filePath: string,
+  cacheBuster?: string
+): Promise<string> {
+  const hash = createHash("sha1");
+  hash.update(filePath);
+
+  await new Promise<void>((resolve, reject) => {
+    const stream = fs.createReadStream(filePath);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("end", () => resolve());
+    stream.on("error", reject);
+  });
+
+  if (cacheBuster) {
+    hash.update(cacheBuster);
+  }
+
+  return hash.digest("hex").slice(0, 16);
+}
+
 /**
  * Generate (or fetch from cache) a video thumbnail frame.
  *
@@ -105,15 +126,12 @@ export async function ensureVideoThumbnail(
   options: VideoThumbnailOptions = {}
 ): Promise<VideoThumbnailResult> {
   const absoluteVideoPath = resolveVideoPath(videoSrc, options.absolutePath);
-  const videoStat = await stat(absoluteVideoPath);
+  await stat(absoluteVideoPath);
 
-  const hash = createHash("sha1")
-    .update(absoluteVideoPath)
-    .update(videoStat.size.toString())
-    .update(videoStat.mtimeMs.toString())
-    .update(options.cacheBuster ?? "")
-    .digest("hex")
-    .slice(0, 16);
+  const hash = await createDeterministicHash(
+    absoluteVideoPath,
+    options.cacheBuster
+  );
 
   await ensureDirectories();
 

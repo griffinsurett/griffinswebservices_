@@ -15,13 +15,13 @@ import { query } from "@/utils/query";
       
       <ThemeControls
         className="hidden sm:flex"
-        client:media="(min-width: 640px)"
+        client:idle
       />
 
       <div class="flex items-center gap-4">
         <ThemeControls
           className="sm:hidden"
-          client:media="(max-width: 639px)"
+          client:idle
         />
 
         <div class="flex items-center justify-center sm:gap-4">
