@@ -10,7 +10,7 @@
 import { getImage } from "astro:assets";
 import type { ImageInput } from "@/content/schema";
 import { resolveImageMetadata, getImageAlt } from "@/utils/images";
-import { ensureVideoThumbnail, generatePosterImage } from "@/utils/videoThumbnails";
+import { generateVideoPoster } from "@/utils/videoThumbnails";
 
 type VideoSource = {
   src: string;
@@ -202,13 +202,10 @@ if (metadataPoster) {
 }
 
 if (!posterPicture && !manualPosterUrl) {
-  const frame = await ensureVideoThumbnail(primarySource.src, {
+  const targetWidth = posterWidths[posterWidths.length - 1] ?? 1600;
+  const posterAsset = await generateVideoPoster(primarySource.src, {
     timecodeSeconds,
-  });
-  const targetWidth = posterWidths[posterWidths.length - 1] ?? 1280;
-  const posterAsset = await generatePosterImage(frame, {
     width: targetWidth,
-    format: "webp",
   });
   posterPicture = {
     alt: posterAlt,
