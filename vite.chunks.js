@@ -10,6 +10,17 @@ export function manualChunks(id) {
     return 'react-core';
   }
 
+  // Visibility/scroll hooks used by header LottieLogo - must be separate from
+  // engagement-hooks to avoid pulling in carousels on initial load
+  // IMPORTANT: This rule must come BEFORE engagement-hooks
+  if (
+    id.includes('hooks/interactions/useScrollInteraction') ||
+    id.includes('hooks/animations/useVisibility') ||
+    id.includes('hooks/interactions/utils')
+  ) {
+    return 'visibility-hooks';
+  }
+
   // Theme controls - split into separate chunks for each island
   // Shared deps (CircleCheckbox, SquareCheckbox) go to theme-shared
   if (id.includes('ThemeControls/checkboxes/')) {
@@ -66,11 +77,13 @@ export function manualChunks(id) {
     return 'accordion';
   }
 
-  // Engagement hooks - only needed for interactive below-fold components
+  // Engagement hooks - carousel/autoplay/drag interactions (below-fold only)
+  // Note: useScrollInteraction is excluded (handled by visibility-hooks above)
   if (
     id.includes('hooks/autoplay/') ||
     id.includes('hooks/autoscroll/') ||
-    id.includes('hooks/interactions/')
+    id.includes('hooks/interactions/useSideDragNavigation') ||
+    id.includes('hooks/interactions/useEngagement')
   ) {
     return 'engagement-hooks';
   }
