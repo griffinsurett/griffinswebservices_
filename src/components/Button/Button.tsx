@@ -7,7 +7,6 @@
  * Uses TypeScript discriminated unions for type safety between button and link modes.
  */
 
-import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, AnchorHTMLAttributes, ReactNode } from 'react';
 import PrimaryButton from './variants/PrimaryButton';
 import SecondaryButton from './variants/SecondaryButton';
@@ -64,71 +63,52 @@ export type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 /**
  * Base component that handles rendering as button or anchor
- * Uses forwardRef to allow ref passing to underlying element
+ * Avoids React hooks so it can be SSR-only when needed.
  */
-export const ButtonBase = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>(
-  (
-    {
-      href,
-      className = '',
-      buttonWrapperClasses: _buttonWrapperClasses,
-      fullWidth: _fullWidth,
-      leftIcon,
-      rightIcon,
-      size = 'lg',
-      children,
-      unstyled = false,
-      animated: _animated,
-      ...props
-    },
-    ref
-  ) => {
-    // Map size prop to Tailwind classes
-    const normalizedSize = size ?? 'lg';
-    const sizeClass =
-      normalizedSize === 'sm'
-        ? 'btn-sm'
-        : normalizedSize === 'lg'
-        ? 'btn-lg'
-        : 'btn-md';
-    const baseClasses = unstyled
-      ? className.trim()
-      : `btn-base ${sizeClass} ${className}`.trim();
+export const ButtonBase = ({
+  href,
+  className = '',
+  buttonWrapperClasses: _buttonWrapperClasses,
+  fullWidth: _fullWidth,
+  leftIcon,
+  rightIcon,
+  size = 'lg',
+  children,
+  unstyled = false,
+  animated: _animated,
+  ...props
+}: ButtonProps) => {
+  const normalizedSize = size ?? 'lg';
+  const sizeClass =
+    normalizedSize === 'sm'
+      ? 'btn-sm'
+      : normalizedSize === 'lg'
+      ? 'btn-lg'
+      : 'btn-md';
+  const baseClasses = unstyled
+    ? className.trim()
+    : `btn-base ${sizeClass} ${className}`.trim();
 
-    // Render as anchor if href is provided
-    if (href) {
-      const { href: linkHref, ...anchorProps } = props as AnchorHTMLAttributes<HTMLAnchorElement>;
-      return (
-        <a
-          ref={ref as React.Ref<HTMLAnchorElement>}
-          href={href}
-          className={baseClasses}
-          {...anchorProps}
-        >
-          {leftIcon}
-          {children}
-          {rightIcon}
-        </a>
-      );
-    }
-
-    // Otherwise render as button
-    const buttonProps = props as ButtonHTMLAttributes<HTMLButtonElement>;
+  if (href) {
+    const anchorProps = props as AnchorHTMLAttributes<HTMLAnchorElement>;
     return (
-      <button
-        ref={ref as React.Ref<HTMLButtonElement>}
-        className={baseClasses}
-        {...buttonProps}
-      >
+      <a href={href} className={baseClasses} {...anchorProps}>
         {leftIcon}
         {children}
         {rightIcon}
-      </button>
+      </a>
     );
   }
-);
 
-ButtonBase.displayName = 'ButtonBase';
+  const buttonProps = props as ButtonHTMLAttributes<HTMLButtonElement>;
+  return (
+    <button type={buttonProps.type ?? 'button'} className={baseClasses} {...buttonProps}>
+      {leftIcon}
+      {children}
+      {rightIcon}
+    </button>
+  );
+};
 
 /**
  * Map of variant names to their component implementations
