@@ -1,29 +1,18 @@
 ---
 // PortfolioScreenVariant.astro
-// Simplified version - no static preview complexity since this is now below-the-fold
+// Below-the-fold portfolio showcase - hydrates only when visible
 import { getImage } from "astro:assets";
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import PortfolioScreenShowcase from "@/components/LoopTemplates/PortfolioScreenShowcase";
 import { getImageAlt, resolveImageMetadata } from "@/utils/images";
 import { toArray } from "@/utils/array";
 
-type HydrationMode = "visible" | "idle" | "load" | "media";
-
-interface Props extends BaseVariantProps {
-  /** Controls when the React carousel hydrates. Default "visible" for below-fold. */
-  hydrateOn?: HydrationMode;
-  /** Media query string for hydrateOn="media" */
-  hydrateMedia?: string;
-  /** @deprecated No longer used - kept for backwards compatibility */
-  loadingStrategy?: string;
-}
+interface Props extends BaseVariantProps {}
 
 const {
   items = [],
   className = "",
   id,
-  hydrateOn = "visible",
-  hydrateMedia = "(min-width: 768px)",
 } = Astro.props as Props;
 
 const safeItems = toArray(items);
@@ -150,15 +139,7 @@ const showcaseProps = {
 >
   <div class="relative w-full max-w-4xl mx-auto h-[420px] sm:h-[500px]">
     <div class="relative h-full">
-      {hydrateOn === "idle" ? (
-        <PortfolioScreenShowcase client:idle {...showcaseProps} />
-      ) : hydrateOn === "load" ? (
-        <PortfolioScreenShowcase client:load {...showcaseProps} />
-      ) : hydrateOn === "media" ? (
-        <PortfolioScreenShowcase client:media={hydrateMedia} {...showcaseProps} />
-      ) : (
-        <PortfolioScreenShowcase client:visible {...showcaseProps} />
-      )}
+      <PortfolioScreenShowcase client:visible {...showcaseProps} />
     </div>
   </div>
 </section>

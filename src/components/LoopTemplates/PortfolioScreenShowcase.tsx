@@ -26,17 +26,12 @@ interface PortfolioScreenShowcaseProps {
   items?: PortfolioItemData[];
   className?: string;
   mediaEntries?: (PortfolioMediaEntry | undefined)[];
-  /** @deprecated No longer used - kept for backwards compatibility */
-  staticContainerId?: string;
-  /** @deprecated No longer used - kept for backwards compatibility */
-  loadingStrategy?: string;
 }
 
 interface ScreenProps {
   item: PortfolioItemData;
   mediaEntry?: PortfolioMediaEntry;
   totalSlides: number;
-  activeIndex: number;
   onCycleComplete: () => void;
   isActive: boolean;
 }
@@ -481,7 +476,6 @@ export default function PortfolioScreenShowcase({
                 item={item}
                 mediaEntry={mediaEntries[slideIndex]}
                 totalSlides={slides.length || 1}
-                activeIndex={slideIndex}
                 onCycleComplete={handleCycleComplete}
                 isActive={isActive && transitionStage === "idle"}
               />

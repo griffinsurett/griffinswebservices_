@@ -43,26 +43,17 @@ const {
   class={`min-h-screen flex items-center justify-center relative overflow-hidden ${className}`}
 >
   <div class="relative z-10 min-h-screen inner-section flex items-center">
-    <div class="mx-auto max-w-4xl text-center space-y-8 py-20">
+    <div class="mx-auto max-w-6xl space-y-8 py-20">
       <SectionHeader
-        className="text-center w-full"
+        className="text-left lg:text-center w-full"
         heading={heading}
         headingTag="h1"
-        headingClassName="h1"
+        headingClassName="text-4xl md:text-5xl lg:text-6xl xl:text-7xl"
         description={description ?? defaultDescription}
-        descriptionClassName="hero-text text-lg leading-relaxed max-w-2xl mx-auto"
+        descriptionClassName="hero-text text-lg leading-relaxed max-w-2xl lg:mx-auto"
       />
 
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-        <Button
-          href={primaryCTA.link}
-          variant="primary"
-          size="lg"
-          rightIcon={primaryCTA.rightIcon}
-        >
-          {primaryCTA.text}
-        </Button>
-
+      <div class="flex flex-col-reverse lg:flex-row items-start lg:items-center lg:justify-center gap-3 lg:gap-6 lg:w-full">
         <ContentRenderer
           query={query("testimonials")
             .where((entry) => entry.data.featured === true)
@@ -75,6 +66,15 @@ const {
           counterSuffix="+"
           counterLabel="Happy Clients"
         />
+
+                <Button
+          href={primaryCTA.link}
+          variant="primary"
+          size="lg"
+          rightIcon={primaryCTA.rightIcon}
+        >
+          {primaryCTA.text}
+        </Button>
       </div>
     </div>
   </div>

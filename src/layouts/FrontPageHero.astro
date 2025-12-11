@@ -11,10 +11,6 @@ interface CTA {
   text: string;
   link: string;
   rightIcon?: string;
-  /**
-   * @deprecated Prefer rightIcon for consistency with Button props.
-   */
-  icon?: string;
 }
 
 export interface Props {
@@ -42,8 +38,7 @@ const {
 
 const primaryCTA = {
   ...incomingPrimaryCTA,
-  rightIcon:
-    incomingPrimaryCTA.rightIcon ?? incomingPrimaryCTA.icon ?? "lu:arrow-right",
+  rightIcon: incomingPrimaryCTA.rightIcon ?? "lu:arrow-right",
 };
 ---
 
@@ -104,7 +99,6 @@ const primaryCTA = {
         <ContentRenderer
           query={query("projects")}
           variant="PortfolioScreenVariant"
-          hydrateOn="idle"
         />
       </div>
     </div>
