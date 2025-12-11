@@ -270,66 +270,104 @@ const staticContainerId = hasPreview ? "portfolio-static-first" : undefined;
       />
     </div>
 
-    {/* Static preview - uses media query to only load on desktop for responsive mode */}
+    {/* Static preview - only rendered on desktop for responsive mode */}
     {hasPreview && (
-      <div
-        id="portfolio-static-first"
-        class:list={[
-          "absolute inset-0 z-10 overflow-hidden rounded-lg transition-opacity duration-500",
-          isResponsive && "hidden lg:block"
-        ]}
-      >
-        <div class="relative h-full w-full">
-          <div class="relative h-full bg-bg3">
-            <div class="flex flex-col gap-3 border-b border-white/10 px-4 py-3 text-white/70 sm:flex-row sm:items-center sm:justify-between">
-              <div class="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/50">
-                <span class="flex items-center gap-1.5">
-                  <span class="h-3 w-3 rounded-full bg-gray-800"></span>
-                  <span class="h-3 w-3 rounded-full bg-gray-800"></span>
-                  <span class="h-3 w-3 rounded-full bg-gray-800"></span>
-                </span>
+      isResponsive ? (
+        /* Responsive mode: Use inline style to guarantee display:none before CSS loads */
+        <div
+          id="portfolio-static-first"
+          class="absolute inset-0 z-10 overflow-hidden rounded-lg transition-opacity duration-500"
+          style="display: none;"
+        >
+          <style>{`@media (min-width: 1024px) { #portfolio-static-first { display: block !important; } }`}</style>
+          <div class="relative h-full w-full">
+            <div class="relative h-full bg-bg3">
+              <div class="flex flex-col gap-3 border-b border-white/10 px-4 py-3 text-white/70 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/50">
+                  <span class="flex items-center gap-1.5">
+                    <span class="h-3 w-3 rounded-full bg-gray-800"></span>
+                    <span class="h-3 w-3 rounded-full bg-gray-800"></span>
+                    <span class="h-3 w-3 rounded-full bg-gray-800"></span>
+                  </span>
+                </div>
               </div>
-            </div>
-            <figure class="relative h-full overflow-y-auto overscroll-contain bg-black/40">
-              {/* Cropped preview - for responsive mode, uses media query to only load on desktop */}
-              <picture>
-                {/* For responsive mode, add media query to sources so image only loads on lg+ */}
-                {firstPreview.sources?.map((source) => (
-                  <source
-                    media={isResponsive ? "(min-width: 1024px)" : undefined}
-                    srcset={source.srcSet}
-                    sizes={source.sizes}
-                    type={source.type}
-                  />
-                ))}
-                {/* WebP source with media query for responsive mode */}
-                {isResponsive && (
+              <figure class="relative h-full overflow-y-auto overscroll-contain bg-black/40">
+                {/* Desktop-only image with media queries on all sources */}
+                <picture>
+                  {firstPreview.sources?.map((source) => (
+                    <source
+                      media="(min-width: 1024px)"
+                      srcset={source.srcSet}
+                      sizes={source.sizes}
+                      type={source.type}
+                    />
+                  ))}
                   <source
                     media="(min-width: 1024px)"
                     srcset={firstPreview.srcSet}
                     sizes={firstPreview.sizes}
                     type="image/webp"
                   />
-                )}
-                {/* Fallback img - for responsive, use a tiny transparent placeholder on mobile */}
-                <img
-                  src={isResponsive ? "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" : firstPreview.src}
-                  srcset={isResponsive ? undefined : firstPreview.srcSet}
-                  sizes={isResponsive ? undefined : firstPreview.sizes}
-                  alt={firstPreview.alt || firstItem?.title || "Project preview"}
-                  width={firstPreview.width}
-                  height={firstPreview.height}
-                  loading="eager"
-                  decoding="async"
-                  fetchpriority={isResponsive ? "auto" : "high"}
-                  draggable="false"
-                  class="block h-auto min-h-full w-full select-none object-cover object-top"
-                />
-              </picture>
-            </figure>
+                  {/* Empty img fallback - no src means no request on mobile */}
+                  <img
+                    alt={firstPreview.alt || firstItem?.title || "Project preview"}
+                    width={firstPreview.width}
+                    height={firstPreview.height}
+                    loading="lazy"
+                    decoding="async"
+                    draggable="false"
+                    class="block h-auto min-h-full w-full select-none object-cover object-top"
+                  />
+                </picture>
+              </figure>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        /* Static-preview mode: Always render the preview */
+        <div
+          id="portfolio-static-first"
+          class="absolute inset-0 z-10 overflow-hidden rounded-lg transition-opacity duration-500"
+        >
+          <div class="relative h-full w-full">
+            <div class="relative h-full bg-bg3">
+              <div class="flex flex-col gap-3 border-b border-white/10 px-4 py-3 text-white/70 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/50">
+                  <span class="flex items-center gap-1.5">
+                    <span class="h-3 w-3 rounded-full bg-gray-800"></span>
+                    <span class="h-3 w-3 rounded-full bg-gray-800"></span>
+                    <span class="h-3 w-3 rounded-full bg-gray-800"></span>
+                  </span>
+                </div>
+              </div>
+              <figure class="relative h-full overflow-y-auto overscroll-contain bg-black/40">
+                <picture>
+                  {firstPreview.sources?.map((source) => (
+                    <source
+                      srcset={source.srcSet}
+                      sizes={source.sizes}
+                      type={source.type}
+                    />
+                  ))}
+                  <img
+                    src={firstPreview.src}
+                    srcset={firstPreview.srcSet}
+                    sizes={firstPreview.sizes}
+                    alt={firstPreview.alt || firstItem?.title || "Project preview"}
+                    width={firstPreview.width}
+                    height={firstPreview.height}
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
+                    draggable="false"
+                    class="block h-auto min-h-full w-full select-none object-cover object-top"
+                  />
+                </picture>
+              </figure>
+            </div>
+          </div>
+        </div>
+      )
     )}
   </div>
 </section>
