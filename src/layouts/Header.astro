@@ -5,7 +5,7 @@
  */
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import Logo from "@/components/Logo/Logo.astro";
-import ThemeControls from "@/components/ThemeControls/ThemeControls";
+import ThemeControls from "@/components/ThemeControls/ThemeControls.astro";
 import { query } from "@/utils/query";
 ---
 <header class="fixed w-full top-0 z-[100000]">
@@ -13,16 +13,10 @@ import { query } from "@/utils/query";
       <!-- Logo -->
       <Logo loading="eager" trigger="scroll" animateOutText={true} />
       
-      <ThemeControls
-        className="hidden sm:flex"
-        client:idle
-      />
+      <ThemeControls className="hidden sm:flex" />
 
       <div class="flex items-center gap-4">
-        <ThemeControls
-          className="sm:hidden"
-          client:idle
-        />
+        <ThemeControls className="sm:hidden" />
 
         <div class="flex items-center justify-center sm:gap-4">
           <!-- Navigation Menu using query -->

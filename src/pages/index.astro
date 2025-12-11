@@ -11,8 +11,7 @@ import PortfolioShowcaseSection from "@/layouts/PortfolioShowcaseSection.astro";
 import { siteData } from "@/content/siteData";
 import { roots } from "@/utils/query/snippets";
 import CTASection from "@/layouts/CTASection.astro";
-// import SpeedScrollVideo from "/speed-site.mov"
-// import DeferredVideo from "@/components/Video/DeferredVideo.astro";
+import Video from "@/components/Video/Video.astro";
 import GradientLayout from "@/layouts/GradientLayout.astro";
 
 const heroHeading = {
@@ -80,17 +79,10 @@ const heroDescription =
       contentType="text"
       borderClass=""
     >
-      <DeferredVideo
-        src={SpeedScrollVideo}
+      <Video
+        src="/speed-site.mov"
         alt="Speed site walkthrough"
-        data-animate="fade-in"
-        wrapperClass="h-full w-full"
-        aspectClass="h-full w-full"
-        videoClass="block w-full h-full max-w-full object-cover"
-        muted
-        loop
         controls
-        playsinline
       />
     </ContentRenderer> -->
 

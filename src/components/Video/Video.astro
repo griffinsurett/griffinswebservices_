@@ -1,0 +1,88 @@
+---
+// src/components/Video/Video.astro
+/**
+ * Video Component
+ *
+ * Auto-generates poster thumbnails from video at build time using ffmpeg.
+ * Lazy loads video sources for optimal performance.
+ */
+import { generateVideoPoster } from "@/utils/videoThumbnails";
+
+interface Props {
+  src: string;
+  poster?: string;
+  alt?: string;
+  class?: string;
+  wrapperClass?: string;
+  autoplay?: boolean;
+  muted?: boolean;
+  loop?: boolean;
+  controls?: boolean;
+  playsinline?: boolean;
+  lazy?: boolean;
+  timecodeSeconds?: number;
+}
+
+const {
+  src,
+  poster: manualPoster,
+  alt = "Video",
+  class: className = "",
+  wrapperClass = "",
+  autoplay = true,
+  muted = true,
+  loop = true,
+  controls = false,
+  playsinline = true,
+  lazy = true,
+  timecodeSeconds = 0,
+  ...rest
+} = Astro.props;
+
+// Generate poster from video if not provided
+let posterUrl = manualPoster;
+if (!posterUrl && src) {
+  const generated = await generateVideoPoster(src, { timecodeSeconds });
+  posterUrl = generated.src;
+}
+
+const componentId = `video-${crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
+---
+
+<figure
+  class={`video-wrapper relative ${wrapperClass}`.trim()}
+  data-video-shell="true"
+  id={componentId}
+>
+  <video
+    class={`w-full h-full object-cover ${className}`.trim()}
+    poster={posterUrl}
+    autoplay={autoplay}
+    muted={muted}
+    loop={loop}
+    controls={controls}
+    playsinline={playsinline}
+    preload={lazy ? "metadata" : "auto"}
+    data-video-src={lazy ? src : undefined}
+    {...rest}
+  >
+    <source
+      src={!lazy ? src : undefined}
+      data-video-src={lazy ? src : undefined}
+      type={src.endsWith('.mov') ? 'video/quicktime' : src.endsWith('.webm') ? 'video/webm' : 'video/mp4'}
+    />
+    Your browser does not support the video tag.
+  </video>
+</figure>
+
+<script>
+  import { setupLazyVideo } from "/scripts/videoLazyLoader.js";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("[data-video-shell]").forEach((el) => {
+      if (el instanceof HTMLElement) {
+        setupLazyVideo(el);
+      }
+    });
+  });
+</script>
