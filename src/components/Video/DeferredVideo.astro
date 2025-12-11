@@ -10,7 +10,7 @@
 import { getImage } from "astro:assets";
 import type { ImageInput } from "@/content/schema";
 import { resolveImageMetadata, getImageAlt } from "@/utils/images";
-import { ensureVideoThumbnail } from "@/utils/videoThumbnails";
+import { ensureVideoThumbnail, generatePosterImage } from "@/utils/videoThumbnails";
 
 type VideoSource = {
   src: string;
@@ -92,20 +92,20 @@ const posterAlt = getImageAlt(poster as ImageInput, alt);
 const POSTER_FORMATS = [
   { format: "avif", quality: 50 },
   { format: "webp", quality: 70 },
-];
+] as const;
 
 type PosterPicture = {
   img: {
     src: string;
     width: number;
     height: number;
-    srcSet: string;
-    sizes: string;
+    srcSet?: string;
+    sizes?: string;
   };
   sources: {
     type: string;
     srcSet: string;
-    sizes: string;
+    sizes?: string;
   }[];
   placeholderSrc?: string;
   alt: string;
@@ -121,7 +121,7 @@ function normalizePosterSource(source: PosterSource): ImageInput | string {
   return source;
 }
 
-async function buildPosterPicture(
+async function buildPosterPictureFromMetadata(
   source: PosterSource,
   widths: number[],
   sizes: string,
@@ -190,7 +190,7 @@ let manualPosterUrl: string | undefined = undefined;
 
 const metadataPoster = resolveImageMetadata(poster as ImageInput);
 if (metadataPoster) {
-  posterPicture = await buildPosterPicture(
+  posterPicture = await buildPosterPictureFromMetadata(
     metadataPoster,
     posterWidths,
     posterSizes,
@@ -205,18 +205,31 @@ if (!posterPicture && !manualPosterUrl) {
   const frame = await ensureVideoThumbnail(primarySource.src, {
     timecodeSeconds,
   });
-  posterPicture = await buildPosterPicture(
-    frame.filePath,
-    posterWidths,
-    posterSizes,
-    posterAlt,
-    { width: frame.width, height: frame.height }
-  );
+  const targetWidth = posterWidths[posterWidths.length - 1] ?? 1280;
+  const posterAsset = await generatePosterImage(frame, {
+    width: targetWidth,
+    format: "webp",
+  });
+  posterPicture = {
+    alt: posterAlt,
+    img: {
+      src: posterAsset.src,
+      width: posterAsset.width,
+      height: posterAsset.height,
+    },
+    sources: [],
+    placeholderSrc: posterAsset.placeholderSrc,
+  };
 }
 
 const videoPoster = posterPicture?.img.src ?? manualPosterUrl;
+const componentId = `deferred-video-${crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
+const basePath = (import.meta.env.BASE_URL ?? "/").replace(/\/+$/, "");
+const videoLoaderSrc = `${basePath}/scripts/videoLazyLoader.js`;
+
 const dataAttrs = {
   "data-video-shell": "true",
+  id: componentId,
 };
 
 const finalPreload =
@@ -296,11 +309,45 @@ const finalPreload =
   </div>
 </figure>
 
-<script type="module" is:inline>
-  import { setupLazyVideo } from "@/components/Video/videoLazyLoader";
-  const root = document.currentScript?.closest("[data-video-shell]");
-  if (root) {
-    setupLazyVideo(root);
+<script
+  type="module"
+  is:inline
+  define:vars={{ componentId, videoLoaderSrc }}
+>
+  const rootId = componentId;
+  const loaderUrl = videoLoaderSrc;
+  const ensureLoader = () => {
+    if (typeof window === "undefined") return Promise.resolve(null);
+    if (!window.__gwsVideoLoaderPromise) {
+      window.__gwsVideoLoaderPromise = import(loaderUrl).catch((error) => {
+        console.warn("Deferred video loader failed to import.", error);
+        return null;
+      });
+    }
+    return window.__gwsVideoLoaderPromise;
+  };
+  const schedule = (cb) => {
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      window.requestIdleCallback(() => cb(), { timeout: 600 });
+    } else {
+      window.setTimeout(cb, 140);
+    }
+  };
+  const init = () => {
+    const root = document.getElementById(rootId);
+    if (!(root instanceof HTMLElement)) return;
+    schedule(() => {
+      ensureLoader().then((mod) => {
+        if (mod?.setupLazyVideo) {
+          mod.setupLazyVideo(root);
+        }
+      });
+    });
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
   }
 </script>
 

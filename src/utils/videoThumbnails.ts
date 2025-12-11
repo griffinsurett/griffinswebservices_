@@ -11,7 +11,7 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdir, stat } from "node:fs/promises";
+import { mkdir, stat, copyFile } from "node:fs/promises";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -22,6 +22,8 @@ const execFileAsync = promisify(execFile);
 const PROJECT_ROOT = process.cwd();
 const PUBLIC_DIR = path.join(PROJECT_ROOT, "public");
 const CACHE_DIR = path.join(PROJECT_ROOT, ".cache", "video-thumbnails");
+const PUBLIC_THUMB_DIR = path.join(PUBLIC_DIR, "__video-thumbnails");
+const PUBLIC_THUMB_ROUTE = "/__video-thumbnails";
 
 export interface VideoThumbnailOptions {
   /**
@@ -52,6 +54,8 @@ export interface VideoThumbnailResult {
   cacheKey: string;
   /** Original, resolved absolute video path */
   videoPath: string;
+  /** Public URL path to the base frame copy */
+  publicPath: string;
 }
 
 /**
@@ -81,9 +85,12 @@ function resolveVideoPath(src: string, absoluteOverride?: string): string {
 /**
  * Ensures the cache directory exists.
  */
-async function ensureCacheDir() {
+async function ensureDirectories() {
   if (!fs.existsSync(CACHE_DIR)) {
     await mkdir(CACHE_DIR, { recursive: true });
+  }
+  if (!fs.existsSync(PUBLIC_THUMB_DIR)) {
+    await mkdir(PUBLIC_THUMB_DIR, { recursive: true });
   }
 }
 
@@ -108,7 +115,7 @@ export async function ensureVideoThumbnail(
     .digest("hex")
     .slice(0, 16);
 
-  await ensureCacheDir();
+  await ensureDirectories();
 
   const outputPath = path.join(CACHE_DIR, `${hash}.jpg`);
 
@@ -138,6 +145,12 @@ export async function ensureVideoThumbnail(
     throw new Error(`[videoThumbnails] Unable to read metadata for ${outputPath}`);
   }
 
+  const publicFilename = `${hash}.jpg`;
+  const absolutePublicPath = path.join(PUBLIC_THUMB_DIR, publicFilename);
+  if (!fs.existsSync(absolutePublicPath)) {
+    await copyFile(outputPath, absolutePublicPath);
+  }
+
   return {
     filePath: outputPath,
     fileUrl: pathToFileURL(outputPath),
@@ -145,5 +158,68 @@ export async function ensureVideoThumbnail(
     height: metadata.height,
     cacheKey: hash,
     videoPath: absoluteVideoPath,
+    publicPath: `${PUBLIC_THUMB_ROUTE}/${publicFilename}`,
+  };
+}
+
+async function ensurePosterFile(destination: string, transformer: () => Promise<void>) {
+  if (fs.existsSync(destination)) return;
+  await transformer();
+}
+
+export interface PosterImageOptions {
+  width?: number;
+  format?: "webp" | "jpg";
+  quality?: number;
+  placeholderWidth?: number;
+}
+
+export interface PosterImageResult {
+  src: string;
+  width: number;
+  height: number;
+  placeholderSrc?: string;
+}
+
+export async function generatePosterImage(
+  frame: VideoThumbnailResult,
+  {
+    width = 1280,
+    format = "webp",
+    quality = 75,
+    placeholderWidth = 32,
+  }: PosterImageOptions = {}
+): Promise<PosterImageResult> {
+  await ensureDirectories();
+  const sharpMod = (await import("sharp")).default;
+  const aspectRatio = frame.height / frame.width;
+  const height = Math.round(width * aspectRatio);
+  const filename = `${frame.cacheKey}-${width}.${format}`;
+  const absPath = path.join(PUBLIC_THUMB_DIR, filename);
+
+  await ensurePosterFile(absPath, async () => {
+    const pipeline = sharpMod(frame.filePath).resize(width, height, { fit: "cover", position: "center" });
+    await pipeline.toFormat(format as any, { quality }).toFile(absPath);
+  });
+
+  let placeholderSrc: string | undefined;
+  if (placeholderWidth && placeholderWidth > 0) {
+    const placeholderName = `${frame.cacheKey}-placeholder.webp`;
+    const placeholderAbs = path.join(PUBLIC_THUMB_DIR, placeholderName);
+    await ensurePosterFile(placeholderAbs, async () => {
+      await sharpMod(frame.filePath)
+        .resize({ width: placeholderWidth })
+        .toFormat("webp", { quality: 30 })
+        .blur()
+        .toFile(placeholderAbs);
+    });
+    placeholderSrc = `${PUBLIC_THUMB_ROUTE}/${placeholderName}`;
+  }
+
+  return {
+    src: `${PUBLIC_THUMB_ROUTE}/${filename}`,
+    width,
+    height,
+    placeholderSrc,
   };
 }

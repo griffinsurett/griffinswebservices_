@@ -1,15 +1,15 @@
-// src/components/Video/videoLazyLoader.ts
-/**
- * Lightweight lazy-loader for DeferredVideo components.
- * Hydrates video sources when the element enters the viewport and
- * gracefully hides the poster overlay once media is ready.
- */
+const DEFAULT_IDLE_TIMEOUT = 800;
 
-type VideoShell = HTMLElement & {
-  __lazyInit?: boolean;
-};
+function scheduleIdle(callback, timeout = DEFAULT_IDLE_TIMEOUT) {
+  if (typeof window === "undefined") return;
+  if (typeof window.requestIdleCallback === "function") {
+    window.requestIdleCallback(() => callback(), { timeout });
+  } else {
+    window.setTimeout(callback, Math.min(timeout, 200));
+  }
+}
 
-function loadVideoSources(video: HTMLVideoElement) {
+function loadVideoSources(video) {
   if (video.dataset.videoLoaded === "true") return true;
 
   let updated = false;
@@ -21,7 +21,7 @@ function loadVideoSources(video: HTMLVideoElement) {
   }
 
   video
-    .querySelectorAll<HTMLSourceElement>("source[data-video-src]")
+    .querySelectorAll("source[data-video-src]")
     .forEach((source) => {
       const src = source.dataset.videoSrc;
       if (src && source.src !== src) {
@@ -38,25 +38,25 @@ function loadVideoSources(video: HTMLVideoElement) {
   return updated;
 }
 
-function attemptAutoplay(video: HTMLVideoElement) {
+function attemptAutoplay(video) {
   if (!video.autoplay) return;
   const playResult = video.play();
-  if (typeof (playResult as Promise<void>)?.catch === "function") {
-    (playResult as Promise<void>).catch(() => undefined);
+  if (playResult && typeof playResult.catch === "function") {
+    playResult.catch(() => undefined);
   }
 }
 
-export function setupLazyVideo(root?: Element | null) {
+export function setupLazyVideo(root) {
   if (!root || !(root instanceof HTMLElement)) return;
-  const shell = root as VideoShell;
+  const shell = root;
   if (shell.__lazyInit) return;
   shell.__lazyInit = true;
 
-  const video = shell.querySelector<HTMLVideoElement>("video");
+  const video = shell.querySelector("video");
   if (!video) return;
 
-  const poster = shell.querySelector<HTMLElement>("[data-video-poster]");
-  const trigger = shell.querySelector<HTMLButtonElement>("[data-video-trigger]");
+  const poster = shell.querySelector("[data-video-poster]");
+  const trigger = shell.querySelector("[data-video-trigger]");
 
   const hidePoster = () => {
     poster?.setAttribute("data-hidden", "true");
@@ -104,15 +104,19 @@ export function setupLazyVideo(root?: Element | null) {
 }
 
 export function setupAllLazyVideos() {
-  document.querySelectorAll<HTMLElement>("[data-video-shell]").forEach((el) =>
-    setupLazyVideo(el)
-  );
+  document.querySelectorAll("[data-video-shell]").forEach((el) => {
+    setupLazyVideo(el);
+  });
 }
 
 if (typeof window !== "undefined") {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => setupAllLazyVideos());
-  } else {
-    setupAllLazyVideos();
+  if (!window.__gwsVideoLoaderAutoInit) {
+    window.__gwsVideoLoaderAutoInit = true;
+    const initAll = () => scheduleIdle(() => setupAllLazyVideos());
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initAll, { once: true });
+    } else {
+      initAll();
+    }
   }
 }
