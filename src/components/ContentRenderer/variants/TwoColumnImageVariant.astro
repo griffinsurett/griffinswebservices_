@@ -114,7 +114,7 @@ const contentOrderClass = imagePosition === "left"
     <div class="flex flex-col lg:flex-row gap-12 lg:gap-16 items-start">
       {/* Image Column */}
       <div class={`lg:flex-1 w-full ${stickyImage ? "sticky-section" : ""} ${imageOrderClass} ${imageClassName}`.trim()}>
-        <div class="aspect-[5/3] rounded-3xl bg-muted/10 border border-muted/20 flex items-center justify-center overflow-hidden">
+        <div class="aspect-5/3 rounded-3xl bg-muted/10 border border-muted/20 flex items-center justify-center overflow-hidden">
           {hasSlotContent ? (
             <slot />
           ) : imageSrc ? (

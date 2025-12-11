@@ -6,12 +6,23 @@ import PortfolioScreenShowcase from "@/components/LoopTemplates/PortfolioScreenS
 import { getImageAlt, resolveImageMetadata, generateCroppedPreview } from "@/utils/images";
 import { toArray } from "@/utils/array";
 
-interface Props extends BaseVariantProps {}
+/**
+ * Loading strategy for the portfolio showcase:
+ * - "static-preview": Renders a static cropped thumbnail eagerly, then loads full image after hydration (best for LCP)
+ * - "client-only": No static preview, all images load client-side after hydration (simpler, less initial HTML)
+ */
+type LoadingStrategy = "static-preview" | "client-only";
+
+interface Props extends BaseVariantProps {
+  /** How to load images - "static-preview" for LCP optimization, "client-only" for simpler loading */
+  loadingStrategy?: LoadingStrategy;
+}
 
 const {
   items = [],
   className = "",
   id,
+  loadingStrategy = "static-preview",
 } = Astro.props as Props;
 
 const safeItems = toArray(items);
@@ -154,8 +165,9 @@ const processedItems = await Promise.all(
 
     // For the first item, generate a cropped "above the fold" preview
     // This shows the top portion - slightly taller than visible to ensure full coverage
+    // Only generate if using static-preview strategy
     let croppedPreview = undefined;
-    if (isFirst) {
+    if (isFirst && loadingStrategy === "static-preview") {
       // Calculate how many source pixels are visible in the container
       const visibleSourceHeight = calculateVisibleSourceHeight(
         metadata.width,
@@ -216,9 +228,9 @@ const processedItems = await Promise.all(
         alt: altText,
         loading: "lazy" as const,
         decoding: "async" as const,
-        // First image uses "low" priority since preview handles LCP
-        // Other images use "auto" for normal lazy loading
-        fetchPriority: (isFirst ? "low" : "auto") as "low" | "auto",
+        // With static-preview: first image uses "low" priority since preview handles LCP
+        // With client-only: first image uses "auto" like others (no preview competing)
+        fetchPriority: (isFirst && loadingStrategy === "static-preview" ? "low" : "auto") as "low" | "auto",
         sources: pictureSources,
       },
       croppedPreview,
@@ -229,9 +241,11 @@ const processedItems = await Promise.all(
 const portfolioItems = processedItems.map((entry) => entry.data);
 const showcaseMedia = processedItems.map((entry) => entry.mediaEntry);
 
-// Extract first item's cropped preview for static rendering
-const firstPreview = processedItems[0]?.croppedPreview;
+// Extract first item's cropped preview for static rendering (only used with static-preview strategy)
+const firstPreview = loadingStrategy === "static-preview" ? processedItems[0]?.croppedPreview : undefined;
 const firstItem = portfolioItems[0];
+const useStaticPreview = loadingStrategy === "static-preview" && firstPreview?.src;
+const staticContainerId = useStaticPreview ? "portfolio-static-first" : undefined;
 ---
 
 <section
@@ -239,38 +253,37 @@ const firstItem = portfolioItems[0];
   class={`relative overflow-hidden p-6 ${className}`.trim()}
 >
   <div class="relative w-full max-w-4xl mx-auto h-[420px] sm:h-[500px]">
-    {/* React carousel - positioned behind the preview, always visible */}
-    {ENABLE_CAROUSEL && (
-      <div class="absolute inset-0 z-0">
-        <PortfolioScreenShowcase
-          client:visible
-          items={portfolioItems}
-          mediaEntries={showcaseMedia}
-          className="w-full mx-auto"
-          staticContainerId="portfolio-static-first"
-        />
-      </div>
-    )}
+    {/* React carousel */}
+    <div class={useStaticPreview ? "absolute inset-0 z-0" : "relative h-full"}>
+      <PortfolioScreenShowcase
+        client:visible
+        items={portfolioItems}
+        mediaEntries={showcaseMedia}
+        className="w-full mx-auto"
+        staticContainerId={staticContainerId}
+        loadingStrategy={loadingStrategy}
+      />
+    </div>
 
-    {/* Static preview - on top, fades out when carousel is ready */}
-    <div
-      id="portfolio-static-first"
-      class="absolute inset-0 z-10 overflow-hidden rounded-lg transition-opacity duration-500"
-    >
-      <div class="relative h-full w-full">
-        <div class="relative h-full bg-bg3">
-          <div class="flex flex-col gap-3 border-b border-white/10 px-4 py-3 text-white/70 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/50">
-              <span class="flex items-center gap-1.5">
-                <span class="h-3 w-3 rounded-full bg-gray-800"></span>
-                <span class="h-3 w-3 rounded-full bg-gray-800"></span>
-                <span class="h-3 w-3 rounded-full bg-gray-800"></span>
-              </span>
+    {/* Static preview - only rendered with static-preview strategy */}
+    {useStaticPreview && (
+      <div
+        id="portfolio-static-first"
+        class="absolute inset-0 z-10 overflow-hidden rounded-lg transition-opacity duration-500"
+      >
+        <div class="relative h-full w-full">
+          <div class="relative h-full bg-bg3">
+            <div class="flex flex-col gap-3 border-b border-white/10 px-4 py-3 text-white/70 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/50">
+                <span class="flex items-center gap-1.5">
+                  <span class="h-3 w-3 rounded-full bg-gray-800"></span>
+                  <span class="h-3 w-3 rounded-full bg-gray-800"></span>
+                  <span class="h-3 w-3 rounded-full bg-gray-800"></span>
+                </span>
+              </div>
             </div>
-          </div>
-          <figure class="relative h-full overflow-y-auto overscroll-contain bg-black/40">
-            {/* Cropped "above the fold" preview - matches carousel figure styling exactly */}
-            {firstPreview?.src ? (
+            <figure class="relative h-full overflow-y-auto overscroll-contain bg-black/40">
+              {/* Cropped "above the fold" preview - matches carousel figure styling exactly */}
               <picture>
                 {firstPreview.sources?.map((source) => (
                   <source
@@ -293,10 +306,10 @@ const firstItem = portfolioItems[0];
                   class="block h-auto min-h-full w-full select-none object-cover object-top"
                 />
               </picture>
-            ) : null}
-          </figure>
+            </figure>
+          </div>
         </div>
       </div>
-    </div>
+    )}
   </div>
 </section>

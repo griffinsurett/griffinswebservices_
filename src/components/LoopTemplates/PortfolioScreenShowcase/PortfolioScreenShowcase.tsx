@@ -23,6 +23,8 @@ interface PortfolioMediaEntry {
   desktopEager?: boolean;
 }
 
+type LoadingStrategy = "static-preview" | "client-only";
+
 interface PortfolioScreenShowcaseProps {
   items?: PortfolioItemData[];
   className?: string;
@@ -31,6 +33,8 @@ interface PortfolioScreenShowcaseProps {
   staticContainerId?: string;
   /** ID of this carousel's container to reveal on hydration */
   carouselContainerId?: string;
+  /** Loading strategy - affects when images start loading */
+  loadingStrategy?: LoadingStrategy;
 }
 
 interface ScreenProps {
@@ -477,6 +481,7 @@ export default function PortfolioScreenShowcase({
   className = "",
   mediaEntries: mediaEntriesProp = [],
   staticContainerId,
+  loadingStrategy = "static-preview",
 }: PortfolioScreenShowcaseProps) {
   const slides = useMemo(() => (Array.isArray(items) ? items : []), [items]);
   const mediaEntries = useMemo(
@@ -490,67 +495,64 @@ export default function PortfolioScreenShowcase({
   const transitionFrameRef = useRef<number | null>(null);
   const preferDesktopEager = useDesktopEagerPreference();
 
+  const isClientOnly = loadingStrategy === "client-only";
+
   // Track when the first full image has loaded and we can swap from preview
-  const [firstImageLoaded, setFirstImageLoaded] = useState(false);
-  const hasSwappedRef = useRef(false);
+  // For client-only mode, we consider it already loaded (no preview to swap)
+  const [firstImageLoaded, setFirstImageLoaded] = useState(isClientOnly);
+  const hasSwappedRef = useRef(isClientOnly);
 
   // Defer first image render until preview has had time to display
-  // This prevents both images from loading simultaneously
-  const [shouldLoadFirstImage, setShouldLoadFirstImage] = useState(false);
+  // For client-only mode, load immediately (no preview to wait for)
+  const [shouldLoadFirstImage, setShouldLoadFirstImage] = useState(isClientOnly);
 
-  // Wait for the static preview to load before starting the full image download.
-  // This prevents LCP regression from double-loading both cropped preview AND full image.
+  // Wait for the page to be fully idle before loading the full carousel image.
+  // Only applies to static-preview mode - client-only loads immediately.
   useEffect(() => {
+    // Client-only mode: load immediately
+    if (isClientOnly) {
+      setShouldLoadFirstImage(true);
+      return;
+    }
+
     if (!staticContainerId) {
       // No preview to wait for - load immediately
       setShouldLoadFirstImage(true);
       return;
     }
 
-    const staticEl = document.getElementById(staticContainerId);
-    if (!staticEl) {
-      setShouldLoadFirstImage(true);
-      return;
-    }
+    // Use requestIdleCallback to wait until browser is idle, with a generous timeout
+    // This ensures LCP (preview) is fully complete before we start the large full image
+    const IDLE_TIMEOUT_MS = 4000; // Max wait before starting anyway
+    const MIN_DELAY_MS = 1500; // Minimum delay to ensure preview is painted and LCP measured
 
-    // Find the preview image inside the static container
-    const previewImg = staticEl.querySelector("img") as HTMLImageElement | null;
-    if (!previewImg) {
-      setShouldLoadFirstImage(true);
-      return;
-    }
+    let cancelled = false;
 
-    // If preview is already loaded, start full image after a brief delay
-    // to ensure the preview has been painted to screen
-    if (previewImg.complete && previewImg.naturalHeight > 0) {
-      const timer = requestAnimationFrame(() => {
+    const startLoading = () => {
+      if (!cancelled) {
         setShouldLoadFirstImage(true);
-      });
-      return () => cancelAnimationFrame(timer);
-    }
-
-    // Wait for preview to load before starting full image
-    const handleLoad = () => {
-      // Small delay to ensure preview is painted before we start loading full image
-      requestAnimationFrame(() => {
-        setShouldLoadFirstImage(true);
-      });
+      }
     };
 
-    previewImg.addEventListener("load", handleLoad, { once: true });
-    previewImg.addEventListener("error", handleLoad, { once: true });
-
-    // Fallback timeout in case something goes wrong
-    const fallbackTimer = setTimeout(() => {
-      setShouldLoadFirstImage(true);
-    }, 3000);
+    // Always wait at least MIN_DELAY_MS to ensure preview is painted
+    const minDelayTimer = setTimeout(() => {
+      if ("requestIdleCallback" in window) {
+        // Wait for browser idle after minimum delay
+        (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(
+          startLoading,
+          { timeout: IDLE_TIMEOUT_MS - MIN_DELAY_MS }
+        );
+      } else {
+        // Fallback for Safari - just use the timeout
+        setTimeout(startLoading, 500);
+      }
+    }, MIN_DELAY_MS);
 
     return () => {
-      previewImg.removeEventListener("load", handleLoad);
-      previewImg.removeEventListener("error", handleLoad);
-      clearTimeout(fallbackTimer);
+      cancelled = true;
+      clearTimeout(minDelayTimer);
     };
-  }, [staticContainerId]);
+  }, [staticContainerId, isClientOnly]);
 
   // Callback when first image finishes loading - triggers the swap
   const handleFirstImageLoad = useCallback(() => {
