@@ -357,9 +357,11 @@ function ComputerScreen({
   const resolvedLoading = wantsDesktopEager
     ? "eager"
     : mediaEntry?.loading ?? "lazy";
+  // Use the fetchPriority from mediaEntry directly - Astro sets "low" for first slide
+  // to ensure full image loads gently behind the preview without affecting LCP
   const resolvedFetchPriority = wantsDesktopEager
     ? "high"
-    : mediaEntry?.fetchPriority ?? "auto";
+    : mediaEntry?.fetchPriority ?? "low";
 
   const renderMedia = () => {
     // Don't render image yet if deferred - prevents double-loading with static preview

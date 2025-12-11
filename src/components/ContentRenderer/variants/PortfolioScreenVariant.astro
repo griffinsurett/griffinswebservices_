@@ -216,10 +216,10 @@ const processedItems = await Promise.all(
         alt: altText,
         loading: "lazy" as const,
         decoding: "async" as const,
-        fetchPriority: "auto" as const,
+        // First image uses "low" priority since preview handles LCP
+        // Other images use "auto" for normal lazy loading
+        fetchPriority: (isFirst ? "low" : "auto") as "low" | "auto",
         sources: pictureSources,
-        // No desktopEager - cropped preview handles initial load,
-        // React carousel always lazy-loads full images
       },
       croppedPreview,
     };
