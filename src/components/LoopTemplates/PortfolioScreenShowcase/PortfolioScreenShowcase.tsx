@@ -23,7 +23,7 @@ interface PortfolioMediaEntry {
   desktopEager?: boolean;
 }
 
-type LoadingStrategy = "static-preview" | "client-only";
+type LoadingStrategy = "static-preview" | "client-only" | "responsive";
 
 interface PortfolioScreenShowcaseProps {
   items?: PortfolioItemData[];
@@ -495,16 +495,30 @@ export default function PortfolioScreenShowcase({
   const transitionFrameRef = useRef<number | null>(null);
   const preferDesktopEager = useDesktopEagerPreference();
 
-  const isClientOnly = loadingStrategy === "client-only";
+  // Determine effective loading behavior:
+  // - "client-only": always load client-side immediately
+  // - "static-preview": always wait for preview, defer full image
+  // - "responsive": desktop uses static-preview behavior, mobile uses client-only
+  const isClientOnly = loadingStrategy === "client-only" ||
+    (loadingStrategy === "responsive" && !preferDesktopEager);
 
   // Track when the first full image has loaded and we can swap from preview
   // For client-only mode, we consider it already loaded (no preview to swap)
-  const [firstImageLoaded, setFirstImageLoaded] = useState(isClientOnly);
-  const hasSwappedRef = useRef(isClientOnly);
+  const [firstImageLoaded, setFirstImageLoaded] = useState(false);
+  const hasSwappedRef = useRef(false);
 
   // Defer first image render until preview has had time to display
   // For client-only mode, load immediately (no preview to wait for)
-  const [shouldLoadFirstImage, setShouldLoadFirstImage] = useState(isClientOnly);
+  const [shouldLoadFirstImage, setShouldLoadFirstImage] = useState(false);
+
+  // Sync state when isClientOnly changes (e.g., responsive mode detecting screen size)
+  useEffect(() => {
+    if (isClientOnly) {
+      setFirstImageLoaded(true);
+      hasSwappedRef.current = true;
+      setShouldLoadFirstImage(true);
+    }
+  }, [isClientOnly]);
 
   // Wait for the page to be fully idle before loading the full carousel image.
   // Only applies to static-preview mode - client-only loads immediately.

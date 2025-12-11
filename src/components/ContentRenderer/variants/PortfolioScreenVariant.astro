@@ -10,11 +10,12 @@ import { toArray } from "@/utils/array";
  * Loading strategy for the portfolio showcase:
  * - "static-preview": Renders a static cropped thumbnail eagerly, then loads full image after hydration (best for LCP)
  * - "client-only": No static preview, all images load client-side after hydration (simpler, less initial HTML)
+ * - "responsive": Desktop uses static-preview, mobile uses client-only (uses media queries to prevent mobile loading)
  */
-type LoadingStrategy = "static-preview" | "client-only";
+type LoadingStrategy = "static-preview" | "client-only" | "responsive";
 
 interface Props extends BaseVariantProps {
-  /** How to load images - "static-preview" for LCP optimization, "client-only" for simpler loading */
+  /** How to load images - "static-preview" for LCP, "client-only" for simple, "responsive" for auto-switch */
   loadingStrategy?: LoadingStrategy;
 }
 
@@ -22,8 +23,12 @@ const {
   items = [],
   className = "",
   id,
-  loadingStrategy = "client-only",
+  loadingStrategy = "responsive",
 } = Astro.props as Props;
+
+// For responsive mode, we generate static preview but use media queries to only load on desktop
+const useStaticPreviewMode = loadingStrategy === "static-preview" || loadingStrategy === "responsive";
+const isResponsive = loadingStrategy === "responsive";
 
 const safeItems = toArray(items);
 
@@ -165,9 +170,9 @@ const processedItems = await Promise.all(
 
     // For the first item, generate a cropped "above the fold" preview
     // This shows the top portion - slightly taller than visible to ensure full coverage
-    // Only generate if using static-preview strategy
+    // Generate for static-preview or responsive mode
     let croppedPreview = undefined;
-    if (isFirst && loadingStrategy === "static-preview") {
+    if (isFirst && useStaticPreviewMode) {
       // Calculate how many source pixels are visible in the container
       const visibleSourceHeight = calculateVisibleSourceHeight(
         metadata.width,
@@ -228,9 +233,9 @@ const processedItems = await Promise.all(
         alt: altText,
         loading: "lazy" as const,
         decoding: "async" as const,
-        // With static-preview: first image uses "low" priority since preview handles LCP
+        // With static-preview/responsive: first image uses "low" priority since preview handles LCP (on desktop)
         // With client-only: first image uses "auto" like others (no preview competing)
-        fetchPriority: (isFirst && loadingStrategy === "static-preview" ? "low" : "auto") as "low" | "auto",
+        fetchPriority: (isFirst && useStaticPreviewMode ? "low" : "auto") as "low" | "auto",
         sources: pictureSources,
       },
       croppedPreview,
@@ -241,11 +246,11 @@ const processedItems = await Promise.all(
 const portfolioItems = processedItems.map((entry) => entry.data);
 const showcaseMedia = processedItems.map((entry) => entry.mediaEntry);
 
-// Extract first item's cropped preview for static rendering (only used with static-preview strategy)
-const firstPreview = loadingStrategy === "static-preview" ? processedItems[0]?.croppedPreview : undefined;
+// Extract first item's cropped preview for static rendering
+const firstPreview = useStaticPreviewMode ? processedItems[0]?.croppedPreview : undefined;
 const firstItem = portfolioItems[0];
-const useStaticPreview = loadingStrategy === "static-preview" && firstPreview?.src;
-const staticContainerId = useStaticPreview ? "portfolio-static-first" : undefined;
+const hasPreview = useStaticPreviewMode && firstPreview?.src;
+const staticContainerId = hasPreview ? "portfolio-static-first" : undefined;
 ---
 
 <section
@@ -254,7 +259,7 @@ const staticContainerId = useStaticPreview ? "portfolio-static-first" : undefine
 >
   <div class="relative w-full max-w-4xl mx-auto h-[420px] sm:h-[500px]">
     {/* React carousel */}
-    <div class={useStaticPreview ? "absolute inset-0 z-0" : "relative h-full"}>
+    <div class={hasPreview ? "absolute inset-0 z-0" : "relative h-full"}>
       <PortfolioScreenShowcase
         client:visible
         items={portfolioItems}
@@ -265,11 +270,14 @@ const staticContainerId = useStaticPreview ? "portfolio-static-first" : undefine
       />
     </div>
 
-    {/* Static preview - only rendered with static-preview strategy */}
-    {useStaticPreview && (
+    {/* Static preview - uses media query to only load on desktop for responsive mode */}
+    {hasPreview && (
       <div
         id="portfolio-static-first"
-        class="absolute inset-0 z-10 overflow-hidden rounded-lg transition-opacity duration-500"
+        class:list={[
+          "absolute inset-0 z-10 overflow-hidden rounded-lg transition-opacity duration-500",
+          isResponsive && "hidden lg:block"
+        ]}
       >
         <div class="relative h-full w-full">
           <div class="relative h-full bg-bg3">
@@ -283,25 +291,37 @@ const staticContainerId = useStaticPreview ? "portfolio-static-first" : undefine
               </div>
             </div>
             <figure class="relative h-full overflow-y-auto overscroll-contain bg-black/40">
-              {/* Cropped "above the fold" preview - matches carousel figure styling exactly */}
+              {/* Cropped preview - for responsive mode, uses media query to only load on desktop */}
               <picture>
+                {/* For responsive mode, add media query to sources so image only loads on lg+ */}
                 {firstPreview.sources?.map((source) => (
                   <source
+                    media={isResponsive ? "(min-width: 1024px)" : undefined}
                     srcset={source.srcSet}
                     sizes={source.sizes}
                     type={source.type}
                   />
                 ))}
+                {/* WebP source with media query for responsive mode */}
+                {isResponsive && (
+                  <source
+                    media="(min-width: 1024px)"
+                    srcset={firstPreview.srcSet}
+                    sizes={firstPreview.sizes}
+                    type="image/webp"
+                  />
+                )}
+                {/* Fallback img - for responsive, use a tiny transparent placeholder on mobile */}
                 <img
-                  src={firstPreview.src}
-                  srcset={firstPreview.srcSet}
-                  sizes={firstPreview.sizes}
+                  src={isResponsive ? "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" : firstPreview.src}
+                  srcset={isResponsive ? undefined : firstPreview.srcSet}
+                  sizes={isResponsive ? undefined : firstPreview.sizes}
                   alt={firstPreview.alt || firstItem?.title || "Project preview"}
                   width={firstPreview.width}
                   height={firstPreview.height}
                   loading="eager"
                   decoding="async"
-                  fetchpriority="high"
+                  fetchpriority={isResponsive ? "auto" : "high"}
                   draggable="false"
                   class="block h-auto min-h-full w-full select-none object-cover object-top"
                 />
