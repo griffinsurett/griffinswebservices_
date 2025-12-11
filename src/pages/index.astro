@@ -52,14 +52,15 @@ const heroDescription =
       className="pt-35 lg:pt-20"
     />
 
-    <!-- Website Features Two-Column Section -->
+    <!-- Website Benefits -->
     <ContentRenderer
       query={query("benefits").orderBy(sortByOrder())}
-      variant="TwoColumnImageVariant"
-      imagePosition="left"
-      imagePlaceholder="🚀"
-      imageAlt="Website features showcase"
-      contentType="checklist"
+      variant="ListCardVariant"
+      title="Why Choose Us"
+      heading={{
+        before: "What Makes",
+        text: "Our Websites Different",
+      }}
     />
 
     <!-- About Us Two-Column Section -->
