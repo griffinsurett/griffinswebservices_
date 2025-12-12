@@ -6,7 +6,7 @@
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import Logo from "@/components/Logo/Logo.astro";
 import ThemeControls from "@/components/ThemeControls/ThemeControls.astro";
-import { query } from "@/utils/query";
+import { related } from "@/utils/query/snippets";
 ---
 <header class="fixed w-full top-0 z-[100000]">
     <div class="relative flex items-center justify-between head-foot-section py-2 gap-4">
@@ -22,15 +22,7 @@ import { query } from "@/utils/query";
         <div class="flex items-center justify-center sm:gap-4">
           <!-- Navigation Menu using query -->
           <ContentRenderer
-            query={query("menu-items")
-              .where((entry) => {
-                const menus = entry.data.menu;
-                if (Array.isArray(menus)) {
-                  return menus.some((m) => m.id === "main-menu");
-                }
-                return menus?.id === "main-menu";
-              })
-              }
+            query={related("menu-items", "menu", "main-menu")}
             variant="MenuVariant"
             mode="hamburger-only"
             className="header-navigation"

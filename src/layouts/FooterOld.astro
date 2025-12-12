@@ -12,9 +12,9 @@
  */
 import { siteData } from "@/content/siteData";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
-import { query, sortBy } from "@/utils/query";
+import { query } from "@/utils/query";
 import PreferencesLayout from "./PreferencesLayout.astro";
-import { roots } from "@/utils/query/snippets";
+import { roots, related } from "@/utils/query/snippets";
 import Logo from "@/components/Logo/Logo.astro";
 ---
 
@@ -68,15 +68,7 @@ import Logo from "@/components/Logo/Logo.astro";
       {/* Column 2: Legal links & preferences */}
       <div class="flex flex-col items-start gap-8 text-sm">
         <ContentRenderer
-          query={query("menu-items")
-            .where((entry) => {
-              const menus = entry.data.menu;
-              if (Array.isArray(menus)) {
-                return menus.some((m) => m.id === "footer-menu");
-              }
-              return menus?.id === "footer-menu";
-            })
-            .orderBy(sortBy("order", "asc"))}
+          query={related("menu-items", "menu", "footer-menu")}
           variant="ListVariant"
           title="Legal Links"
           className="text-bg flex flex-col items-start justify-center"

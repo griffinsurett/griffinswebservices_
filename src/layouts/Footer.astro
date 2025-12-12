@@ -12,9 +12,9 @@
  */
 import { siteData, ctaData } from "@/content/siteData";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
-import { query, sortBy } from "@/utils/query";
+import { query } from "@/utils/query";
 import PreferencesLayout from "./PreferencesLayout.astro";
-import { roots } from "@/utils/query/snippets";
+import { roots, related } from "@/utils/query/snippets";
 import Logo from "@/components/Logo/Logo.astro";
 import Button from "@/components/Button/Button";
 ---
@@ -27,7 +27,9 @@ import Button from "@/components/Button/Button";
       <section
         class="inner-section flex flex-col gap-10 py-12 text-center lg:text-left md:flex-row md:items-center md:justify-between"
       >
-        <div class="flex flex-col lg:flex-row justify-center items-center gap-4 lg:gap-7 xl:gap-10">
+        <div
+          class="flex flex-col lg:flex-row justify-center items-center gap-4 lg:gap-7 xl:gap-10"
+        >
           <Logo
             loading="lazy"
             trigger="visible"
@@ -89,31 +91,15 @@ import Button from "@/components/Button/Button";
       >
         {/* Column 2: Legal links & preferences */}
         <div class="flex flex-col items-start gap-8 text-sm">
-                    <ContentRenderer
-            query={query("menu-items")
-              .where((entry) => {
-                const menus = entry.data.menu;
-                if (Array.isArray(menus)) {
-                  return menus.some((m) => m.id === "footer-menu-2");
-                }
-                return menus?.id === "footer-menu-2";
-              })
-              .orderBy(sortBy("order", "asc"))}
+          <ContentRenderer
+            query={related("menu-items", "menu", "footer-menu-2")}
             variant="ListVariant"
             title="Links"
             className="text-bg flex flex-col items-start justify-center"
             showHeadingDivider
           />
           <ContentRenderer
-            query={query("menu-items")
-              .where((entry) => {
-                const menus = entry.data.menu;
-                if (Array.isArray(menus)) {
-                  return menus.some((m) => m.id === "footer-menu");
-                }
-                return menus?.id === "footer-menu";
-              })
-              .orderBy(sortBy("order", "asc"))}
+            query={related("menu-items", "menu", "footer-menu")}
             variant="ListVariant"
             title="Legal Links"
             className="text-bg flex flex-col items-start justify-center"
