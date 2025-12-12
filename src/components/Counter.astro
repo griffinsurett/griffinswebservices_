@@ -1,0 +1,116 @@
+---
+// Counter.astro - Lightweight counter animation (tiny inline script, no React bundle)
+
+interface Props {
+  start?: number;
+  end: number;
+  duration?: number;
+  class?: string;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+}
+
+const {
+  start = 0,
+  end,
+  duration = 2000,
+  class: className = "",
+  prefix = "",
+  suffix = "",
+  decimals,
+} = Astro.props;
+
+// Calculate decimal places from the numbers if not specified
+const getDecimalPlaces = (value: number) => {
+  const str = value.toString();
+  const decimalIndex = str.indexOf(".");
+  return decimalIndex === -1 ? 0 : str.length - decimalIndex - 1;
+};
+
+const resolvedDecimals =
+  typeof decimals === "number"
+    ? Math.max(0, decimals)
+    : Math.max(getDecimalPlaces(start), getDecimalPlaces(end));
+
+// Format the end value for min-width calculation
+const formattedEnd = resolvedDecimals > 0
+  ? end.toFixed(resolvedDecimals)
+  : Math.round(end).toString();
+const minWidthCh = Math.max(1, formattedEnd.length);
+
+// Initial display value
+const initialDisplay = resolvedDecimals > 0
+  ? start.toFixed(resolvedDecimals)
+  : Math.round(start).toString();
+---
+
+<span class:list={["counter-wrapper", className]}>
+  {prefix && <span class="counter-prefix">{prefix}</span>}
+  <span
+    class="counter-value tabular-nums"
+    data-start={start}
+    data-end={end}
+    data-duration={duration}
+    data-decimals={resolvedDecimals}
+    style={`display: inline-block; min-width: ${minWidthCh}ch;`}
+  >{initialDisplay}</span>
+  {suffix && <span class="counter-suffix">{suffix}</span>}
+</span>
+
+<style>
+  .counter-wrapper {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.125em;
+  }
+</style>
+
+<script>
+  // Lightweight counter animation - runs once per page, no React needed
+  const counters = document.querySelectorAll('.counter-value[data-end]');
+
+  if (counters.length > 0) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const el = entry.target as HTMLElement;
+          observer.unobserve(el);
+
+          const start = parseFloat(el.dataset.start || '0');
+          const end = parseFloat(el.dataset.end || '0');
+          const duration = parseInt(el.dataset.duration || '2000', 10);
+          const decimals = parseInt(el.dataset.decimals || '0', 10);
+
+          if (start === end) {
+            el.textContent = decimals > 0 ? end.toFixed(decimals) : Math.round(end).toString();
+            return;
+          }
+
+          const startTime = performance.now();
+          const range = end - start;
+
+          const animate = (timestamp: number) => {
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease-out cubic curve
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = start + range * eased;
+
+            el.textContent = decimals > 0
+              ? current.toFixed(decimals)
+              : Math.round(current).toString();
+
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            }
+          };
+
+          requestAnimationFrame(animate);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    counters.forEach((counter) => observer.observe(counter));
+  }
+</script>

@@ -1,6 +1,7 @@
 ---
+// StatsVariant.astro - Uses pure CSS/Astro StatCard (no React bundle)
 import type { BaseVariantProps } from "../ContentRenderer.types";
-import StatCard from "@/components/LoopComponents/StatCard";
+import StatCard from "@/components/LoopComponents/StatCard.astro";
 import { toArray } from "@/utils/array";
 
 interface Props extends BaseVariantProps {
@@ -24,7 +25,7 @@ const columnClasses: Record<1 | 2 | 3 | 4, string> = {
     <ul class={`${columnClasses[columns]} list-none`.trim()}>
       {safeItems.map((item) => (
         <li class="h-full">
-          <StatCard client:visible data={item} className="h-full" />
+          <StatCard data={item} class="h-full" />
         </li>
       ))}
     </ul>
