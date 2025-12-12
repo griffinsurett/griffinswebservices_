@@ -5,20 +5,16 @@
  * Client-side video player with lazy loading support.
  */
 import { useRef, useEffect, forwardRef } from "react";
+import type {
+  VideoHTMLAttributes,
+  MutableRefObject,
+  ReactNode,
+} from "react";
 
-interface VideoProps {
-  src: string;
-  poster?: string;
-  className?: string;
-  autoplay?: boolean;
-  muted?: boolean;
-  loop?: boolean;
-  controls?: boolean;
-  playsInline?: boolean;
+interface VideoProps extends VideoHTMLAttributes<HTMLVideoElement> {
   lazy?: boolean;
-  onPlay?: () => void;
-  onPause?: () => void;
-  onEnded?: () => void;
+  sourceType?: string;
+  children?: ReactNode;
 }
 
 export const Video = forwardRef<HTMLVideoElement, VideoProps>(
@@ -27,23 +23,31 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
       src,
       poster,
       className = "",
-      autoplay = true,
+      autoPlay = true,
       muted = true,
       loop = true,
       controls = false,
       playsInline = true,
       lazy = true,
-      onPlay,
-      onPause,
-      onEnded,
+      sourceType,
+      children,
+      ...rest
     },
-    ref
+    ref,
   ) => {
-    const internalRef = useRef<HTMLVideoElement>(null);
-    const videoRef = (ref as React.RefObject<HTMLVideoElement>) || internalRef;
+    const internalRef = useRef<HTMLVideoElement | null>(null);
+
+    const assignRef = (node: HTMLVideoElement | null) => {
+      internalRef.current = node;
+      if (typeof ref === "function") {
+        ref(node);
+      } else if (ref) {
+        (ref as MutableRefObject<HTMLVideoElement | null>).current = node;
+      }
+    };
 
     useEffect(() => {
-      const video = videoRef.current;
+      const video = internalRef.current;
       if (!video || !lazy) return;
 
       const observer = new IntersectionObserver(
@@ -54,7 +58,7 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
               if (dataSrc && video.src !== dataSrc) {
                 video.src = dataSrc;
                 video.load();
-                if (autoplay) {
+                if (autoPlay) {
                   video.play().catch(() => {});
                 }
               }
@@ -62,19 +66,19 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
             }
           });
         },
-        { threshold: 0.35, rootMargin: "0px 0px 160px 0px" }
+        { threshold: 0.35, rootMargin: "0px 0px 160px 0px" },
       );
 
       observer.observe(video);
       return () => observer.disconnect();
-    }, [lazy, autoplay]);
+    }, [lazy, autoPlay]);
 
     return (
       <video
-        ref={videoRef}
+        ref={assignRef}
         className={`w-full h-full object-cover ${className}`.trim()}
         poster={poster}
-        autoPlay={!lazy && autoplay}
+        autoPlay={!lazy && autoPlay}
         muted={muted}
         loop={loop}
         controls={controls}
@@ -82,12 +86,19 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
         preload={lazy ? "metadata" : "auto"}
         data-video-src={lazy ? src : undefined}
         src={!lazy ? src : undefined}
-        onPlay={onPlay}
-        onPause={onPause}
-        onEnded={onEnded}
-      />
+        {...rest}
+      >
+        {src && (
+          <source
+            src={!lazy ? src : undefined}
+            data-video-src={lazy ? src : undefined}
+            type={sourceType}
+          />
+        )}
+        {children ?? "Your browser does not support the video tag."}
+      </video>
     );
-  }
+  },
 );
 
 Video.displayName = "Video";

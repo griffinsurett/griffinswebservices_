@@ -70,7 +70,7 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
           trigger={trigger}
           className="logo-class"
           mediaClasses={logoClasses}
-          client:idle
+          client:visible
         >
           <Image
             src={POSTER_SRC}
@@ -92,8 +92,8 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
           trigger={trigger}
           className="logo-class"
           mediaClasses={logoClasses}
-          client:idle
-      >
+          client:load
+        >
           <Image
             src={POSTER_SRC}
             alt="Griffin's Web Services Logo"
@@ -105,7 +105,7 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
             quality={90}
             class={logoClasses}
             fetchpriority={loading === "eager" ? "high" : undefined}
-      />
+          />
         </LottieLogo>
       )}
     </>

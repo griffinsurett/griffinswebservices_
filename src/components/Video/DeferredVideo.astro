@@ -221,9 +221,6 @@ if (!posterPicture && !manualPosterUrl) {
 
 const videoPoster = posterPicture?.img.src ?? manualPosterUrl;
 const componentId = `deferred-video-${crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
-const basePath = (import.meta.env.BASE_URL ?? "/").replace(/\/+$/, "");
-const videoLoaderSrc = `${basePath}/scripts/videoLazyLoader.js`;
-
 const dataAttrs = {
   "data-video-shell": "true",
   id: componentId,
@@ -309,14 +306,13 @@ const finalPreload =
 <script
   type="module"
   is:inline
-  define:vars={{ componentId, videoLoaderSrc }}
+  define:vars={{ componentId }}
 >
   const rootId = componentId;
-  const loaderUrl = videoLoaderSrc;
   const ensureLoader = () => {
     if (typeof window === "undefined") return Promise.resolve(null);
     if (!window.__gwsVideoLoaderPromise) {
-      window.__gwsVideoLoaderPromise = import(loaderUrl).catch((error) => {
+      window.__gwsVideoLoaderPromise = import("@/scripts/videoLazyLoader").catch((error) => {
         console.warn("Deferred video loader failed to import.", error);
         return null;
       });

@@ -7,6 +7,7 @@
  * Lazy loads video sources for optimal performance.
  */
 import { generateVideoPoster } from "@/utils/videoThumbnails";
+import VideoClient from "./Video";
 
 interface Props {
   src: string;
@@ -46,43 +47,25 @@ if (!posterUrl && src) {
   posterUrl = generated.src;
 }
 
-const componentId = `video-${crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)}`;
 ---
 
-<figure
-  class={`video-wrapper relative ${wrapperClass}`.trim()}
-  data-video-shell="true"
-  id={componentId}
->
-  <video
-    class={`w-full h-full object-cover ${className}`.trim()}
+<figure class={`video-wrapper relative ${wrapperClass}`.trim()}>
+  <VideoClient
+    client:visible
+    className={className}
+    src={src}
     poster={posterUrl}
-    autoplay={autoplay}
+    autoPlay={autoplay}
     muted={muted}
     loop={loop}
     controls={controls}
-    playsinline={playsinline}
-    preload={lazy ? "metadata" : "auto"}
-    data-video-src={lazy ? src : undefined}
+    playsInline={playsinline}
+    lazy={lazy}
+    sourceType={src?.endsWith(".mov")
+      ? "video/quicktime"
+      : src?.endsWith(".webm")
+        ? "video/webm"
+        : "video/mp4"}
     {...rest}
-  >
-    <source
-      src={!lazy ? src : undefined}
-      data-video-src={lazy ? src : undefined}
-      type={src.endsWith('.mov') ? 'video/quicktime' : src.endsWith('.webm') ? 'video/webm' : 'video/mp4'}
-    />
-    Your browser does not support the video tag.
-  </video>
+  />
 </figure>
-
-<script>
-  import { setupLazyVideo } from "/scripts/videoLazyLoader.js";
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("[data-video-shell]").forEach((el) => {
-      if (el instanceof HTMLElement) {
-        setupLazyVideo(el);
-      }
-    });
-  });
-</script>
