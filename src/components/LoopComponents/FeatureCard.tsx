@@ -119,8 +119,13 @@ export default function FeatureCard({
     ...(overrideSource ? [overrideSource] : []),
     ...collectDataSources(data),
   ];
-  const { content: resolvedData, url } =
+  const { content: resolvedData, url: resolvedUrl } =
     dataSources.length > 0 ? normalizeFeatureCardData(dataSources) : EMPTY_PAYLOAD;
+  const cardUrl =
+    typeof resolvedUrl === "string" && resolvedUrl.trim().length > 0
+      ? resolvedUrl.trim()
+      : undefined;
+  const isInteractive = Boolean(cardUrl);
 
   const {
     layout,
@@ -159,18 +164,28 @@ export default function FeatureCard({
       : "h-90 mx-auto px-10 flex flex-col justify-center items-center relative card-bg";
 
   const wrapperTextClass = resolvedLayout.includes("horizontal") ? "text-left" : "text-center";
+  const wrapperClassName = [
+    isInteractive ? "group" : "",
+    wrapperTextClass,
+    "outer-card-transition",
+    isInteractive ? "outer-card-hover-transition" : "",
+    "!duration-[900ms]",
+    "ease-out",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className={className}>
       <AnimatedBorder
-        variant="progress-b-f"
-        triggers="hover"
+        variant={isInteractive ? "progress-b-f" : "none"}
+        triggers={isInteractive ? "hover" : []}
         duration={ringDuration}
         borderRadius="rounded-3xl"
         borderWidth={2}
-        className={`group ${wrapperTextClass} outer-card-transition outer-card-hover-transition !duration-[900ms] ease-out`}
+        className={wrapperClassName}
         innerClassName={innerCardClass}
-        linkProps={url ? { href: url } : undefined}
+        linkProps={isInteractive ? { href: cardUrl } : undefined}
       >
         <div className="inner-card-style inner-card-transition inner-card-color" />
         <IconListItem

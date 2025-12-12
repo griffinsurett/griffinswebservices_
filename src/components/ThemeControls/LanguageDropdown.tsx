@@ -7,17 +7,24 @@ function getStoredLanguageCode(): string {
   return localStorage.getItem("user-language") || "en";
 }
 
-// Map common codes to flags (inline to avoid importing language utils)
+// Flag map now covers all supported languages (lowercase keys for easier lookups)
 const FLAG_MAP: Record<string, string> = {
   en: "🇺🇸",
   es: "🇪🇸",
-  fr: "🇫🇷",
+  hi: "🇮🇳",
+  iw: "🇮🇱",
   de: "🇩🇪",
+  ru: "🇷🇺",
+  uk: "🇺🇦",
   it: "🇮🇹",
-  pt: "🇧🇷",
+  fr: "🇫🇷",
+  pt: "🇵🇹",
+  "zh-cn": "🇨🇳",
+  zh: "🇨🇳",
+  "zh-tw": "🇹🇼",
   ja: "🇯🇵",
   ko: "🇰🇷",
-  zh: "🇨🇳",
+  ar: "🇸🇦",
 };
 
 // Lazy load the heavy dropdown content
@@ -68,7 +75,9 @@ export default function LanguageDropdown() {
     setOpen((v) => !v);
   };
 
-  const currentFlag = FLAG_MAP[currentCode.split("-")[0]] || "🌐";
+  const normalizedCode = currentCode.toLowerCase();
+  const currentFlag =
+    FLAG_MAP[normalizedCode] || FLAG_MAP[normalizedCode.split("-")[0]] || FLAG_MAP.en;
 
   return (
     <div ref={containerRef} className="relative contents">

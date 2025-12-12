@@ -34,7 +34,11 @@ const LOGO_SIZES = "(min-width: 1024px) 45px, 40px";
 const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-contain";
 ---
 
-<a href="/" class={`flex justify-center items-center gap-1.5 ${className}`}>
+<a
+  href="/"
+  translate="no"
+  class={`notranslate flex justify-center items-center gap-1.5 ${className}`}
+>
   {shouldUseLottie ? (
     <>
       {trigger === "scroll" ? (
@@ -89,7 +93,7 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
           className="logo-class"
           mediaClasses={logoClasses}
           client:idle
-        >
+      >
           <Image
             src={POSTER_SRC}
             alt="Griffin's Web Services Logo"
@@ -101,7 +105,7 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
             quality={90}
             class={logoClasses}
             fetchpriority={loading === "eager" ? "high" : undefined}
-          />
+      />
         </LottieLogo>
       )}
     </>
