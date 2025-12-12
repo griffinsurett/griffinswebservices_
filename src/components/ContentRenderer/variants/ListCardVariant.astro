@@ -50,7 +50,7 @@ const segmentedHeading = isSegmentedHeading ? normalizedHeading : undefined;
 const resolvedHeading = headingString ?? (segmentedHeading ? segmentedHeading.text : undefined);
 const headingPayload = segmentedHeading ?? resolvedHeading;
 const showHeader = Boolean(title || headingPayload || description);
-const gridMarginClass = showHeader ? "mt-12" : "";
+const gridMarginClass = showHeader ? "mt-5 lg:px-25" : "";
 const showCTA =
   showButtonSection &&
   shouldShowCollectionCTA(collectionUrl, safeItems.length) &&
@@ -85,14 +85,12 @@ const featureCardProps: Partial<FeatureCardProps> = {
       </div>
     )}
 
-    <div class="list-card-variant">
       <CardRenderer
         items={safeItems}
         columns={1}
         className={gridMarginClass}
         featureCardProps={featureCardProps}
       />
-    </div>
 
     {showCTA && (
       <div class="buttons-section-center">

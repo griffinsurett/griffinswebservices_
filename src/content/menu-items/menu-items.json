@@ -6,6 +6,6 @@
     "url": "/",
     "order": 0,
     "openInNewTab": false,
-    "menu": ["main-menu", "links-menu"]
+    "menu": ["main-menu", "links-menu", "footer-menu-2"]
   }
 ]

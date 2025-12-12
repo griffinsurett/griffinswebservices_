@@ -12,6 +12,12 @@ export interface Props {
   animateOutText?: boolean;
   class?: string;
   useLottie?: boolean;
+  logoMediaClass?: string;
+  logoWidths?: number[];
+  logoSizes?: string;
+  titleFirstClass?: string;
+  titleRestClass?: string;
+  loop?: boolean;
 }
 
 const {
@@ -21,6 +27,12 @@ const {
   animateOutText = false,
   class: className = "",
   useLottie = true,
+  logoMediaClass,
+  logoWidths,
+  logoSizes,
+  titleFirstClass,
+  titleRestClass,
+  loop = true,
 } = Astro.props;
 
 const shouldUseLottie =
@@ -29,9 +41,14 @@ const shouldUseLottie =
     trigger === "visible" ||
     trigger === "load");
 
-const LOGO_WIDTHS = [45, 80, 90];
-const LOGO_SIZES = "(min-width: 1024px) 45px, 40px";
-const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-contain";
+const DEFAULT_LOGO_WIDTHS = [45, 80, 90];
+const DEFAULT_LOGO_SIZES = "(min-width: 1024px) 45px, 40px";
+const DEFAULT_LOGO_CLASSES =
+  "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-contain";
+
+const LOGO_WIDTHS = logoWidths ?? DEFAULT_LOGO_WIDTHS;
+const LOGO_SIZES = logoSizes ?? DEFAULT_LOGO_SIZES;
+const logoClasses = logoMediaClass ?? DEFAULT_LOGO_CLASSES;
 ---
 
 <a
@@ -48,6 +65,7 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
           trigger={trigger}
           className="logo-class"
           mediaClasses={logoClasses}
+          loop={loop}
           client:idle
         >
           <Image
@@ -70,6 +88,7 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
           trigger={trigger}
           className="logo-class"
           mediaClasses={logoClasses}
+          loop={loop}
           client:visible
         >
           <Image
@@ -92,6 +111,7 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
           trigger={trigger}
           className="logo-class"
           mediaClasses={logoClasses}
+          loop={loop}
           client:load
         >
           <Image
@@ -130,6 +150,8 @@ const logoClasses = "block w-[43px] h-[43px] lg:w-[45px] lg:h-[45px] object-cont
       className="flex flex-col p-0 m-0"
       fadeDuration={textFadeMs}
       animateOutText={animateOutText}
+      firstClass={titleFirstClass}
+      restClass={titleRestClass}
     />
   </div>
 </a>

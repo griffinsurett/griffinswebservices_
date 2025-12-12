@@ -28,7 +28,7 @@ export function normalizeContactLinks(items: Array<any>): ContactLink[] {
       const linkPrefix = data.linkPrefix ?? '';
       const tags: string[] = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
 
-      const displayTitle = isPhoneContactId(id)
+      const displayTitle = linkPrefix?.toLowerCase().startsWith("tel")
         ? formatPhoneNumber(rawTitle)
         : rawTitle;
 

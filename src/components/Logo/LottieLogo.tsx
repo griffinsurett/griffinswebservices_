@@ -9,6 +9,7 @@ interface LottieLogoProps {
   trigger?: "auto" | "scroll" | "visible" | "load";
   respectReducedMotion?: boolean;
   fadeMs?: number;
+  loop?: boolean;
 }
 
 const ANIMATION_URL = new URL("../../Lotties/Animation_logo_small_size.json", import.meta.url);
@@ -20,6 +21,7 @@ export default function LottieLogo({
   trigger = "auto",
   respectReducedMotion = true,
   fadeMs = 180,
+  loop = true,
   children,
 }: PropsWithChildren<LottieLogoProps>) {
   return (
@@ -32,7 +34,7 @@ export default function LottieLogo({
       respectReducedMotion={respectReducedMotion}
       fadeMs={fadeMs}
       rewindToStartOnTop
-      loop
+      loop={loop}
       autoplay={false}
       speed={0.5}
       renderer="svg"

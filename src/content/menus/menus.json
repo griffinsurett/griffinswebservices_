@@ -7,7 +7,12 @@
   {
     "id": "footer-menu",
     "title": "Footer Menu",
-    "description": "Secondary footer links"
+    "description": "Legal footer links"
+  },
+  {
+    "id": "footer-menu-2",
+    "title": "Links",
+    "description": "About Us Links"
   },
   {
     "id": "links-menu",

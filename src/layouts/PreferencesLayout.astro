@@ -23,6 +23,38 @@ import "../styles/accessibility.css";
 import BrowserTranslateScript from "@/components/preferences/language/BrowserTranslateScript.astro";
 import "../styles/language-switcher.css";
 import DividerHeading from "@/components/DividerHeading/DividerHeading";
+
+interface Props {
+  showHeading?: boolean;
+  layout?: "vertical" | "horizontal";
+  class?: string;
+}
+
+const {
+  showHeading = true,
+  layout = "vertical",
+  class: className = "",
+} = Astro.props as Props;
+
+const isHorizontal = layout === "horizontal";
+const wrapperClasses = [
+  "preferences-layout flex flex-col gap-4 w-full",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+const itemsClasses = isHorizontal
+  ? "flex flex-col items-center text-center sm:text-left sm:flex-row sm:items-center sm:justify-between flex-wrap gap-2 lg:gap-4 w-full"
+  : "flex flex-col justify-center items-center sm:items-start gap-2 text-center sm:text-left";
+const linkClasses = [
+  "text-text hover:underline",
+  isHorizontal ? "whitespace-nowrap text-sm" : "",
+]
+  .filter(Boolean)
+  .join(" ");
+const actionWrapperClasses = isHorizontal
+  ? "inline-flex items-center gap-2 text-sm justify-center"
+  : "inline-flex items-center gap-2 text-sm justify-center sm:justify-start";
 ---
 
 {/* Consent Script - Inline initialization, runs immediately */}
@@ -31,19 +63,22 @@ import DividerHeading from "@/components/DividerHeading/DividerHeading";
 {/* Browser Translation Script - Both native and Google enabled */}
 <BrowserTranslateScript enableNative={true} enableGoogle={true} />
 
-<DividerHeading title="Preferences" className="mb-4" />
+<div class={wrapperClasses}>
+  {showHeading && (
+    <DividerHeading title="Preferences" className="mb-4" />
+  )}
 
-<div class="flex flex-col justify-center items-start gap-3">
+  <div class={itemsClasses}>
+    {/* CCPA Opt-Out Link */}
+    <a href="/privacy-policy#ccpa-rights" class={linkClasses}
+      >Do Not Sell My Personal Information</a
+    >
 
-{/* CCPA Opt-Out Link */}
-<a href="/privacy-policy#ccpa-rights" class="text-text hover:underline"
-  >Do Not Sell My Personal Information</a
->
+    {/* Cookie Preferences Button - Client-side only */}
+      <CookiePreferencesButton client:visible />
+    <LazyCookieConsentBanner client:visible />
 
-{/* Cookie Preferences Button - Client-side only */}
-<CookiePreferencesButton client:visible />
-<LazyCookieConsentBanner client:visible />
-
-{/* Accessibility Button - Client-side only */}
-<AccessibilityButton client:visible />
+    {/* Accessibility Button - Client-side only */}
+      <AccessibilityButton client:visible />
+  </div>
 </div>
