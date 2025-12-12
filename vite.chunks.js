@@ -46,14 +46,21 @@ export function manualChunks(id) {
     return 'lazy-utils';
   }
 
+  // Shared UI primitives used by both accordion and feature-cards
+  // This MUST come BEFORE accordion and feature-cards rules
+  // AnimatedBorder and IconListItem are shared deps - put them in their own chunk
+  // so they don't cause accordion to pull in feature-cards or vice versa
+  if (
+    id.includes('AnimatedBorder/') ||
+    id.includes('LoopComponents/IconListItem')
+  ) {
+    return 'ui-primitives';
+  }
+
   // Below-fold heavy components - keep these separate so they're only loaded
   // when scrolled into view (via client:visible)
   // These are NOT in the initial viewport and should be deferred
-  if (
-    id.includes('LoopComponents/FeatureCard') ||
-    id.includes('LoopComponents/IconListItem') ||
-    id.includes('AnimatedBorder/')
-  ) {
+  if (id.includes('LoopComponents/FeatureCard')) {
     return 'feature-cards';
   }
 
