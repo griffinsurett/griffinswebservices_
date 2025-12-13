@@ -5,16 +5,18 @@
  * Manages open/close state for mobile menu with checkbox-based hamburger button.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Modal from "@/components/Modal";
 import MobileMenuItem from "@/components/LoopComponents/Menu/MobileMenuItem";
-import HamburgerButton from "../../Menu/HamburgerButton";
+import HamburgerButton from "@/components/Menu/HamburgerButton";
 
 interface MobileMenuDrawerProps {
   items: any[];
   className?: string;
   hamburgerTransform?: boolean;
   closeButton?: boolean;
+  triggerId?: string;
+  useExternalTrigger?: boolean;
 }
 
 interface MenuLevel {
@@ -27,11 +29,15 @@ export default function MobileMenuDrawer({
   className = "",
   hamburgerTransform = true,
   closeButton = false,
+  triggerId = "mobile-menu-toggle",
+  useExternalTrigger = false,
 }: MobileMenuDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [menuStack, setMenuStack] = useState<MenuLevel[]>(() => [
     { title: "Main Menu", items },
   ]);
+  const latestTriggerId = useRef(triggerId);
+  latestTriggerId.current = triggerId;
 
   const resetMenuStack = useCallback(() => {
     setMenuStack([{ title: "Main Menu", items }]);
@@ -41,12 +47,43 @@ export default function MobileMenuDrawer({
     resetMenuStack();
   }, [resetMenuStack]);
 
-  const toggleMenu = (nextState: boolean) => {
-    setIsOpen(nextState);
-    if (!nextState) {
-      resetMenuStack();
-    }
-  };
+  const syncTriggerState = useCallback(
+    (next: boolean) => {
+      const button = document.getElementById(latestTriggerId.current);
+      if (button) {
+        button.setAttribute("aria-expanded", String(next));
+      }
+    },
+    []
+  );
+
+  const toggleMenu = useCallback(
+    (forced?: boolean) => {
+      setIsOpen((prev) => {
+        const next = typeof forced === "boolean" ? forced : !prev;
+        if (!next) {
+          resetMenuStack();
+        }
+        syncTriggerState(next);
+        return next;
+      });
+    },
+    [resetMenuStack, syncTriggerState]
+  );
+
+  useEffect(() => {
+    syncTriggerState(isOpen);
+  }, [isOpen, syncTriggerState]);
+
+  useEffect(() => {
+    if (!useExternalTrigger) return;
+    const button = document.getElementById(triggerId);
+    if (!button) return;
+
+    const handleClick = () => toggleMenu();
+    button.addEventListener("click", handleClick);
+    return () => button.removeEventListener("click", handleClick);
+  }, [triggerId, toggleMenu, useExternalTrigger]);
 
   const handleNavigate = () => {
     toggleMenu(false);
@@ -68,14 +105,15 @@ export default function MobileMenuDrawer({
 
   return (
     <>
-      {/* Checkbox-based Hamburger Button */}
-      <HamburgerButton
-        isOpen={isOpen}
-        onChange={toggleMenu}
-        hamburgerTransform={hamburgerTransform}
-        ariaLabel={isOpen ? "Close menu" : "Open menu"}
-        id="mobile-menu-toggle"
-      />
+      {!useExternalTrigger && (
+        <HamburgerButton
+          isOpen={isOpen}
+          onChange={(state) => toggleMenu(state)}
+          hamburgerTransform={hamburgerTransform}
+          ariaLabel={isOpen ? "Close menu" : "Open menu"}
+          id={triggerId}
+        />
+      )}
 
       {/* Mobile Menu Modal */}
       <Modal

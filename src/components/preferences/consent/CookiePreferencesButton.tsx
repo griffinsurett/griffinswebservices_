@@ -1,11 +1,20 @@
 // src/components/consent/CookiePreferencesButton.tsx
-import { useState, useTransition, lazy, Suspense, memo } from "react";
+import { useEffect, useState, useTransition, lazy, Suspense, memo } from "react";
+import { subscribeToCookiePreferencesRequests } from "@/utils/consent/events";
 
 const CookiePreferencesModal = lazy(() => import("./CookiePreferencesModal"));
 
 function CookiePreferencesButton() {
   const [showModal, setShowModal] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    return subscribeToCookiePreferencesRequests(() => {
+      startTransition(() => {
+        setShowModal(true);
+      });
+    });
+  }, [startTransition]);
 
   const handleOpenModal = () => {
     startTransition(() => {

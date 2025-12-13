@@ -6,15 +6,14 @@
  * Now expects items to be passed with potential parent relationships.
  * Builds tree structure from flat items.
  *
- * Mobile menu uses deferred hydration:
- * 1. Static hamburger button renders immediately (no JS)
- * 2. Menu content lazy-loads only when button is clicked
+ * Mobile menu renders with the interactive drawer component so the menu
+ * opens instantly with no extra click or event replaying.
  */
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import MenuList from "@/components/LoopTemplates/Menu/MenuList.astro";
+import HamburgerMenuDrawer from "@/components/LoopTemplates/Menu/HamburgerMenu/HamburgerMenuDrawer";
 import StaticHamburgerButton from "@/components/Menu/StaticHamburgerButton.astro";
-import LazyHamburgerMenu from "@/components/LoopTemplates/Menu/HamburgerMenu/Lazy";
 import { buildMenuTree } from "@/utils/menuQueries";
 import { toArray } from "@/utils/array";
 
@@ -49,9 +48,8 @@ const showMobile = mode === "responsive" || mode === "hamburger-only";
 // Responsive visibility classes
 const desktopClasses = mode === "responsive" ? "hidden md:block" : "";
 const mobileClasses = showMobile && mode === "responsive" ? "md:hidden" : "";
-
-// Generate unique button ID for this menu instance
 const buttonId = id ? `${id}-menu-toggle` : "mobile-menu-toggle";
+
 ---
 
 <div id={id} class={`menu-variant ${className}`}>
@@ -69,16 +67,15 @@ const buttonId = id ? `${id}-menu-toggle` : "mobile-menu-toggle";
   {
     showMobile && (
       <div class={`menu-mobile ${mobileClasses}`}>
-        {/* Static button - no JS required for initial render */}
         <StaticHamburgerButton id={buttonId} />
-
-        {/* Lazy-loaded menu - only hydrates on first click */}
-        <LazyHamburgerMenu
+        <HamburgerMenuDrawer
           client:click={{ selector: `#${buttonId}` }}
           items={menuTree}
-          buttonId={buttonId}
+          className="menu-mobile-inner"
           closeButton={closeButton}
           hamburgerTransform={hamburgerTransform}
+          triggerId={buttonId}
+          useExternalTrigger
         />
       </div>
     )
