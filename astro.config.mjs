@@ -63,6 +63,8 @@ export default defineConfig({
     inlineStylesheets: 'always',
     split: true,
   },
+
+  prefetch: false,
   
   compressHTML: true,
   redirects,
