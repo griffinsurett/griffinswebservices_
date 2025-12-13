@@ -13,6 +13,7 @@ import ContentBridge from "@/components/ContentRenderer/ContentBridge/ContentBri
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import fallbackVideo from "@/assets/Black-Microwave-Earrape.mp4";
 import { toArray } from "@/utils/array";
+import { generateVideoPoster } from "@/utils/videoThumbnails";
 
 interface Props extends BaseVariantProps {
   items?: any[];
@@ -42,22 +43,54 @@ const solutionEntries = safeItems.filter(
 const contentItems = solutionEntries.length > 0 ? solutionEntries : safeItems;
 const showHeader = Boolean(title || description);
 
-const accordionItems = contentItems.map((item: any, index: number) => {
-  const slug = item?.slug ?? `solution-${index}`;
-  const hasPage = item?.hasPage !== false && Boolean(item?.url);
+async function resolveVideoPoster(
+  src?: string,
+  slug?: string,
+) {
+  if (!src || src.startsWith("http")) {
+    return null;
+  }
 
-  return {
-    key: slug,
-    icon: item?.icon,
-    title: item?.title,
-    description: item?.description ?? item?.summary ?? item?.excerpt,
-    slug,
-    contentSlotId: `${id}-slot-${index}`,
-    videoSrc: item?.videoSrc ?? fallbackVideo,
-    hasPage,
-    url: hasPage ? item?.url : undefined,
-  };
-});
+  try {
+    return await generateVideoPoster(src);
+  } catch (error) {
+    console.warn(`[VideoAccordionVariant] Failed to generate poster for ${slug ?? src}`, error);
+    return null;
+  }
+}
+
+const accordionItems = await Promise.all(
+  contentItems.map(async (item: any, index: number) => {
+    const slug = item?.slug ?? `solution-${index}`;
+    const hasPage = item?.hasPage !== false && Boolean(item?.url);
+    const videoSrc = item?.videoSrc ?? fallbackVideo;
+    const hasManualPoster = typeof item?.videoPoster === "string";
+    const poster = hasManualPoster
+      ? {
+          src: item.videoPoster,
+          placeholderSrc: item.videoPlaceholder,
+          width: item.posterWidth,
+          height: item.posterHeight,
+        }
+      : await resolveVideoPoster(videoSrc, slug);
+
+    return {
+      key: slug,
+      icon: item?.icon,
+      title: item?.title,
+      description: item?.description ?? item?.summary ?? item?.excerpt,
+      slug,
+      contentSlotId: `${id}-slot-${index}`,
+      videoSrc,
+      videoPoster: poster?.src,
+      videoPlaceholder: poster?.placeholderSrc,
+      posterWidth: poster?.width,
+      posterHeight: poster?.height,
+      hasPage,
+      url: hasPage ? item?.url : undefined,
+    };
+  }),
+);
 ---
 
 <section id={id} class={`outer-section bg-bg relative ${className}`.trim()}>

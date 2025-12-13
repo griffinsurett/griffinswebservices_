@@ -1,8 +1,10 @@
 ---
 import LottieLogo from "./LottieLogo";
+import LazyScrollLottieLogo from "./LazyScrollLottieLogo";
 import TextLogoStatic from "./TextLogoStatic.astro";
 import { Image } from "astro:assets";
 import POSTER_SRC from "@/assets/GWS-animated.png";
+import SVG_LOGO from "@/assets/GWS-animated.svg";
 import { siteData } from "@/content/siteData";
 
 export interface Props {
@@ -59,7 +61,7 @@ const logoClasses = logoMediaClass ?? DEFAULT_LOGO_CLASSES;
   {shouldUseLottie ? (
     <>
       {trigger === "scroll" ? (
-        <LottieLogo
+        <LazyScrollLottieLogo
           alt="Griffin's Web Services Animated Logo"
           loading={loading}
           trigger={trigger}
@@ -68,19 +70,15 @@ const logoClasses = logoMediaClass ?? DEFAULT_LOGO_CLASSES;
           loop={loop}
           client:idle
         >
-          <Image
-            src={POSTER_SRC}
+          <img
+            src={SVG_LOGO.src}
             alt="Griffin's Web Services Logo"
             loading={loading}
             decoding="async"
-            format="webp"
-            widths={LOGO_WIDTHS}
-            sizes={LOGO_SIZES}
-            quality={90}
             class={logoClasses}
             fetchpriority={loading === "eager" ? "high" : "low"}
           />
-        </LottieLogo>
+        </LazyScrollLottieLogo>
       ) : trigger === "visible" ? (
         <LottieLogo
           alt="Griffin's Web Services Animated Logo"
@@ -91,15 +89,11 @@ const logoClasses = logoMediaClass ?? DEFAULT_LOGO_CLASSES;
           loop={loop}
           client:visible
         >
-          <Image
-            src={POSTER_SRC}
+          <img
+            src={SVG_LOGO.src}
             alt="Griffin's Web Services Logo"
             loading={loading}
             decoding="async"
-            format="webp"
-            widths={LOGO_WIDTHS}
-            sizes={LOGO_SIZES}
-            quality={90}
             class={logoClasses}
             fetchpriority={loading === "eager" ? "high" : undefined}
           />
@@ -114,15 +108,11 @@ const logoClasses = logoMediaClass ?? DEFAULT_LOGO_CLASSES;
           loop={loop}
           client:load
         >
-          <Image
-            src={POSTER_SRC}
+          <img
+            src={SVG_LOGO.src}
             alt="Griffin's Web Services Logo"
             loading={loading}
             decoding="async"
-            format="webp"
-            widths={LOGO_WIDTHS}
-            sizes={LOGO_SIZES}
-            quality={90}
             class={logoClasses}
             fetchpriority={loading === "eager" ? "high" : undefined}
           />
@@ -130,15 +120,11 @@ const logoClasses = logoMediaClass ?? DEFAULT_LOGO_CLASSES;
       )}
     </>
   ) : (
-    <Image
-      src={POSTER_SRC}
+    <img
+      src={SVG_LOGO.src}
       alt="Griffin's Web Services Logo"
       loading={loading}
       decoding="async"
-      format="webp"
-      widths={LOGO_WIDTHS}
-      sizes={LOGO_SIZES}
-      quality={90}
       class={logoClasses}
       fetchpriority={loading === "eager" ? "high" : undefined}
     />

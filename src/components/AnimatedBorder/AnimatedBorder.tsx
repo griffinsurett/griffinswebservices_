@@ -181,10 +181,13 @@ export default function AnimatedBorder({
   const borderWidthValue =
     typeof borderWidth === "number" ? `${borderWidth}px` : borderWidth;
 
+  const resolvedDuration =
+    controllerProvided && variant === "progress" ? 0 : duration;
+
   const overlayStyle: Record<string, string | number> = {
     "--ab-color": color,
     "--ab-border-width": borderWidthValue,
-    "--ab-duration": `${duration}ms`,
+    "--ab-duration": `${resolvedDuration}ms`,
     "--ab-fade-duration": `${fadeOutMs}ms`,
   };
 

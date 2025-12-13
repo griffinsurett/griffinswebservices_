@@ -78,7 +78,7 @@ export default function EnhancedAccordionItem({
             `}
             aria-hidden="true"
           >
-            <span className="translate-y-[-1px]">{isActive ? "−" : "+"}</span>
+            <span>{isActive ? "−" : "+"}</span>
           </div>
         </Button>
 

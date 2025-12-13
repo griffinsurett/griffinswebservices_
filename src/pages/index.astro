@@ -102,6 +102,19 @@ const heroDescription =
       autoAdvanceDelay={2000}
     />
 
+    <ContentRenderer
+      query={query("solutions")}
+      variant="VideoAccordionVariant"
+      title="See Our Solutions In Action"
+      heading={{
+        before: "Explore the work.",
+        text: "Watch how each solution performs.",
+      }}
+      description="Dive deeper into the speed, visuals, and UX of every solution with quick video overviews pulled straight from our library."
+      className="pt-16"
+      autoAdvanceDelay={3500}
+    />
+
     <!-- Testimonials with rating filter -->
     <ContentRenderer
       query={query("testimonials").where((entry) => entry.data.rating >= 4)}

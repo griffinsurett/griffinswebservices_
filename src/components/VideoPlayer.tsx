@@ -5,11 +5,14 @@ import {
   type Ref,
   type ReactNode,
 } from "react";
+import Video from "@/components/Video/Video";
 
 interface VideoPlayerProps extends VideoHTMLAttributes<HTMLVideoElement> {
   desktop?: boolean;
   wrapperClassName?: string;
   overlay?: ReactNode;
+  lazy?: boolean;
+  sourceType?: string;
 }
 
 const VideoPlayer = forwardRef(function VideoPlayer(
@@ -18,11 +21,16 @@ const VideoPlayer = forwardRef(function VideoPlayer(
     className = "",
     wrapperClassName = "",
     overlay,
-    autoPlay,
-    muted,
-    playsInline,
+    lazy = true,
+    autoPlay = true,
+    muted = true,
+    playsInline = true,
     controls,
-    preload,
+    loop = false,
+    src,
+    poster,
+    sourceType,
+    children,
     ...rest
   }: VideoPlayerProps,
   ref: Ref<HTMLVideoElement>,
@@ -31,26 +39,28 @@ const VideoPlayer = forwardRef(function VideoPlayer(
     ? "w-full h-[24rem] object-cover rounded-2xl"
     : "w-full aspect-video object-cover rounded-2xl";
 
-  const resolvedAutoPlay = autoPlay ?? true;
-  const resolvedMuted = muted ?? true;
-  const resolvedPlaysInline = playsInline ?? true;
   const resolvedControls = controls ?? desktop;
-  const resolvedPreload = preload ?? "metadata";
 
   return (
     <div
       className={`relative rounded-2xl overflow-hidden bg-card/40 ${wrapperClassName}`.trim()}
     >
-      <video
+      <Video
         ref={ref}
         className={`${baseClasses} ${className}`.trim()}
-        autoPlay={resolvedAutoPlay}
-        muted={resolvedMuted}
-        playsInline={resolvedPlaysInline}
+        src={src ?? ""}
+        poster={poster}
+        autoPlay={autoPlay}
+        muted={muted}
+        playsInline={playsInline}
         controls={resolvedControls}
-        preload={resolvedPreload}
+        loop={loop}
+        lazy={lazy}
+        sourceType={sourceType}
         {...rest}
-      />
+      >
+        {children ?? "Your browser does not support the video tag."}
+      </Video>
       {overlay}
     </div>
   );

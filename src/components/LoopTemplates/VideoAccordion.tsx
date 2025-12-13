@@ -19,6 +19,10 @@ export interface VideoAccordionItem {
   description?: string;
   icon?: string;
   videoSrc?: string;
+  videoPoster?: string;
+  videoPlaceholder?: string;
+  posterWidth?: number;
+  posterHeight?: number;
   contentSlotId?: string;
   slug?: string;
   hasPage?: boolean;
@@ -32,6 +36,12 @@ interface VideoAccordionProps {
 }
 
 const sanitizeId = (value: string) => value.replace(/[:]/g, "");
+const getVideoType = (src?: string) => {
+  if (!src) return undefined;
+  if (src.endsWith(".mov")) return "video/quicktime";
+  if (src.endsWith(".webm")) return "video/webm";
+  return "video/mp4";
+};
 
 export default function VideoAccordion({
   items,
@@ -194,6 +204,9 @@ export default function VideoAccordion({
                         mobileVideoRef.current = node;
                       }}
                       src={item.videoSrc}
+                      poster={item.videoPoster}
+                      lazy={false}
+                      sourceType={getVideoType(item.videoSrc)}
                       onTimeUpdate={handleTimeUpdate}
                       onEnded={handleEnded}
                       onLoadedData={handleLoadedData}
@@ -223,6 +236,9 @@ export default function VideoAccordion({
             key={`desktop-${activeItem?.key ?? activeIndex}`}
             ref={desktopVideoRef}
             src={activeItem?.videoSrc}
+            poster={activeItem?.videoPoster}
+            sourceType={getVideoType(activeItem?.videoSrc)}
+            lazy={false}
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleEnded}
             onLoadedData={handleLoadedData}
