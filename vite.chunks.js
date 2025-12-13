@@ -48,11 +48,13 @@ export function manualChunks(id) {
 
   // Shared UI primitives used by both accordion and feature-cards
   // This MUST come BEFORE accordion and feature-cards rules
-  // AnimatedBorder and IconListItem are shared deps - put them in their own chunk
+  // AnimatedBorder, IconListItem, and Icon are shared deps - put them in their own chunk
   // so they don't cause accordion to pull in feature-cards or vice versa
   if (
     id.includes('AnimatedBorder/') ||
-    id.includes('LoopComponents/IconListItem')
+    id.includes('LoopComponents/IconListItem') ||
+    id.includes('/components/Icon.tsx') ||
+    id.includes('/components/Icon/index')
   ) {
     return 'ui-primitives';
   }
@@ -64,24 +66,26 @@ export function manualChunks(id) {
     return 'feature-cards';
   }
 
+  // Accordion component - below fold FAQ section
+  // MUST come BEFORE carousels since VideoAccordion should be in accordion chunk
+  // MUST be separate from theme controls and ui-primitives
+  if (
+    id.includes('LoopTemplates/Accordion') ||
+    id.includes('LoopComponents/AccordionItem') ||
+    id.includes('LoopComponents/EnhancedAccordionItem') ||
+    id.includes('VideoAccordion')
+  ) {
+    return 'accordion';
+  }
+
   // Carousels and heavy interactive sections - loaded on scroll
   if (
     id.includes('TestimonialCarousel') ||
     id.includes('PortfolioCarousel') ||
     id.includes('PortfolioScreenShowcase') ||
-    id.includes('TechStackSection') ||
-    id.includes('VideoAccordion')
+    id.includes('TechStackSection')
   ) {
     return 'carousels';
-  }
-
-  // Accordion component - below fold FAQ section
-  if (
-    id.includes('LoopTemplates/Accordion') ||
-    id.includes('LoopComponents/AccordionItem') ||
-    id.includes('LoopComponents/EnhancedAccordionItem')
-  ) {
-    return 'accordion';
   }
 
   // Engagement hooks - carousel/autoplay/drag interactions (below-fold only)
