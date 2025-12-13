@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState, lazy, Suspense } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CircleCheckbox } from "./checkboxes/CircleCheckbox";
+import LanguageDropdownContent from "./LanguageDropdownContent";
 
 // Get stored language code from localStorage (lightweight)
 function getStoredLanguageCode(): string {
@@ -27,12 +28,8 @@ const FLAG_MAP: Record<string, string> = {
   ar: "🇸🇦",
 };
 
-// Lazy load the heavy dropdown content
-const LanguageDropdownContent = lazy(() => import("./LanguageDropdownContent"));
-
 export default function LanguageDropdown() {
   const [open, setOpen] = useState(false);
-  const [hasOpened, setHasOpened] = useState(false);
   const [currentCode, setCurrentCode] = useState("en");
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -71,7 +68,6 @@ export default function LanguageDropdown() {
   }, [open]);
 
   const handleToggle = () => {
-    if (!hasOpened) setHasOpened(true);
     setOpen((v) => !v);
   };
 
@@ -95,14 +91,12 @@ export default function LanguageDropdown() {
         </div>
       </CircleCheckbox>
 
-      {hasOpened && (
-        <Suspense fallback={null}>
-          <LanguageDropdownContent
-            open={open}
-            onClose={() => setOpen(false)}
-            onLanguageChange={(code) => setCurrentCode(code)}
-          />
-        </Suspense>
+      {open && (
+        <LanguageDropdownContent
+          open={open}
+          onClose={() => setOpen(false)}
+          onLanguageChange={(code) => setCurrentCode(code)}
+        />
       )}
     </div>
   );

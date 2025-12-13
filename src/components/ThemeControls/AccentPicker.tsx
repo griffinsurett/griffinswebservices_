@@ -1,12 +1,9 @@
-import { useEffect, useRef, useState, lazy, Suspense } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CircleCheckbox } from "./checkboxes/CircleCheckbox";
-
-// Lazy load the picker content (includes useAccentColor hook and SquareCheckbox)
-const AccentPickerContent = lazy(() => import("./AccentPickerContent"));
+import AccentPickerContent from "./AccentPickerContent";
 
 export default function AccentPicker() {
   const [open, setOpen] = useState(false);
-  const [hasOpened, setHasOpened] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Close on outside click
@@ -21,7 +18,6 @@ export default function AccentPicker() {
   }, [open]);
 
   const handleToggle = () => {
-    if (!hasOpened) setHasOpened(true);
     setOpen((v) => !v);
   };
 
@@ -41,11 +37,7 @@ export default function AccentPicker() {
         </svg>
       </CircleCheckbox>
 
-      {hasOpened && (
-        <Suspense fallback={null}>
-          <AccentPickerContent open={open} onClose={() => setOpen(false)} />
-        </Suspense>
-      )}
+      {open && <AccentPickerContent open={open} onClose={() => setOpen(false)} />}
     </div>
   );
 }

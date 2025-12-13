@@ -7,6 +7,10 @@ const customClientDirectives = [
     name: 'scroll',
     entrypoint: './src/client-directives/scroll.ts',
   },
+  {
+    name: 'hover',
+    entrypoint: './src/client-directives/hover.ts',
+  },
 ];
 
 export default function clientDirectivesIntegration() {
