@@ -14,12 +14,12 @@
  * Ensures consistent structure and metadata across the entire site.
  */
 
-import "../styles/global.css";
+// Note: fonts.css and global.css are imported in Theme.astro
 import HeadTags from "./HeadTags.astro";
 import SEO from "./SEO.astro";
 import Theme from "./Theme.astro";
 import BodyTags from "./BodyTags.astro";
-import Header from "./Header.astro"; 
+import Header from "./Header.astro";
 import Footer from "./Footer.astro";
 // Language detection removed - page always loads in English first
 // Translation only happens when user explicitly selects a language
@@ -37,15 +37,6 @@ const { ...seoProps } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <Theme />
-    <link
-      rel="preload"
-      href="/fonts/TikTok_Sans/TikTokSans-Latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin="anonymous"
-      fetchpriority="high"
-    />
-
     <meta name="generator" content={Astro.generator} />
 
     {/* SEO meta tags */}

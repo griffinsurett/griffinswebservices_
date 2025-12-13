@@ -1,8 +1,19 @@
 ---
 // src/layouts/Theme.astro
 
+import "../styles/fonts.css";  // Critical fonts - loaded first for optimal LCP
 import "../styles/global.css";
 ---
+
+<!-- Font preload - critical for LCP -->
+<link
+  rel="preload"
+  href="/fonts/TikTok_Sans/TikTokSans-Latin.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin="anonymous"
+  fetchpriority="high"
+/>
 
 <!-- Favicons -->
 <link rel="shortcut icon" href="/3dfavicons/favicon.ico" />
