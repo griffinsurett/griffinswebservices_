@@ -8,10 +8,18 @@ type ClientClickDirectiveValue =
       replay?: boolean;
     };
 
+type ClientScrollDirectiveValue =
+  | boolean
+  | number
+  | {
+      threshold?: number;
+    };
+
 declare global {
   namespace Astro {
     interface ClientDirectives {
       'client:click'?: ClientClickDirectiveValue;
+      'client:scroll'?: ClientScrollDirectiveValue;
     }
   }
 }

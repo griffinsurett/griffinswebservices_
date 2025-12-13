@@ -3,6 +3,10 @@ const customClientDirectives = [
     name: 'click',
     entrypoint: './src/client-directives/click.ts',
   },
+  {
+    name: 'scroll',
+    entrypoint: './src/client-directives/scroll.ts',
+  },
 ];
 
 export default function clientDirectivesIntegration() {
