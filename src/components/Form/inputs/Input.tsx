@@ -14,6 +14,14 @@ import {
 } from "react";
 import AnimatedBorder from "@/components/AnimatedBorder/AnimatedBorder";
 
+interface AnimatedBorderConfig {
+  enabled?: boolean;
+  duration?: number;
+  width?: number;
+  radius?: string;
+  color?: string;
+}
+
 interface InputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   name: string;
@@ -32,10 +40,8 @@ interface InputProps
   // Accessibility helpers
   describedBy?: string;
 
-  // Animated border tweaks
-  borderDuration?: number;
-  borderWidth?: number;
-  borderRadius?: string;
+  // Animated border configuration
+  animatedBorder?: AnimatedBorderConfig;
 }
 
 export default function Input({
@@ -48,14 +54,20 @@ export default function Input({
   showLabel = true,
   labelHidden = false,
   describedBy,
-  borderDuration = 900,
-  borderWidth = 2,
-  borderRadius = "rounded-xl",
+  animatedBorder = {},
   id: idProp,
   onFocus,
   onBlur,
   ...inputProps
 }: InputProps) {
+  // Destructure animated border config with defaults
+  const {
+    enabled = true,
+    duration = 900,
+    width = 2,
+    radius = "rounded-xl",
+    color = "var(--color-accent)",
+  } = animatedBorder;
   const [focused, setFocused] = useState(false);
   const reactId = useId();
   const id = idProp ?? `${name}-${reactId}`;
@@ -83,6 +95,20 @@ export default function Input({
     .filter(Boolean)
     .join(" ");
 
+  const inputElement = (
+    <input
+      id={id}
+      name={name}
+      required={required}
+      aria-required={required || undefined}
+      aria-describedby={describedBy}
+      className={`form-field ${enabled ? 'border-transparent! focus:border-transparent!' : ''} ${inputClassName}`.trim()}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      {...inputProps}
+    />
+  );
+
   return (
     <div className={containerClassName}>
       {label && (
@@ -92,28 +118,22 @@ export default function Input({
         </label>
       )}
 
-      <AnimatedBorder
-        variant="solid"
-        triggers="controlled"
-        active={focused}
-        duration={borderDuration}
-        borderWidth={borderWidth}
-        borderRadius={borderRadius}
-        color="var(--color-accent)"
-        innerClassName={`!bg-transparent !border-transparent p-0 ${borderRadius}`}
-      >
-        <input
-          id={id}
-          name={name}
-          required={required}
-          aria-required={required || undefined}
-          aria-describedby={describedBy}
-          className={`form-field ${inputClassName}`.trim()}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          {...inputProps}
-        />
-      </AnimatedBorder>
+      {enabled ? (
+        <AnimatedBorder
+          variant="progress-b-f"
+          triggers="controlled"
+          active={focused}
+          duration={duration}
+          borderWidth={width}
+          borderRadius={radius}
+          color={color}
+          innerClassName={`!bg-transparent !border-transparent p-0 ${radius}`}
+        >
+          {inputElement}
+        </AnimatedBorder>
+      ) : (
+        inputElement
+      )}
     </div>
   );
 }

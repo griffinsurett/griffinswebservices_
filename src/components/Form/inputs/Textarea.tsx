@@ -12,6 +12,14 @@ import {
 } from "react";
 import AnimatedBorder from "@/components/AnimatedBorder/AnimatedBorder";
 
+interface AnimatedBorderConfig {
+  enabled?: boolean;
+  duration?: number;
+  width?: number;
+  radius?: string;
+  color?: string;
+}
+
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   name: string;
   label?: string;
@@ -26,9 +34,8 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   labelHidden?: boolean;
   describedBy?: string;
 
-  borderDuration?: number;
-  borderWidth?: number;
-  borderRadius?: string;
+  // Animated border configuration
+  animatedBorder?: AnimatedBorderConfig;
 }
 
 export default function Textarea({
@@ -42,14 +49,20 @@ export default function Textarea({
   labelHidden = false,
   describedBy,
   rows = 5,
-  borderDuration = 900,
-  borderWidth = 2,
-  borderRadius = "rounded-xl",
+  animatedBorder = {},
   id: idProp,
   onFocus,
   onBlur,
   ...textareaProps
 }: TextareaProps) {
+  // Destructure animated border config with defaults
+  const {
+    enabled = true,
+    duration = 900,
+    width = 2,
+    radius = "rounded-xl",
+    color = "var(--color-accent)",
+  } = animatedBorder;
   const [focused, setFocused] = useState(false);
   const reactId = useId();
   const id = idProp ?? `${name}-${reactId}`;
@@ -77,6 +90,21 @@ export default function Textarea({
     .filter(Boolean)
     .join(" ");
 
+  const textareaElement = (
+    <textarea
+      id={id}
+      name={name}
+      rows={rows}
+      required={required}
+      aria-required={required || undefined}
+      aria-describedby={describedBy}
+      className={`form-field resize-none ${enabled ? 'border-transparent! focus:border-transparent!' : ''} ${textareaClassName}`.trim()}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      {...textareaProps}
+    />
+  );
+
   return (
     <div className={containerClassName}>
       {label && (
@@ -86,29 +114,22 @@ export default function Textarea({
         </label>
       )}
 
-      <AnimatedBorder
-        variant="solid"
-        triggers="controlled"
-        active={focused}
-        duration={borderDuration}
-        borderWidth={borderWidth}
-        borderRadius={borderRadius}
-        color="var(--color-accent)"
-        innerClassName={`!bg-transparent !border-transparent p-0 ${borderRadius}`}
-      >
-        <textarea
-          id={id}
-          name={name}
-          rows={rows}
-          required={required}
-          aria-required={required || undefined}
-          aria-describedby={describedBy}
-          className={`form-field resize-none ${textareaClassName}`.trim()}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          {...textareaProps}
-        />
-      </AnimatedBorder>
+      {enabled ? (
+        <AnimatedBorder
+          variant="progress-b-f"
+          triggers="controlled"
+          active={focused}
+          duration={duration}
+          borderWidth={width}
+          borderRadius={radius}
+          color={color}
+          innerClassName={`!bg-transparent !border-transparent p-0 ${radius}`}
+        >
+          {textareaElement}
+        </AnimatedBorder>
+      ) : (
+        textareaElement
+      )}
     </div>
   );
 }

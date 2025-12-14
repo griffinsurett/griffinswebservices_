@@ -2,20 +2,19 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const rootDir = resolve(__dirname, '../..');
 
 const customClientDirectives = [
   {
     name: 'click',
-    entrypoint: resolve(rootDir, 'src/integrations/client-directives/click.ts'),
+    entrypoint: resolve(__dirname, 'click.ts'),
   },
   {
     name: 'scroll',
-    entrypoint: resolve(rootDir, 'src/integrations/client-directives/scroll.ts'),
+    entrypoint: resolve(__dirname, 'scroll.ts'),
   },
   {
     name: 'hover',
-    entrypoint: resolve(rootDir, 'src/integrations/client-directives/hover.ts'),
+    entrypoint: resolve(__dirname, 'hover.ts'),
   },
 ];
 

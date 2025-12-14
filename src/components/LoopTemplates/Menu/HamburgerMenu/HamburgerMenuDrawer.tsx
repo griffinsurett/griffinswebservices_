@@ -131,7 +131,7 @@ export default function MobileMenuDrawer({
       {!useExternalTrigger && (
         <HamburgerButton
           isOpen={isOpen}
-          onChange={(state) => toggleMenu(state)}
+          onChange={(state: boolean | undefined) => toggleMenu(state)}
           hamburgerTransform={hamburgerTransform}
           ariaLabel={isOpen ? "Close menu" : "Open menu"}
           id={triggerId}
