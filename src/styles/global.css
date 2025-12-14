@@ -71,8 +71,8 @@
 
     /* Extras */
   --color-border-dim: rgba(255, 255, 255, 0.2);
-  --font-header: "TikTok Sans", Helvetica, Arial, sans-serif;
-  --font-body: "TikTok Sans", Helvetica, Arial, sans-serif;
+  --font-header: "TikTok Sans", "TikTok Sans Fallback", system-ui, -apple-system, sans-serif;
+  --font-body: "TikTok Sans", "TikTok Sans Fallback", system-ui, -apple-system, sans-serif;
 }
 
 body {

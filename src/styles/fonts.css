@@ -1,4 +1,15 @@
 /* Critical font definitions - loaded first for optimal LCP */
+
+/* Optimized system font fallback that matches TikTok Sans metrics */
+@font-face {
+  font-family: "TikTok Sans Fallback";
+  src: local("Arial");
+  size-adjust: 107%;
+  ascent-override: 92%;
+  descent-override: 23%;
+  line-gap-override: 0%;
+}
+
 @font-face {
   font-family: "TikTok Sans";
   src: url("/fonts/TikTok_Sans/TikTokSans-Latin.woff2") format("woff2-variations");

@@ -75,7 +75,7 @@ const logoClasses = logoMediaClass ?? DEFAULT_LOGO_CLASSES;
         class={logoClasses}
         widths={LOGO_WIDTHS}
         sizes={LOGO_SIZES}
-        fetchpriority="low"
+        fetchpriority={loading === "eager" ? "high" : "low"}
       />
     </LottieLogo>
   ) : (
