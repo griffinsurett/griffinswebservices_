@@ -13,7 +13,7 @@ import PortfolioItemComponent, {
 import { LeftArrow, RightArrow } from "@/components/Carousels/CarouselArrows";
 import useCarouselAutoplay from "@/components/Carousels/useCarouselAutoplay";
 import { useSideDragNavigation } from "@/hooks/interactions/useSideDragNavigation";
-import { animationProps } from "@/utils/animationProps";
+import { animationProps } from "@/integrations/scroll-animations/animationProps";
 
 interface PortfolioMediaEntry {
   src: string;

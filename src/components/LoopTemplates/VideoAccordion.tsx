@@ -12,7 +12,7 @@ import VideoPlayer from "@/components/VideoPlayer";
 import Button from "@/components/Button/Button";
 import { useVisibility } from "@/hooks/animations/useVisibility";
 import useEngagementAutoplay from "@/hooks/autoplay/useEngagementAutoplay";
-import { animationProps } from "@/utils/animationProps";
+import { animationProps } from "@/integrations/scroll-animations/animationProps";
 export interface VideoAccordionItem {
   key?: string;
   title: string;

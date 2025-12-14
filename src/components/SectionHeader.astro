@@ -3,8 +3,14 @@
 import BorderTitle from "@/components/BorderTitle";
 import Heading from "@/components/Heading";
 import type { ReactNode } from "react";
+import type * as ReactNamespace from "react";
 import type { VisibleRootMargin } from "@/components/AnimatedBorder/AnimatedBorder";
 import type { HeadingContent } from "@/content/schema";
+
+type HeadingTag = Extract<
+  keyof ReactNamespace.JSX.IntrinsicElements,
+  keyof HTMLElementTagNameMap
+>;
 
 interface Props {
   title?: ReactNode;
@@ -15,13 +21,16 @@ interface Props {
   headingBefore?: ReactNode;
   headingEmphasis?: ReactNode;
   headingAfter?: ReactNode;
-  headingTag?: string;
+  headingTag?: HeadingTag;
   headingClassName?: string;
   emphasisClassName?: string;
   description?: ReactNode;
   descriptionClassName?: string;
   className?: string;
   headerProps?: Record<string, unknown>;
+  animateHeading?: boolean;
+  animateDescription?: boolean;
+  animateOnce?: boolean;
 }
 
 const {
@@ -40,6 +49,9 @@ const {
   descriptionClassName = "large-text",
   className = "text-section",
   headerProps = {},
+  animateHeading = false,
+  animateDescription = false,
+  animateOnce = true,
 } = Astro.props as Props;
 
 const isHeadingContent = (value: unknown): value is HeadingContent => {
@@ -76,30 +88,53 @@ const hasPlainHeading =
   )}
 
   {hasContentHeading ? (
-    <Heading
-      tagName={headingTag}
-      className={headingClassName}
-      segmented={headingContent}
-      textClass={emphasisClassName}
-      {...headerProps}
-    />
+    <div
+      data-animate={animateHeading ? "fade-in" : undefined}
+      data-animate-once={animateHeading ? String(animateOnce) : undefined}
+    >
+      <Heading
+        tagName={headingTag}
+        className={headingClassName}
+        segmented={headingContent}
+        textClass={emphasisClassName}
+        {...headerProps}
+      />
+    </div>
   ) : hasSegmentedHeading ? (
-    <Heading
-      tagName={headingTag}
-      className={headingClassName}
-      before={headingBefore}
-      text={headingEmphasis}
-      after={headingAfter}
-      textClass={emphasisClassName}
-      {...headerProps}
-    />
+    <div
+      data-animate={animateHeading ? "fade-in" : undefined}
+      data-animate-once={animateHeading ? String(animateOnce) : undefined}
+    >
+      <Heading
+        tagName={headingTag}
+        className={headingClassName}
+        before={headingBefore}
+        text={headingEmphasis}
+        after={headingAfter}
+        textClass={emphasisClassName}
+        {...headerProps}
+      />
+    </div>
   ) : (
     hasPlainHeading && (
-      <Heading tagName={headingTag} className={headingClassName} {...headerProps}>
-        {headingValue as ReactNode}
-      </Heading>
+      <div
+        data-animate={animateHeading ? "fade-in" : undefined}
+        data-animate-once={animateHeading ? String(animateOnce) : undefined}
+      >
+        <Heading tagName={headingTag} className={headingClassName} {...headerProps}>
+          {headingValue as ReactNode}
+        </Heading>
+      </div>
     )
   )}
 
-  {description && <p class={descriptionClassName}>{description}</p>}
+  {description && (
+    <p
+      class={descriptionClassName}
+      data-animate={animateDescription ? "fade-in" : undefined}
+      data-animate-once={animateDescription ? String(animateOnce) : undefined}
+    >
+      {description}
+    </p>
+  )}
 </div>
