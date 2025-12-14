@@ -10,14 +10,14 @@ import { related } from "@/utils/query/snippets";
 ---
 <header class="fixed w-full top-0 z-[100000]">
     <div class="relative flex items-center justify-between head-foot-section py-2 gap-4">
-      
+
       <!-- Logo -->
       <Logo loading="eager" trigger="scroll" animateOutText={true} />
-      
-      <ThemeControls className="hidden sm:flex" client:load />
+
+      <ThemeControls className="hidden lg:flex" client:media="(min-width: 1024px)" />
 
       <div class="flex items-center gap-4">
-        <ThemeControls className="sm:hidden" client:load />
+        <ThemeControls className="lg:hidden" client:media="(max-width: 1023px)" />
 
         <div class="flex items-center justify-center sm:gap-4">
           <!-- Navigation Menu using query -->

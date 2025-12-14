@@ -9,7 +9,7 @@ import SliderControl from "@/integrations/preferences/controls/components/Slider
 import ToggleControl from "@/integrations/preferences/controls/components/ToggleControl";
 import SelectControl from "@/integrations/preferences/controls/components/SelectControl";
 import ButtonGroupControl from "@/integrations/preferences/controls/components/ButtonGroupControl";
-import LanguageSwitcher from "@/integrations/preferences/language/components/LanguageSwitcher";
+import LanguageSwitcher from "@/components/ThemeControls/LanguageSwitcher";
 import Button from "@/components/Button/Button";
 
 interface AccessibilityModalProps {

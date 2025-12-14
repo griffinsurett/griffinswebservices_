@@ -12,7 +12,7 @@ interface LottieLogoProps {
   loop?: boolean;
 }
 
-const ANIMATION_URL = new URL("../../Lotties/Animation_logo_small_size.json", import.meta.url);
+const ANIMATION_URL = "/lotties/Animation_logo_small_size.json";
 
 export default function LottieLogo({
   alt = "",
