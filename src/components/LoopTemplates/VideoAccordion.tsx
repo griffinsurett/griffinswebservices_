@@ -144,26 +144,80 @@ export default function VideoAccordion({
     return desktop || mobile;
   }, []);
 
+  const rafRef = useRef<number | null>(null);
+
+  const updateProgressSmooth = useCallback(() => {
+    const video = getActiveVideo();
+    if (!video || !video.duration) {
+      rafRef.current = null;
+      return;
+    }
+
+    const newProgress = (video.currentTime / video.duration) * 100;
+    setProgress(newProgress);
+
+    // Continue updating while video is playing
+    if (!video.paused && !video.ended) {
+      rafRef.current = requestAnimationFrame(updateProgressSmooth);
+    } else {
+      rafRef.current = null;
+    }
+  }, [getActiveVideo]);
+
   const handleTimeUpdate = useCallback(() => {
     const video = getActiveVideo();
     if (!video || !video.duration) return;
-    setProgress((video.currentTime / video.duration) * 100);
+
+    // Start smooth updates if not already running
+    if (rafRef.current === null && !video.paused && !video.ended) {
+      rafRef.current = requestAnimationFrame(updateProgressSmooth);
+    }
+
     scheduleRef.current?.();
-  }, [getActiveVideo]);
+  }, [getActiveVideo, updateProgressSmooth]);
 
   const handleLoadedData = useCallback(() => {
     setProgress(0);
     scheduleRef.current?.();
   }, []);
 
+  const handlePlay = useCallback(() => {
+    // Start smooth progress updates when video plays
+    if (rafRef.current === null) {
+      rafRef.current = requestAnimationFrame(updateProgressSmooth);
+    }
+  }, [updateProgressSmooth]);
+
+  const handlePause = useCallback(() => {
+    // Stop smooth updates when paused
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  }, []);
+
   const handleEnded = useCallback(() => {
     setProgress(100);
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
     beginGraceWindow();
   }, [beginGraceWindow]);
 
   const handleVideoClick = useCallback(() => {
     engageUser();
   }, [engageUser]);
+
+  // Cleanup RAF on unmount or activeIndex change
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [activeIndex]);
 
   if (safeItems.length === 0) {
     return null;
@@ -208,6 +262,8 @@ export default function VideoAccordion({
                       lazy={false}
                       sourceType={getVideoType(item.videoSrc)}
                       onTimeUpdate={handleTimeUpdate}
+                      onPlay={handlePlay}
+                      onPause={handlePause}
                       onEnded={handleEnded}
                       onLoadedData={handleLoadedData}
                       onClick={handleVideoClick}
@@ -240,6 +296,8 @@ export default function VideoAccordion({
             sourceType={getVideoType(activeItem?.videoSrc)}
             lazy={false}
             onTimeUpdate={handleTimeUpdate}
+            onPlay={handlePlay}
+            onPause={handlePause}
             onEnded={handleEnded}
             onLoadedData={handleLoadedData}
             onClick={handleVideoClick}

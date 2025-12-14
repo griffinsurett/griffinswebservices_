@@ -37,7 +37,7 @@ export default function EnhancedAccordionItem({
         triggers="controlled"
         active={isActive}
         controller={progress}
-        duration={300}
+        duration={100}
         borderRadius="rounded-3xl"
         borderWidth={2}
         className="transition-all duration-200"

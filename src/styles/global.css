@@ -610,7 +610,7 @@ body {
   .animated-border-overlay.progress {
     transition:
       opacity var(--ab-fade-duration, 220ms) cubic-bezier(.2, 0, 0, 1),
-      --ab-progress var(--ab-duration, 2000ms) cubic-bezier(.4, 0, .2, 1);
+      --ab-progress var(--ab-duration, 2000ms) linear;
   }
 
   .animated-border-overlay.progress-b-f {
