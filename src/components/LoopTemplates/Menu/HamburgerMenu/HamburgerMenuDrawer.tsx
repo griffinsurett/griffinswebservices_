@@ -7,30 +7,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  CLIENT_CLICK_HANDLER_READY_EVENT,
-  CLIENT_CLICK_HANDLER_STORE_KEY,
-  type ClientClickHandler,
+  CLIENT_CLICK_PENDING_EVENT,
+  consumePendingClientClicks,
+  markClientClickHandlerReady,
 } from "@/client-directives/shared/clientClickBridge";
 import Modal from "@/components/Modal";
 import MobileMenuItem from "@/components/LoopComponents/Menu/MobileMenuItem";
 import HamburgerButton from "@/components/Menu/HamburgerButton";
-
-type HandlerStoreWindow = Window & {
-  [CLIENT_CLICK_HANDLER_STORE_KEY]?: Map<string, ClientClickHandler>;
-};
-
-const getClientClickHandlerStore = (): Map<string, ClientClickHandler> | null => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const handlerWindow = window as HandlerStoreWindow;
-  if (!handlerWindow[CLIENT_CLICK_HANDLER_STORE_KEY]) {
-    handlerWindow[CLIENT_CLICK_HANDLER_STORE_KEY] = new Map();
-  }
-
-  return handlerWindow[CLIENT_CLICK_HANDLER_STORE_KEY]!;
-};
 
 interface MobileMenuDrawerProps {
   items: any[];
@@ -114,31 +97,35 @@ export default function MobileMenuDrawer({
       return;
     }
 
-    const store = getClientClickHandlerStore();
-    if (!store) {
+    const runPending = () => {
+      const pending = consumePendingClientClicks(clientClickHandlerKey);
+      if (pending > 0) {
+        toggleMenu(true);
+      }
+    };
+
+    runPending();
+    markClientClickHandlerReady(clientClickHandlerKey);
+
+    if (typeof window === "undefined") {
       return;
     }
 
-    const handler: ClientClickHandler = () => {
-      toggleMenu();
-      return true;
+    const handlePending = (event: Event) => {
+      if (!(event instanceof CustomEvent)) return;
+      if (event.detail?.key !== clientClickHandlerKey) return;
+      runPending();
     };
 
-    store.set(clientClickHandlerKey, handler);
-
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent(CLIENT_CLICK_HANDLER_READY_EVENT, {
-          detail: { key: clientClickHandlerKey },
-        })
-      );
-    }
-
+    window.addEventListener(
+      CLIENT_CLICK_PENDING_EVENT,
+      handlePending as EventListener
+    );
     return () => {
-      const current = store.get(clientClickHandlerKey);
-      if (current === handler) {
-        store.delete(clientClickHandlerKey);
-      }
+      window.removeEventListener(
+        CLIENT_CLICK_PENDING_EVENT,
+        handlePending as EventListener
+      );
     };
   }, [clientClickHandlerKey, toggleMenu]);
 

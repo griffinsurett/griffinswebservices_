@@ -7,7 +7,6 @@ type ClientClickDirectiveValue =
       once?: boolean;
       replay?: boolean;
       handlerKey?: string;
-      handlerTimeout?: number;
     };
 
 type ClientScrollDirectiveValue =
