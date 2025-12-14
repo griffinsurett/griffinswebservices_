@@ -633,3 +633,14 @@ body {
     --ab-progress: 360deg;
   }
 }
+
+/* Disable animated borders for reduced motion (accessibility) */
+@media (prefers-reduced-motion: reduce) {
+  .animated-border-overlay {
+    display: none !important;
+  }
+}
+
+[data-a11y-motion="reduced"] .animated-border-overlay {
+  display: none !important;
+}

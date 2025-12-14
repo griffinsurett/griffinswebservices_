@@ -15,6 +15,63 @@ import {
   type TriggerInput,
 } from "./useEngagedByTriggers";
 
+/**
+ * Hook to detect if reduced motion is preferred (system or user preference)
+ * Safe for SSR - only runs checks on client side
+ */
+function useReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    // Only run on client side (SSR safe)
+    if (typeof window === "undefined") return;
+
+    // Check system preference
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const checkMotionPreference = () => {
+      // Check system preference
+      const systemPreference = mediaQuery.matches;
+
+      // Check user accessibility preference
+      const userPreference =
+        document.documentElement.getAttribute("data-a11y-motion") === "reduced";
+
+      setPrefersReducedMotion(systemPreference || userPreference);
+    };
+
+    // Initial check
+    checkMotionPreference();
+
+    // Listen for system preference changes
+    mediaQuery.addEventListener("change", checkMotionPreference);
+
+    // Listen for user preference changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "data-a11y-motion"
+        ) {
+          checkMotionPreference();
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-a11y-motion"],
+    });
+
+    return () => {
+      mediaQuery.removeEventListener("change", checkMotionPreference);
+      observer.disconnect();
+    };
+  }, []);
+
+  return prefersReducedMotion;
+}
+
 export type AnimatedBorderVariant =
   | "none"
   | "solid"
@@ -84,6 +141,10 @@ export default function AnimatedBorder({
   ...rest
 }: AnimatedBorderProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+
+  // Override variant to "none" if reduced motion is preferred (accessibility)
+  const effectiveVariant = prefersReducedMotion ? "none" : variant;
 
   const { engaged, onEnter, onLeave, isAlways } = useEngagedByTriggers({
     ref: hostRef,
@@ -121,7 +182,7 @@ export default function AnimatedBorder({
   }, []);
 
   useEffect(() => {
-    if (variant !== "progress") {
+    if (effectiveVariant !== "progress") {
       prevEngagedRef.current = engagedFinal;
       return;
     }
@@ -145,10 +206,10 @@ export default function AnimatedBorder({
       }, fadeOutMs);
       return () => window.clearTimeout(timeout);
     }
-  }, [variant, engagedFinal, fadeOutMs]);
+  }, [effectiveVariant, engagedFinal, fadeOutMs]);
 
   useEffect(() => {
-    if (variant !== "progress") return;
+    if (effectiveVariant !== "progress") return;
     if (controllerProvided) {
       if (engagedFinal) {
         latestPercentRef.current = controllerValue ?? 0;
@@ -158,23 +219,23 @@ export default function AnimatedBorder({
     if (engagedFinal) {
       latestPercentRef.current = 100;
     }
-  }, [variant, engagedFinal, controllerProvided, controllerValue]);
+  }, [effectiveVariant, engagedFinal, controllerProvided, controllerValue]);
 
   const resolvedPercent = useMemo(() => {
-    if (variant === "progress") {
+    if (effectiveVariant === "progress") {
       if (controllerProvided) {
         return controllerValue ?? 0;
       }
       return engagedFinal && mounted ? 100 : 0;
     }
-    if (variant === "progress-b-f") {
+    if (effectiveVariant === "progress-b-f") {
       return engagedFinal ? 100 : 0;
     }
     return 0;
-  }, [variant, controllerProvided, controllerValue, engagedFinal, mounted]);
+  }, [effectiveVariant, controllerProvided, controllerValue, engagedFinal, mounted]);
 
   const displayPercent =
-    variant === "progress" && !engagedFinal && freezeAt != null
+    effectiveVariant === "progress" && !engagedFinal && freezeAt != null
       ? freezeAt
       : resolvedPercent;
 
@@ -182,7 +243,7 @@ export default function AnimatedBorder({
     typeof borderWidth === "number" ? `${borderWidth}px` : borderWidth;
 
   const resolvedDuration =
-    controllerProvided && variant === "progress" ? 0 : duration;
+    controllerProvided && effectiveVariant === "progress" ? 0 : duration;
 
   const overlayStyle: Record<string, string | number> = {
     "--ab-color": color,
@@ -191,16 +252,16 @@ export default function AnimatedBorder({
     "--ab-fade-duration": `${fadeOutMs}ms`,
   };
 
-  if (variant === "progress" || variant === "progress-b-f") {
+  if (effectiveVariant === "progress" || effectiveVariant === "progress-b-f") {
     overlayStyle["--ab-progress"] = `${(displayPercent || 0) * 3.6}deg`;
   }
 
-  if (variant === "progress") {
+  if (effectiveVariant === "progress") {
     overlayStyle.opacity = engagedFinal || fadingOut ? 1 : 0;
-  } else if (variant === "solid") {
+  } else if (effectiveVariant === "solid") {
     overlayStyle.opacity = engagedFinal ? 1 : 0;
     overlayStyle.padding = engagedFinal ? borderWidthValue : "0px";
-  } else if (variant === "progress-infinite") {
+  } else if (effectiveVariant === "progress-infinite") {
     overlayStyle.opacity = engagedFinal ? 1 : 0;
     overlayStyle.animationPlayState = engagedFinal ? "running" : "paused";
   }
@@ -214,17 +275,17 @@ export default function AnimatedBorder({
     "animated-border-overlay",
   ];
 
-  if (variant === "solid") {
+  if (effectiveVariant === "solid") {
     overlayClassNames.push("is-solid", "transition-all", "duration-800", "ease-in-out");
-  } else if (variant === "progress") {
+  } else if (effectiveVariant === "progress") {
     overlayClassNames.push("progress");
-  } else if (variant === "progress-b-f") {
+  } else if (effectiveVariant === "progress-b-f") {
     overlayClassNames.push("progress-b-f");
-  } else if (variant === "progress-infinite") {
+  } else if (effectiveVariant === "progress-infinite") {
     overlayClassNames.push("progress-infinite");
   }
 
-  const mountOverlay = variant !== "none";
+  const mountOverlay = effectiveVariant !== "none";
 
   const handleEnter = (event: MouseEvent<HTMLDivElement>) => {
     onMouseEnter?.(event);

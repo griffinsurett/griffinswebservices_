@@ -41,7 +41,6 @@ const handleSubmit = async (values: any) => {
     <div class="relative z-10 space-y-4">
       <div class="grid gap-3 md:grid-cols-2">
         <Input
-          client:idle
           name="firstName"
           label="First Name"
           type="text"
@@ -53,7 +52,6 @@ const handleSubmit = async (values: any) => {
         />
 
         <Input
-          client:idle
           name="lastName"
           label="Last Name"
           type="text"
@@ -64,7 +62,6 @@ const handleSubmit = async (values: any) => {
         />
 
         <Input
-          client:idle
           name="email"
           label="Email"
           type="email"
@@ -74,7 +71,6 @@ const handleSubmit = async (values: any) => {
         />
 
         <Input
-          client:idle
           name="phone"
           label="Phone"
           type="tel"
@@ -83,7 +79,6 @@ const handleSubmit = async (values: any) => {
         />
 
         <Textarea
-          client:idle
           name="message"
           label="Message"
           required={true}

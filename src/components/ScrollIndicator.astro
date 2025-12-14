@@ -1,0 +1,57 @@
+---
+// src/components/ScrollIndicator.astro
+export interface Props {
+  href?: string;
+  className?: string;
+}
+
+const { href = "#about-us", className = "" } = Astro.props;
+---
+
+<a
+  href={href}
+  class={`scroll-indicator absolute bottom-8 md:bottom-8 left-1/2 -translate-x-1/2 z-20 cursor-pointer no-underline ${className}`}
+  aria-label="Scroll down for more content"
+>
+  <div
+    class="flex items-center justify-center p-1 border-1 border-text rounded-full shadow-lg transition-all duration-300 ease-in-out"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="10"
+      height="10"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="text-text transition-all duration-300 w-4 h-4 md:w-5 md:h-5 hover:text-white hover:translate-y-0.5"
+    >
+      <path d="M12 5v14M19 12l-7 7-7-7"></path>
+    </svg>
+  </div>
+</a>
+
+<style>
+  .scroll-indicator {
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(-15px);
+    }
+  }
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-indicator {
+      animation: none;
+    }
+  }
+</style>
