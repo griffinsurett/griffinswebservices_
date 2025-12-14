@@ -105,6 +105,7 @@ export interface AnimatedBorderProps
   hoverDelay?: number;
   unhoverIntent?: HoverIntentOptions;
   visibleRootMargin?: VisibleRootMargin;
+  visibilityOptions?: IntersectionObserverInit;
   linkProps?: AnchorHTMLAttributes<HTMLAnchorElement>;
 }
 
@@ -135,6 +136,7 @@ export default function AnimatedBorder({
   hoverDelay = 0,
   unhoverIntent,
   visibleRootMargin = 75,
+  visibilityOptions = { threshold: 0.25 },
   onMouseEnter,
   onMouseLeave,
   linkProps,
@@ -153,6 +155,7 @@ export default function AnimatedBorder({
     hoverDelay,
     unhoverIntent,
     visibleRootMargin,
+    visibilityOptions,
   });
 
   const forceAlways = useMemo(() => {
