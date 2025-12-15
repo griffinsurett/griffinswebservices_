@@ -201,6 +201,7 @@ const contentOrderClass = imagePosition === "left"
               href={ctaHref ?? collectionUrl}
               rightIcon="lu:arrow-right"
               variant="secondary"
+              client:visible
             >
               {ctaText ?? `View All ${(title ?? collectionTitle ?? "").trim()}`}
             </Button>

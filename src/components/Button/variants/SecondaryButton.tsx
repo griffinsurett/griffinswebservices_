@@ -5,8 +5,6 @@ import { getButtonBaseClasses, renderButtonIcon } from "../utils";
 import { animationProps } from "@/integrations/scroll-animations";
 
 const BORDER_RADIUS_CLASS = "rounded-full";
-const DEFAULT_WRAPPER_CLASSES =
-  "inline-flex primary-button-transition w-full lg:w-auto";
 
 export default function SecondaryButton({
   leftIcon,
@@ -26,31 +24,33 @@ export default function SecondaryButton({
     .join(" ");
 
   return (
-    <AnimatedBorder
-      variant="progress-b-f"
-      triggers="visible"
-      color="var(--color-accent)"
-      borderWidth={2}
-      borderRadius={BORDER_RADIUS_CLASS}
-      duration={800}
-      className={
-        [
-          fullWidth ? "inline-flex w-full" : DEFAULT_WRAPPER_CLASSES,
-          buttonWrapperClasses,
-          "primary-button-transition justify-center items-center",
-        ]
-          .filter(Boolean)
-          .join(" ")
-      }
-      innerClassName="p-0 shadow-none border-transparent justify-center items-center bg-transparent"
+    <span
+      className={[
+        fullWidth ? "inline-flex w-full" : "inline-flex w-full lg:w-auto",
+        buttonWrapperClasses,
+        "group",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       {...animationProps("fade-in-up", { once: true })}
     >
-      <ButtonBase
-        {...props}
-        className={innerButtonClasses}
-        leftIcon={renderButtonIcon(leftIcon, props.size)}
-        rightIcon={renderButtonIcon(rightIcon, props.size)}
-      />
-    </AnimatedBorder>
+      <AnimatedBorder
+        variant="progress-b-f"
+        triggers="visible"
+        color="var(--color-accent)"
+        borderWidth={2}
+        borderRadius={BORDER_RADIUS_CLASS}
+        duration={800}
+        className="justify-center items-center w-full transition-all duration-700 ease-out group-hover:-translate-y-1"
+        innerClassName="p-0 shadow-none border-transparent justify-center items-center bg-transparent w-full"
+      >
+        <ButtonBase
+          {...props}
+          className={innerButtonClasses}
+          leftIcon={renderButtonIcon(leftIcon, props.size)}
+          rightIcon={renderButtonIcon(rightIcon, props.size)}
+        />
+      </AnimatedBorder>
+    </span>
   );
 }
