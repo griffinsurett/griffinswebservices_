@@ -7,6 +7,7 @@
  * Lazy loads video sources for optimal performance.
  */
 import { generateVideoPoster } from "@/utils/videoThumbnails";
+import { Image } from "astro:assets";
 import VideoClient from "./Video";
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
   playsinline?: boolean;
   lazy?: boolean;
   timecodeSeconds?: number;
+  clientLoadPlaceholder?: boolean;
 }
 
 const {
@@ -37,30 +39,51 @@ const {
   playsinline = true,
   lazy = true,
   timecodeSeconds = 0,
+  clientLoadPlaceholder = false,
   ...rest
 } = Astro.props;
 
 // Generate poster from video if not provided
 let posterUrl = manualPoster;
+let placeholderUrl: string | undefined;
 if (!posterUrl && src) {
   const generated = await generateVideoPoster(src, { timecodeSeconds });
   posterUrl = generated.src;
+  placeholderUrl = generated.placeholderSrc;
+}
+
+// For SSR placeholder loading, convert to absolute path for Astro Image
+let placeholderImageSrc: string | undefined;
+if (!clientLoadPlaceholder && placeholderUrl) {
+  // Convert to absolute path for Astro Image component
+  placeholderImageSrc = placeholderUrl;
 }
 
 ---
 
 <figure class={`video-wrapper relative ${wrapperClass}`.trim()}>
+  {!clientLoadPlaceholder && placeholderImageSrc && (
+    <img
+      src={placeholderImageSrc}
+      alt={alt}
+      class={`absolute inset-0 w-full h-full object-cover ${className}`.trim()}
+      loading="lazy"
+      decoding="async"
+    />
+  )}
   <VideoClient
     client:visible
     className={className}
     src={src}
     poster={posterUrl}
+    placeholderSrc={clientLoadPlaceholder ? placeholderUrl : undefined}
     autoPlay={autoplay}
     muted={muted}
     loop={loop}
     controls={controls}
     playsInline={playsinline}
     lazy={lazy}
+    clientLoadPlaceholder={clientLoadPlaceholder}
     sourceType={src?.endsWith(".mov")
       ? "video/quicktime"
       : src?.endsWith(".webm")

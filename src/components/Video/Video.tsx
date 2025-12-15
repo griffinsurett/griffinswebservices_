@@ -7,7 +7,6 @@
 import { useRef, useEffect, forwardRef } from "react";
 import type {
   VideoHTMLAttributes,
-  MutableRefObject,
   ReactNode,
 } from "react";
 
@@ -15,6 +14,8 @@ interface VideoProps extends VideoHTMLAttributes<HTMLVideoElement> {
   lazy?: boolean;
   sourceType?: string;
   children?: ReactNode;
+  clientLoadPlaceholder?: boolean;
+  placeholderSrc?: string;
 }
 
 export const Video = forwardRef<HTMLVideoElement, VideoProps>(
@@ -31,6 +32,8 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
       lazy = true,
       sourceType,
       children,
+      clientLoadPlaceholder = false,
+      placeholderSrc,
       ...rest
     },
     ref,
@@ -42,7 +45,7 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
       if (typeof ref === "function") {
         ref(node);
       } else if (ref) {
-        (ref as MutableRefObject<HTMLVideoElement | null>).current = node;
+        ref.current = node;
       }
     };
 
@@ -74,29 +77,40 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
     }, [lazy, autoPlay]);
 
     return (
-      <video
-        ref={assignRef}
-        className={`w-full h-full object-cover ${className}`.trim()}
-        poster={poster}
-        autoPlay={!lazy && autoPlay}
-        muted={muted}
-        loop={loop}
-        controls={controls}
-        playsInline={playsInline}
-        preload={lazy ? "metadata" : "auto"}
-        data-video-src={lazy ? src : undefined}
-        src={!lazy ? src : undefined}
-        {...rest}
-      >
-        {src && (
-          <source
-            src={!lazy ? src : undefined}
-            data-video-src={lazy ? src : undefined}
-            type={sourceType}
+      <>
+        {clientLoadPlaceholder && placeholderSrc && (
+          <img
+            src={placeholderSrc}
+            alt="Video placeholder"
+            className={`absolute inset-0 w-full h-full object-cover ${className}`.trim()}
+            loading="eager"
+            decoding="async"
           />
         )}
-        {children ?? "Your browser does not support the video tag."}
-      </video>
+        <video
+          ref={assignRef}
+          className={`w-full h-full object-cover ${className}`.trim()}
+          poster={poster}
+          autoPlay={!lazy && autoPlay}
+          muted={muted}
+          loop={loop}
+          controls={controls}
+          playsInline={playsInline}
+          preload={lazy ? "metadata" : "auto"}
+          data-video-src={lazy ? src : undefined}
+          src={!lazy ? src : undefined}
+          {...rest}
+        >
+          {src && (
+            <source
+              src={!lazy ? src : undefined}
+              data-video-src={lazy ? src : undefined}
+              type={sourceType}
+            />
+          )}
+          {children ?? "Your browser does not support the video tag."}
+        </video>
+      </>
     );
   },
 );
