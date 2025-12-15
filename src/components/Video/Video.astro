@@ -7,7 +7,6 @@
  * Lazy loads video sources for optimal performance.
  */
 import { generateVideoPoster } from "@/utils/videoThumbnails";
-import { Image } from "astro:assets";
 import VideoClient from "./Video";
 
 interface Props {
@@ -52,12 +51,15 @@ if (!posterUrl && src) {
   placeholderUrl = generated.placeholderSrc;
 }
 
-// For SSR placeholder loading, convert to absolute path for Astro Image
-let placeholderImageSrc: string | undefined;
-if (!clientLoadPlaceholder && placeholderUrl) {
-  // Convert to absolute path for Astro Image component
-  placeholderImageSrc = placeholderUrl;
-}
+// Only include placeholder markup during SSR when explicitly enabled
+const placeholderImageSrc =
+  !clientLoadPlaceholder && placeholderUrl ? placeholderUrl : undefined;
+
+const ssrPoster = clientLoadPlaceholder ? undefined : posterUrl;
+const deferredPosterSrc = clientLoadPlaceholder ? posterUrl : undefined;
+const ssrPlaceholder = placeholderImageSrc;
+const clientPlaceholderSrc =
+  clientLoadPlaceholder && placeholderUrl ? placeholderUrl : undefined;
 
 ---
 
@@ -66,8 +68,10 @@ if (!clientLoadPlaceholder && placeholderUrl) {
     client:visible
     className={className}
     src={src}
-    poster={posterUrl}
-    placeholderSrc={clientLoadPlaceholder ? placeholderUrl : placeholderImageSrc}
+    poster={ssrPoster}
+    clientPosterSrc={deferredPosterSrc}
+    placeholderSrc={ssrPlaceholder}
+    clientPlaceholderSrc={clientPlaceholderSrc}
     autoPlay={autoplay}
     muted={muted}
     loop={loop}

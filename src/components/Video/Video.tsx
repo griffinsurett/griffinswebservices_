@@ -4,7 +4,7 @@
  *
  * Client-side video player with lazy loading support.
  */
-import { useRef, useEffect, forwardRef } from "react";
+import { useRef, useEffect, forwardRef, useState } from "react";
 import type {
   VideoHTMLAttributes,
   ReactNode,
@@ -16,6 +16,8 @@ interface VideoProps extends VideoHTMLAttributes<HTMLVideoElement> {
   children?: ReactNode;
   clientLoadPlaceholder?: boolean;
   placeholderSrc?: string;
+  clientPosterSrc?: string;
+  clientPlaceholderSrc?: string;
 }
 
 export const Video = forwardRef<HTMLVideoElement, VideoProps>(
@@ -34,11 +36,19 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
       children,
       clientLoadPlaceholder = false,
       placeholderSrc,
+      clientPosterSrc,
+      clientPlaceholderSrc,
       ...rest
     },
     ref,
   ) => {
     const internalRef = useRef<HTMLVideoElement | null>(null);
+    const [resolvedPoster, setResolvedPoster] = useState<string | undefined>(
+      clientLoadPlaceholder ? undefined : poster,
+    );
+    const [resolvedPlaceholderSrc, setResolvedPlaceholderSrc] = useState<
+      string | undefined
+    >(clientLoadPlaceholder ? undefined : placeholderSrc);
 
     const assignRef = (node: HTMLVideoElement | null) => {
       internalRef.current = node;
@@ -76,11 +86,31 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
       return () => observer.disconnect();
     }, [lazy, autoPlay]);
 
+    useEffect(() => {
+      if (!clientLoadPlaceholder) {
+        setResolvedPoster(poster);
+        return;
+      }
+      if (clientPosterSrc) {
+        setResolvedPoster(clientPosterSrc);
+      }
+    }, [clientLoadPlaceholder, clientPosterSrc, poster]);
+
+    useEffect(() => {
+      if (!clientLoadPlaceholder) {
+        setResolvedPlaceholderSrc(placeholderSrc);
+        return;
+      }
+      if (clientPlaceholderSrc) {
+        setResolvedPlaceholderSrc(clientPlaceholderSrc);
+      }
+    }, [clientLoadPlaceholder, clientPlaceholderSrc, placeholderSrc]);
+
     return (
       <div className="relative w-full h-full">
-        {placeholderSrc && (
+        {resolvedPlaceholderSrc && (
           <img
-            src={placeholderSrc}
+            src={resolvedPlaceholderSrc}
             alt="Video placeholder"
             className={`absolute inset-0 w-full h-full object-cover z-0 ${className}`.trim()}
             loading={clientLoadPlaceholder ? "eager" : "lazy"}
@@ -90,7 +120,7 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
         <video
           ref={assignRef}
           className={`relative w-full h-full object-cover z-10 ${className}`.trim()}
-          poster={poster}
+          poster={resolvedPoster}
           autoPlay={!lazy && autoPlay}
           muted={muted}
           loop={loop}
