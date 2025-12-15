@@ -9,7 +9,7 @@
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import type { FeatureCardData, FeatureCardProps } from "@/components/LoopComponents/FeatureCard";
 import type { HeadingContent } from "@/content/schema";
-import CardRenderer from "@/components/LoopTemplates/CardRenderer.astro";
+import CardRenderer from "@/components/LoopTemplates/CardRenderer";
 import SectionHeader from "@/components/SectionHeader.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
@@ -86,6 +86,7 @@ const featureCardProps: Partial<FeatureCardProps> = {
     )}
 
       <CardRenderer
+        client:visible
         items={safeItems}
         columns={1}
         className={gridMarginClass}

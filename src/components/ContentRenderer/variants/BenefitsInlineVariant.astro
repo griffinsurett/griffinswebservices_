@@ -3,7 +3,7 @@
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import type { FeatureCardData } from "@/components/LoopComponents/FeatureCard";
 import SectionHeader from "@/components/SectionHeader.astro";
-import CardRenderer from "@/components/LoopTemplates/CardRenderer.astro";
+import CardRenderer from "@/components/LoopTemplates/CardRenderer";
 import { toArray } from "@/utils/array";
 import type { HeadingContent } from "@/content/schema";
 
@@ -64,6 +64,7 @@ const featureCardProps = {
 
     {safeItems.length > 0 && (
       <CardRenderer
+        client:visible
         items={safeItems}
         columns={columns}
         featureCardProps={featureCardProps}
