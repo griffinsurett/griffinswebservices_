@@ -144,12 +144,20 @@ function renderLibraryIcon(
     return null;
   }
 
-  return createElement(IconComponent, {
+  const iconProps: Record<string, any> = {
     size: iconSizeMap[size],
     className,
     color,
-    'aria-label': ariaLabel,
-  });
+  };
+
+  // Add aria-label if provided, otherwise mark as decorative
+  if (ariaLabel) {
+    iconProps['aria-label'] = ariaLabel;
+  } else {
+    iconProps['aria-hidden'] = 'true';
+  }
+
+  return createElement(IconComponent, iconProps);
 }
 
 /**
