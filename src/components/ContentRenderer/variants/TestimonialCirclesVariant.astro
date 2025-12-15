@@ -58,6 +58,7 @@ const resolveImage = (face: any) => {
   id={id}
   href={link}
   class={`testimonials flex items-center gap-4 lg:gap-6 px-2 md:px-0 ${className}`.trim()}
+  aria-label={`${counterLabel} - View testimonials`}
 >
   <div class="flex justify-center items-center">
     {faces.map((face) => (

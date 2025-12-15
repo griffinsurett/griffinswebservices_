@@ -67,7 +67,7 @@ export default function EnhancedAccordionItem({
               </span>
             )}
             <div className="text-left">
-              <p className="h4">{title}</p>
+              <h3 className="h4">{title}</h3>
             </div>
           </div>
 
