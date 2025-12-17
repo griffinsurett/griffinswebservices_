@@ -239,43 +239,53 @@ if (!clientLoadPlaceholder && firstMedia) {
     <div class="relative h-full top-0 card-bg-2 rounded-lg">
       <!-- ComputerScreen wrapper with client carousel inside -->
       <ComputerScreen>
-        <!-- SSR thumbnail placeholder for first item -->
-        {!clientLoadPlaceholder && placeholderMedia && (
-          <figure class="absolute inset-0 pointer-events-none overflow-hidden bg-black/40" data-ssr-placeholder>
-            <img
-              src={placeholderMedia.src}
-              alt={placeholderMedia.alt || firstItem?.title || "Project preview"}
-              width={placeholderMedia.width}
-              height={placeholderMedia.height}
-              loading={optimizeForLCP ? "eager" : "lazy"}
-              fetchpriority={optimizeForLCP ? "high" : "auto"}
-              draggable={false}
-              class="block h-auto min-h-full w-full select-none object-cover object-top"
-            />
-          </figure>
-        )}
+        <div class="relative h-full">
+          <!-- SSR thumbnail placeholder for first item - sits behind carousel -->
+          {!clientLoadPlaceholder && placeholderMedia && (
+            <figure class="absolute inset-0 pointer-events-none overflow-hidden bg-black/40 z-0" data-ssr-placeholder>
+              <img
+                src={placeholderMedia.src}
+                alt={placeholderMedia.alt || firstItem?.title || "Project preview"}
+                width={placeholderMedia.width}
+                height={placeholderMedia.height}
+                loading={optimizeForLCP ? "eager" : "lazy"}
+                fetchpriority={optimizeForLCP ? "high" : "auto"}
+                draggable={false}
+                class="block h-auto min-h-full w-full select-none object-cover object-top"
+              />
+            </figure>
+          )}
 
-        <!-- Client carousel loads here -->
-        {mediaQuery ? (
-          <PortfolioScreenShowcase client:media={mediaQuery} {...showcaseProps} />
-        ) : (
-          <PortfolioScreenShowcase client:visible {...showcaseProps} />
-        )}
+          <!-- Client carousel loads here - sits on top with z-10 -->
+          <div class="relative z-10 h-full">
+            {mediaQuery ? (
+              <PortfolioScreenShowcase client:media={mediaQuery} {...showcaseProps} />
+            ) : (
+              <PortfolioScreenShowcase client:visible {...showcaseProps} />
+            )}
+          </div>
+        </div>
       </ComputerScreen>
     </div>
   </div>
 </section>
 
 <style>
-  /* Hide SSR placeholder once component hydrates */
+  /* SSR placeholder - visible until carousel loads, then fades out */
   [data-ssr-placeholder] {
     opacity: 1;
-    transition: opacity 0.3s ease-out;
+    visibility: visible;
+    transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
   }
 
-  /* This selector targets when the React component has mounted */
-  :global(.portfolio-showcase-mounted) ~ [data-ssr-placeholder] {
+  /* Hide placeholder when React component mounts (use global selector to reach into component) */
+  :global([data-astro-cid-*]) :global(.portfolio-showcase-mounted) {
+    /* Placeholder fades out when carousel is ready */
+  }
+
+  /* Alternative: Hide when any child has hydrated */
+  :has(:global(.portfolio-showcase-mounted)) [data-ssr-placeholder] {
     opacity: 0;
-    pointer-events: none;
+    visibility: hidden;
   }
 </style>

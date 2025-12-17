@@ -478,7 +478,7 @@ export default function PortfolioScreenShowcase({
     "absolute inset-0 transition-transform transition-opacity duration-[750ms] ease-[cubic-bezier(0.4,0,0.2,1)]";
 
   return (
-    <div className={`relative h-full ${className}`.trim()}>
+    <div className={`portfolio-showcase-mounted relative h-full ${className}`.trim()}>
       <div className="relative h-full w-full overflow-hidden">
         {slides.map((item, slideIndex) => {
           const isActive = slideIndex === activeIndex;
