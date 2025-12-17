@@ -16,6 +16,10 @@ const customClientDirectives = [
     name: 'hover',
     entrypoint: resolve(__dirname, 'hover.ts'),
   },
+  {
+    name: 'firstInteraction',
+    entrypoint: resolve(__dirname, 'firstInteraction.ts'),
+  },
 ];
 
 export default function clientDirectivesIntegration() {

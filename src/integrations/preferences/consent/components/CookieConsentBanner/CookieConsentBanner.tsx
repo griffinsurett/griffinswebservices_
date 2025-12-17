@@ -3,22 +3,19 @@
  * Cookie Consent Banner
  *
  * Initial consent prompt that appears for first-time visitors.
- * Lazy loads the detailed preferences modal only when needed.
+ * Loads eagerly on first user interaction via client:firstInteraction.
  *
  * After consent is given, enables scripts via scriptManager.
  */
 
-import { useState, useEffect, useTransition, useRef, type ComponentType } from "react";
+import { useState, useEffect, useTransition, lazy, Suspense } from "react";
 import { useCookieStorage } from "@/hooks/useCookieStorage";
 import { enableConsentedScripts } from "@/integrations/preferences/consent/scripts/scriptManager";
 import Modal from "@/components/Modal";
 import type { CookieConsent } from "../types";
 import Button from "@/components/Button/Button";
 
-interface PreferencesModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+const CookiePreferencesModal = lazy(() => import("../CookiePreferencesModal"));
 
 export default function CookieConsentBanner() {
   const [showBanner, setShowBanner] = useState(false);
@@ -26,21 +23,12 @@ export default function CookieConsentBanner() {
   const [isPending, startTransition] = useTransition();
   const { setCookie } = useCookieStorage();
 
-  // Deferred loading of preferences modal
-  const [PreferencesModal, setPreferencesModal] =
-    useState<ComponentType<PreferencesModalProps> | null>(null);
-  const modalLoadStarted = useRef(false);
-
   useEffect(() => {
     // Quick inline check - if consent exists, don't show banner
     if (document.cookie.includes("cookie-consent=")) return;
 
-    // Delay banner appearance slightly for better UX
-    const timer = setTimeout(() => {
-      setShowBanner(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    // Show banner immediately (component already loads on first interaction)
+    setShowBanner(true);
   }, []);
 
   const handleAcceptAll = () => {
@@ -90,15 +78,9 @@ export default function CookieConsentBanner() {
   };
 
   const handleOpenSettings = () => {
-    if (!modalLoadStarted.current) {
-      modalLoadStarted.current = true;
-      import("../CookiePreferencesModal").then((m) => {
-        setPreferencesModal(() => m.default);
-        setShowModal(true);
-      });
-    } else {
+    startTransition(() => {
       setShowModal(true);
-    }
+    });
   };
 
   return (
@@ -167,11 +149,13 @@ export default function CookieConsentBanner() {
         </div>
       </Modal>
 
-      {PreferencesModal && (
-        <PreferencesModal
-          isOpen={showModal}
-          onClose={() => setShowModal(false)}
-        />
+      {showModal && (
+        <Suspense fallback={null}>
+          <CookiePreferencesModal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+          />
+        </Suspense>
       )}
     </>
   );

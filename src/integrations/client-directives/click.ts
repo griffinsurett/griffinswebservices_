@@ -1,11 +1,13 @@
 // Click Directive
 import type { ClientDirective } from 'astro';
+import type { EventName } from './shared/eventHandlers';
+import { eventMatchesSelector } from './shared/eventHandlers';
+import { waitForHydrationReady } from './shared/hydrationHelpers';
 import {
   enqueuePendingClientClickInvocation,
   getRegisteredClientClickHandler,
 } from './shared/clientClickBridge';
 
-type EventName = keyof HTMLElementEventMap | (string & {});
 type DirectiveConfig =
   | boolean
   | string
@@ -30,14 +32,6 @@ const DEFAULTS: NormalizedOptions = {
   events: DEFAULT_EVENTS,
   once: true,
   replay: true,
-};
-
-const waitForHydrationReady = () => {
-  if (typeof requestAnimationFrame === 'function') {
-    return new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  }
-
-  return new Promise<void>((resolve) => setTimeout(() => setTimeout(resolve, 0), 0));
 };
 
 function normalizeOptions(value: DirectiveConfig | undefined): NormalizedOptions {
@@ -79,11 +73,7 @@ const clickDirective: ClientDirective = (load, options, el) => {
   const doc = el.ownerDocument ?? (typeof document !== 'undefined' ? document : null);
   const eventTarget: EventTarget = selector && doc ? doc : el;
 
-  const shouldHydrate = (event: Event) => {
-    if (!selector) return true;
-    if (!(event.target instanceof Element)) return false;
-    return Boolean(event.target.closest(selector));
-  };
+  const shouldHydrate = (event: Event) => eventMatchesSelector(event, selector);
 
   const replayEvent = (event: Event) => {
     if (!replay) return;

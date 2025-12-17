@@ -1,4 +1,12 @@
 import type { ClientDirective } from 'astro';
+import {
+  createScrollHandler,
+  createWheelHandler,
+  createKeydownHandler,
+  createImmediateHandler,
+  meetsScrollThreshold,
+} from './shared/eventHandlers';
+import { createHydrationTrigger } from './shared/hydrationHelpers';
 
 type DirectiveConfig =
   | boolean
@@ -14,9 +22,6 @@ interface NormalizedOptions {
 const DEFAULTS: NormalizedOptions = {
   threshold: 0,
 };
-
-const SCROLL_KEYS = new Set(['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' ']);
-const INTERACTIVE_KEY_TARGETS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON']);
 
 function normalizeOptions(value: DirectiveConfig | undefined): NormalizedOptions {
   if (typeof value === 'number' && Number.isFinite(value)) {
@@ -41,79 +46,28 @@ const scrollDirective: ClientDirective = (load, options) => {
 
   const { threshold } = normalizeOptions(options.value as DirectiveConfig);
   const controller = new AbortController();
-  let hydrated = false;
+  const triggerHydration = createHydrationTrigger(load, controller);
 
-  const triggerHydration = async () => {
-    if (hydrated) {
-      return;
-    }
-    hydrated = true;
-    const hydrate = await load();
-    controller.abort();
-    await hydrate();
-  };
-
-  const meetsThreshold = () => {
-    const y = window.scrollY ?? window.pageYOffset ?? 0;
-    return y > threshold;
-  };
-
-  const handleScroll = () => {
-    if (meetsThreshold()) {
-      triggerHydration();
-    }
-  };
-
-  const handleWheel = (event: WheelEvent) => {
-    if (event.deltaY !== 0 || event.deltaX !== 0 || meetsThreshold()) {
-      triggerHydration();
-    }
-  };
-
-  const handleTouchMove = () => {
-    triggerHydration();
-  };
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (!SCROLL_KEYS.has(event.key)) {
-      return;
-    }
-
-    const target = event.target;
-    if (target instanceof HTMLElement) {
-      if (target.isContentEditable) {
-        return;
-      }
-
-      const tagName = target.tagName ? target.tagName.toUpperCase() : '';
-      if (INTERACTIVE_KEY_TARGETS.has(tagName)) {
-        return;
-      }
-    }
-
-    triggerHydration();
-  };
-
-  window.addEventListener('scroll', handleScroll, {
+  window.addEventListener('scroll', createScrollHandler(triggerHydration, threshold), {
     passive: true,
     signal: controller.signal,
   });
 
-  window.addEventListener('wheel', handleWheel, {
+  window.addEventListener('wheel', createWheelHandler(triggerHydration, threshold), {
     passive: true,
     signal: controller.signal,
   });
 
-  window.addEventListener('touchmove', handleTouchMove, {
+  window.addEventListener('touchmove', createImmediateHandler(triggerHydration), {
     passive: true,
     signal: controller.signal,
   });
 
-  window.addEventListener('keydown', handleKeyDown, {
+  window.addEventListener('keydown', createKeydownHandler(triggerHydration), {
     signal: controller.signal,
   });
 
-  if (meetsThreshold()) {
+  if (meetsScrollThreshold(threshold)) {
     triggerHydration();
   }
 };
