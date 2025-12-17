@@ -16,6 +16,7 @@ interface ResponsivityConfig {
 
 interface Props extends BaseVariantProps {
   responsivity?: ResponsivityConfig;
+  clientLoadPlaceholder?: boolean;
 }
 
 const {
@@ -23,6 +24,7 @@ const {
   className = "",
   id,
   responsivity,
+  clientLoadPlaceholder = true,
 } = Astro.props as Props;
 
 // Map Tailwind breakpoints to media queries
@@ -179,6 +181,10 @@ if (responsivity?.show) {
   // Visible by default, hide at breakpoint and above
   visibilityClasses = `block ${responsivity.hide}:hidden`;
 }
+
+// Get first item's optimized thumbnail for SSR placeholder
+const firstMedia = showcaseMedia[0];
+const firstItem = portfolioItems[0];
 ---
 
 <section
@@ -187,6 +193,64 @@ if (responsivity?.show) {
 >
   <div class="relative w-full max-w-[920px] mx-auto h-[420px] sm:h-[520px] lg:h-[450px]">
     <div class="relative h-full top-0">
+      <!-- SSR thumbnail placeholder for first item -->
+      {!clientLoadPlaceholder && firstMedia && (
+        <div class="absolute inset-0 pointer-events-none" data-ssr-placeholder>
+          <div class="relative h-full w-full">
+            <div class="flex flex-col gap-3 border-b border-white/10 px-4 py-3 text-white/70 sm:flex-row sm:items-center sm:justify-between">
+              <div class="flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/50">
+                <span class="flex items-center gap-1.5">
+                  <span class="h-3 w-3 rounded-full bg-gray-800" />
+                  <span class="h-3 w-3 rounded-full bg-gray-800" />
+                  <span class="h-3 w-3 rounded-full bg-gray-800" />
+                </span>
+              </div>
+            </div>
+            <div class="relative h-full overflow-hidden bg-black/40 card-bg-2 rounded-lg">
+              {firstMedia.sources?.length ? (
+                <picture>
+                  {firstMedia.sources.map((source, idx) => (
+                    <source
+                      key={`${firstItem.slug ?? firstItem.id ?? idx}-source-${idx}`}
+                      srcSet={source.srcSet}
+                      sizes={source.sizes ?? firstMedia.sizes}
+                      type={source.type}
+                    />
+                  ))}
+                  <img
+                    src={firstMedia.src}
+                    srcSet={firstMedia.srcSet}
+                    sizes={firstMedia.sizes}
+                    alt={firstMedia.alt || firstItem.title || "Project preview"}
+                    width={firstMedia.width}
+                    height={firstMedia.height}
+                    loading="eager"
+                    decoding="sync"
+                    fetchpriority="high"
+                    draggable={false}
+                    class="block h-auto min-h-full w-full select-none object-cover object-top"
+                  />
+                </picture>
+              ) : firstMedia.src ? (
+                <img
+                  src={firstMedia.src}
+                  srcSet={firstMedia.srcSet}
+                  sizes={firstMedia.sizes}
+                  alt={firstMedia.alt || firstItem.title || "Project preview"}
+                  width={firstMedia.width}
+                  height={firstMedia.height}
+                  loading="eager"
+                  decoding="sync"
+                  fetchpriority="high"
+                  draggable={false}
+                  class="block h-auto min-h-full w-full select-none object-cover object-top"
+                />
+              ) : null}
+            </div>
+          </div>
+        </div>
+      )}
+
       {mediaQuery ? (
         <PortfolioScreenShowcase client:media={mediaQuery} {...showcaseProps} />
       ) : (
@@ -195,3 +259,17 @@ if (responsivity?.show) {
     </div>
   </div>
 </section>
+
+<style>
+  /* Hide SSR placeholder once component hydrates */
+  [data-ssr-placeholder] {
+    opacity: 1;
+    transition: opacity 0.3s ease-out;
+  }
+
+  /* This selector targets when the React component has mounted */
+  :global(.portfolio-showcase-mounted) ~ [data-ssr-placeholder] {
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>
