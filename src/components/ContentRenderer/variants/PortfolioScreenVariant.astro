@@ -7,19 +7,26 @@ import PortfolioScreenShowcase from "@/components/LoopTemplates/PortfolioScreenS
 import { getImageAlt, resolveImageMetadata } from "@/utils/images";
 import { toArray } from "@/utils/array";
 
+type Breakpoint = "sm" | "md" | "lg" | "xl" | "2xl";
+
+interface ResponsivityConfig {
+  show?: Breakpoint;
+  hide?: Breakpoint;
+}
+
 interface Props extends BaseVariantProps {
-  clientMedia?: "none" | "sm" | "md" | "lg" | "xl" | "2xl";
+  responsivity?: ResponsivityConfig;
 }
 
 const {
   items = [],
   className = "",
   id,
-  clientMedia = "none",
+  responsivity,
 } = Astro.props as Props;
 
 // Map Tailwind breakpoints to media queries
-const breakpointMap: Record<string, string> = {
+const breakpointMap: Record<Breakpoint, string> = {
   sm: "(min-width: 640px)",
   md: "(min-width: 768px)",
   lg: "(min-width: 1024px)",
@@ -27,7 +34,24 @@ const breakpointMap: Record<string, string> = {
   "2xl": "(min-width: 1536px)",
 };
 
-const mediaQuery = clientMedia !== "none" ? breakpointMap[clientMedia] : undefined;
+// Map breakpoints to max-width media queries (for hide)
+const breakpointMaxMap: Record<Breakpoint, string> = {
+  sm: "(max-width: 639px)",
+  md: "(max-width: 767px)",
+  lg: "(max-width: 1023px)",
+  xl: "(max-width: 1279px)",
+  "2xl": "(max-width: 1535px)",
+};
+
+// Determine media query based on show/hide config
+let mediaQuery: string | undefined;
+if (responsivity?.show) {
+  // Show only on this breakpoint and above
+  mediaQuery = breakpointMap[responsivity.show];
+} else if (responsivity?.hide) {
+  // Hide on this breakpoint and below (show above it)
+  mediaQuery = breakpointMap[responsivity.hide];
+}
 
 const safeItems = toArray(items);
 
