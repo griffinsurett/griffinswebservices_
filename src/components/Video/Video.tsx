@@ -5,6 +5,7 @@
  * Client-side video player with lazy loading support.
  */
 import { useRef, useEffect, forwardRef, useState } from "react";
+import ClientImage from "@/components/ClientImage";
 import type {
   VideoHTMLAttributes,
   ReactNode,
@@ -111,7 +112,7 @@ export const Video = forwardRef<HTMLVideoElement, VideoProps>(
     return (
       <div className={wrapperClasses}>
         {resolvedPlaceholderSrc && (
-          <img
+          <ClientImage
             src={resolvedPlaceholderSrc}
             alt="Video placeholder"
             className={`${mediaClasses} ${stackClasses}`.trim()}

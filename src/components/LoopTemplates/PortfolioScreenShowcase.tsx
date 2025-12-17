@@ -8,6 +8,7 @@ import {
 import { useEngagementAutoScroll } from "@/hooks/autoscroll/useEngagementAutoScroll";
 import { useClickToScroll } from "@/hooks/interactions/useClickToScroll";
 import { getImageSrc } from "@/layouts/collections/helpers/layoutHelpers";
+import ClientImage from "@/components/ClientImage";
 import type { PortfolioItemData } from "@/components/LoopComponents/PortfolioItemComponent";
 
 interface PortfolioMediaEntry {
@@ -286,60 +287,15 @@ function ComputerScreen({
     "";
 
   const renderMedia = () => {
-    // Don't render images during SSR - prevents browser from preloading below-fold images
+    // Show placeholder during SSR/before hydration
     if (!isHydrated) {
       return (
         <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-bg2 via-bg to-bg/80" />
       );
     }
 
-    if (mediaEntry?.sources?.length) {
-      return (
-        <picture>
-          {mediaEntry.sources.map((source, idx) => (
-            <source
-              key={`${item.slug ?? item.id ?? idx}-source-${idx}`}
-              srcSet={source.srcSet}
-              sizes={source.sizes ?? mediaEntry.sizes}
-              type={source.type}
-            />
-          ))}
-          <img
-            src={mediaEntry.src}
-            srcSet={mediaEntry.srcSet}
-            sizes={mediaEntry.sizes}
-            alt={mediaEntry.alt || item.alt || item.title || "Project preview"}
-            width={mediaEntry.width}
-            height={mediaEntry.height}
-            loading="lazy"
-            decoding="async"
-            fetchPriority="auto"
-            draggable={false}
-            className="block h-auto min-h-full w-full select-none object-cover object-top"
-          />
-        </picture>
-      );
-    }
-
-    if (mediaEntry?.src) {
-      return (
-        <img
-          src={mediaEntry.src}
-          srcSet={mediaEntry.srcSet}
-          sizes={mediaEntry.sizes}
-          alt={mediaEntry.alt || item.alt || item.title || "Project preview"}
-          width={mediaEntry.width}
-          height={mediaEntry.height}
-          loading="lazy"
-          decoding="async"
-          fetchPriority="auto"
-          draggable={false}
-          className="block h-auto min-h-full w-full select-none object-cover object-top"
-        />
-      );
-    }
-
-    if (!fallbackSrc) {
+    // No media available
+    if (!mediaEntry?.src && !fallbackSrc) {
       return (
         <div className="flex h-full w-full items-center justify-center bg-gradient-to-b from-bg2 via-bg to-bg/80 text-white/30">
           Preview coming soon
@@ -347,10 +303,16 @@ function ComputerScreen({
       );
     }
 
+    // Use ClientImage for all image rendering (only renders on client)
     return (
-      <img
-        src={fallbackSrc}
-        alt={item.alt || item.title || "Project preview"}
+      <ClientImage
+        src={mediaEntry?.src || fallbackSrc}
+        srcSet={mediaEntry?.srcSet}
+        sizes={mediaEntry?.sizes}
+        sources={mediaEntry?.sources}
+        alt={mediaEntry?.alt || item.alt || item.title || "Project preview"}
+        width={mediaEntry?.width}
+        height={mediaEntry?.height}
         loading="lazy"
         decoding="async"
         fetchPriority="auto"
