@@ -187,7 +187,7 @@ if (responsivity?.show) {
 const firstMedia = showcaseMedia[0];
 const firstItem = portfolioItems[0];
 
-// Generate smaller placeholder image (640px width max for SSR)
+// Generate smaller placeholder image for SSR (optimized for initial render)
 let placeholderMedia: typeof firstMedia | undefined;
 if (!clientLoadPlaceholder && firstMedia) {
   const placeholderItem = processedItems[0];
@@ -195,25 +195,23 @@ if (!clientLoadPlaceholder && firstMedia) {
   const metadata = resolveImageMetadata(primaryImage);
 
   if (metadata) {
-    const PLACEHOLDER_WIDTH = 640;
+    // Mobile-first sizing: max 480px width, max 600px height for SSR placeholder
+    const PLACEHOLDER_WIDTH = 480;
+    const PLACEHOLDER_MAX_HEIGHT = 600;
+
     const aspectRatio = metadata.height / metadata.width;
     const naturalHeight = Math.round(aspectRatio * PLACEHOLDER_WIDTH);
-    const constrainedHeight = Math.min(naturalHeight, MAX_RENDER_HEIGHT);
-    const shouldConstrain = constrainedHeight < naturalHeight;
-    const resizeOptions = shouldConstrain
-      ? {
-          height: constrainedHeight,
-          fit: "cover" as const,
-          position: "top" as const,
-        }
-      : {};
+    const constrainedHeight = Math.min(naturalHeight, PLACEHOLDER_MAX_HEIGHT);
 
+    // Always constrain height for SSR placeholder to reduce file size
     const placeholderImage = await getImage({
       src: metadata,
       width: PLACEHOLDER_WIDTH,
+      height: constrainedHeight,
       format: "webp",
-      quality: 75,
-      ...resizeOptions,
+      quality: 60, // Lower quality for placeholder (will be replaced on hydration)
+      fit: "cover",
+      position: "top",
     });
 
     placeholderMedia = {
