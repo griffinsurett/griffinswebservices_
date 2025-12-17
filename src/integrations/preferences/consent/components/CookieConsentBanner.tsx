@@ -1,4 +1,4 @@
-// src/components/preferences/consent/CookieConsentBanner/CookieConsentBanner.tsx
+// src/components/preferences/consent/CookieConsentBanner.tsx
 /**
  * Cookie Consent Banner
  *
@@ -15,7 +15,7 @@ import Modal from "@/components/Modal";
 import type { CookieConsent } from "../types";
 import Button from "@/components/Button/Button";
 
-const CookiePreferencesModal = lazy(() => import("../CookiePreferencesModal"));
+const CookiePreferencesModal = lazy(() => import("./CookiePreferencesModal"));
 
 export default function CookieConsentBanner() {
   const [showBanner, setShowBanner] = useState(false);
@@ -126,6 +126,7 @@ export default function CookieConsentBanner() {
                   onClick={handleRejectAll}
                   fullWidth={true}
                   type="button"
+                  buttonWrapperClasses="text-center"
                   size="md"
                   disabled={isPending}
                 >
