@@ -15,6 +15,7 @@ import PortfolioShowcaseSection from "@/layouts/PortfolioShowcaseSection.astro";
 import GradientLayout from "@/layouts/GradientLayout.astro";
 import FrontPageHero from "@/layouts/FrontPageHero.astro";
 import ColorBorderLayout from "@/layouts/ColorBorderLayout.astro";
+import DoubleCard from "@/layouts/DoubleCard.astro";
 
 const heroHeading = {
   before: "Launch a website that works.",
@@ -30,7 +31,7 @@ const heroDescription =
 <BaseLayout title="Home" description={siteData.description}>
   <main class="flex-1">
 
-    <GradientLayout>
+    <!-- <GradientLayout> -->
       <!-- Lightweight text-only hero - zero carousel JS on initial load -->
       <!-- <TextHero
         heading={heroHeading}
@@ -60,10 +61,12 @@ const heroDescription =
             clientLoadPlaceholder={true}
           />
           </div>
+
+          <DoubleCard />
     <!-- Under-hero portfolio showcase -->
     <!-- <PortfolioShowcaseSection /> -->
 
-    </GradientLayout>
+    <!-- </GradientLayout> -->
 
     <ContentRenderer
       query={roots("capabilities").orderBy(sortByOrder()).limit(6)}
