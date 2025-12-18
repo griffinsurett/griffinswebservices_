@@ -14,6 +14,7 @@ import Video from "@/components/Video/Video.astro";
 import PortfolioShowcaseSection from "@/layouts/PortfolioShowcaseSection.astro";
 import GradientLayout from "@/layouts/GradientLayout.astro";
 import FrontPageHero from "@/layouts/FrontPageHero.astro";
+import ColorBorderLayout from "@/layouts/ColorBorderLayout.astro";
 
 const heroHeading = {
   before: "Launch a website that works.",
@@ -48,7 +49,7 @@ const heroDescription =
           text: "Get Started",
           link: "/contact-us",
         }}
-        scrollToSection="#portfolio-showcase"
+        scrollToSection="#website-services"
         />
 
         <div class="block md:hidden min-h-screen inner-section">
@@ -124,7 +125,6 @@ const heroDescription =
     </ContentRenderer> -->
 
     <!-- <ContentRenderer query={query("projects")} variant="PortfolioVariant" /> -->
-
     <ContentRenderer
       query={query("solutions")}
       variant="IconListVariant"
@@ -137,8 +137,7 @@ const heroDescription =
       description="We design top-tier websites for businesses in every industry — from local services to global brands. Every site is custom-built for your goals, lightning-fast, secure, and easy to manage. No templates, no bloat — just a powerful online presence that looks sharp, performs flawlessly, and grows with you."
       autoAdvanceDelay={2000}
 />
-
-
+     <ColorBorderLayout borderPosition="both">
     <ContentRenderer
       query={query("solutions")}
       variant="VideoAccordionVariant"
@@ -151,6 +150,8 @@ const heroDescription =
       className="pt-16"
       autoAdvanceDelay={3500}
     />
+    </ColorBorderLayout>
+
 
     <!-- Testimonials with rating filter -->
     <ContentRenderer
