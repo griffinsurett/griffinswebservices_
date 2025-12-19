@@ -1,6 +1,6 @@
 // src/components/Icon.tsx
 import type { ReactNode } from 'react';
-import { renderIcon, type IconSize } from '@/integrations/icons/utils/iconLoader';
+import { renderIcon, type IconSize } from '@/integrations/icons';
 import type { IconType } from '@/content/schema';
 
 export interface IconProps {

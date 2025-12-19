@@ -2,7 +2,7 @@
 import { isValidElement, type ReactNode } from "react";
 import Icon from "@/components/Icon";
 import type { IconType } from "@/content/schema";
-import type { IconSize } from "@/integrations/icons/utils/iconLoader";
+import type { IconSize } from "@/integrations/icons";
 
 type IconValue = IconType | ReactNode | IconRenderConfig;
 

@@ -1,4 +1,4 @@
-// src/utils/icons/iconLoader.ts
+// src/integrations/icons/utils/iconLoader.ts
 /**
  * Icon Loading and Rendering System
  * 
