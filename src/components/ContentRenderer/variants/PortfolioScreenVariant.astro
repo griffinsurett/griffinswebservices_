@@ -190,60 +190,12 @@ if (responsivity?.show) {
   visibilityClasses = `block ${responsivity.hide}:hidden`;
 }
 
-// Get first item's optimized thumbnail for SSR placeholder
+// Get first item's optimized media for SSR placeholder (use full srcset for LCP)
 const firstMedia = showcaseMedia[0];
 const firstItem = portfolioItems[0];
 
-// Generate smaller placeholder image for SSR (optimized for initial render)
 // Show placeholder when EITHER clientLoadPlaceholder is false OR optimizeForLCP is true
 const shouldShowPlaceholder = !clientLoadPlaceholder || optimizeForLCP;
-let placeholderMedia: {
-  src: string;
-  srcSet?: string;
-  sizes?: string;
-  width: number;
-  height: number;
-  alt: string;
-  loading?: "eager" | "lazy";
-  decoding?: "sync" | "async";
-  fetchPriority?: "high" | "low" | "auto";
-} | undefined;
-if (shouldShowPlaceholder && firstMedia) {
-  const placeholderItem = processedItems[0];
-  const primaryImage = placeholderItem.data.featuredImage ?? placeholderItem.data.bannerImage;
-  const metadata = resolveImageMetadata(primaryImage);
-
-  if (metadata) {
-    // Mobile-first sizing: max 480px width, max 600px height for SSR placeholder
-    const PLACEHOLDER_WIDTH = 480;
-    const PLACEHOLDER_MAX_HEIGHT = 600;
-
-    const aspectRatio = metadata.height / metadata.width;
-    const naturalHeight = Math.round(aspectRatio * PLACEHOLDER_WIDTH);
-    const constrainedHeight = Math.min(naturalHeight, PLACEHOLDER_MAX_HEIGHT);
-
-    // Always constrain height for SSR placeholder to reduce file size
-    const placeholderImage = await getImage({
-      src: metadata,
-      width: PLACEHOLDER_WIDTH,
-      height: constrainedHeight,
-      format: "webp",
-      quality: 60, // Lower quality for placeholder (will be replaced on hydration)
-      fit: "cover",
-      position: "top",
-    });
-
-    placeholderMedia = {
-      src: placeholderImage.src,
-      width: placeholderImage.attributes.width as number,
-      height: placeholderImage.attributes.height as number,
-      alt: firstMedia.alt,
-      loading: (optimizeForLCP ? "eager" : "lazy") as const,
-      decoding: (optimizeForLCP ? "sync" : "async") as const,
-      fetchPriority: (optimizeForLCP ? "high" : "auto") as const,
-    };
-  }
-}
 ---
 
 <div
@@ -255,20 +207,31 @@ if (shouldShowPlaceholder && firstMedia) {
       <!-- ComputerScreen wrapper with client carousel inside -->
       <ComputerScreen>
         <div class="relative h-full">
-          <!-- SSR thumbnail placeholder for first item - sits behind carousel -->
-          {shouldShowPlaceholder && placeholderMedia && (
+          <!-- SSR LCP image for first item - uses full srcset, sits behind carousel -->
+          {shouldShowPlaceholder && firstMedia && (
             <figure class="absolute inset-0 pointer-events-none overflow-hidden bg-black/40 z-0" data-ssr-placeholder>
-              <img
-                src={placeholderMedia.src}
-                alt={placeholderMedia.alt || firstItem?.title || "Project preview"}
-                width={placeholderMedia.width}
-                height={placeholderMedia.height}
-                loading={placeholderMedia.loading || "lazy"}
-                decoding={placeholderMedia.decoding || "async"}
-                fetchpriority={placeholderMedia.fetchPriority || "auto"}
-                draggable={false}
-                class="block h-auto min-h-full w-full select-none object-cover object-top"
-              />
+              <picture>
+                {firstMedia.sources?.map((source) => (
+                  <source
+                    type={source.type}
+                    srcset={source.srcSet}
+                    sizes={source.sizes || firstMedia.sizes}
+                  />
+                ))}
+                <img
+                  src={firstMedia.src}
+                  srcset={firstMedia.srcSet}
+                  sizes={firstMedia.sizes}
+                  alt={firstMedia.alt || firstItem?.title || "Project preview"}
+                  width={firstMedia.width}
+                  height={firstMedia.height}
+                  loading={optimizeForLCP ? "eager" : "lazy"}
+                  decoding={optimizeForLCP ? "sync" : "async"}
+                  fetchpriority={optimizeForLCP ? "high" : "auto"}
+                  draggable={false}
+                  class="block h-auto min-h-full w-full select-none object-cover object-top"
+                />
+              </picture>
             </figure>
           )}
 
