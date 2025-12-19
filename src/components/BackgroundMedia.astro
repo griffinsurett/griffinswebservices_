@@ -59,12 +59,25 @@ let responsiveImages = null;
 
 if (backgroundMedia?.image?.src) {
   const rawSrc = backgroundMedia.image.src;
-  const isProcessedImage =
+
+  // Check if this is an Astro ImageMetadata object (has width, height, format)
+  // These can be passed to getImage for optimization
+  const isAstroImageMetadata =
     typeof rawSrc === 'object' &&
     rawSrc !== null &&
-    typeof rawSrc.src === 'string';
+    'width' in rawSrc &&
+    'height' in rawSrc &&
+    'format' in rawSrc;
 
-  if (!isProcessedImage && typeof rawSrc !== 'string') {
+  // Check if this is already a processed/optimized image (just has src string)
+  const isAlreadyProcessed =
+    typeof rawSrc === 'object' &&
+    rawSrc !== null &&
+    typeof rawSrc.src === 'string' &&
+    !isAstroImageMetadata;
+
+  // Process if it's an Astro ImageMetadata object OR if it's not a string
+  if (isAstroImageMetadata || (typeof rawSrc !== 'string' && !isAlreadyProcessed)) {
     try {
       const [mobile, tablet, desktop] = await Promise.all([
         getImage({
@@ -86,16 +99,18 @@ if (backgroundMedia?.image?.src) {
           width: maxWidth,
         }),
       ]);
-      
+
       responsiveImages = { mobile, tablet, desktop };
     } catch (error) {
       console.error('Failed to optimize background image:', error);
     }
   } else {
+    // Already processed or is a string URL - use as-is
+    const srcValue = isAlreadyProcessed ? rawSrc.src : rawSrc;
     responsiveImages = {
-      mobile: { src: isProcessedImage ? rawSrc.src : rawSrc },
-      tablet: { src: isProcessedImage ? rawSrc.src : rawSrc },
-      desktop: { src: isProcessedImage ? rawSrc.src : rawSrc },
+      mobile: { src: srcValue },
+      tablet: { src: srcValue },
+      desktop: { src: srcValue },
     };
   }
 }
