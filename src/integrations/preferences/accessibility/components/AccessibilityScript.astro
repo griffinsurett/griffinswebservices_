@@ -23,11 +23,13 @@
       var root = document.documentElement;
 
       // TEXT & TYPOGRAPHY
+      var weightMap = { normal: '400', semibold: '600', bold: '700' };
+      var resolvedWeight = weightMap[prefs.text.fontWeight] || '400';
       root.style.setProperty('--a11y-font-size', prefs.text.fontSize + '%');
       root.style.setProperty('--a11y-line-height', String(prefs.text.lineHeight));
       root.style.setProperty('--a11y-letter-spacing', prefs.text.letterSpacing + 'em');
       root.style.setProperty('--a11y-word-spacing', prefs.text.wordSpacing + 'em');
-      root.style.setProperty('--a11y-font-weight', prefs.text.fontWeight);
+      root.style.setProperty('--a11y-font-weight', resolvedWeight);
       root.style.setProperty('--a11y-text-align', prefs.text.textAlign);
       root.setAttribute('data-a11y-font', prefs.text.fontFamily);
 

@@ -17,8 +17,8 @@
 }
 
 /* Font weight mappings - TODO: semibold override needs more work */
-[data-a11y-font-weight="semibold"] { --a11y-font-weight: 600; }
-[data-a11y-font-weight="bold"] { --a11y-font-weight: 700; }
+[data-a11y-font-weight="semibold"] { --a11y-font-weight: 700; }
+[data-a11y-font-weight="bold"] { --a11y-font-weight: 900; }
 
 /* ============================================================================
    TEXT & TYPOGRAPHY
@@ -35,6 +35,7 @@ body {
   letter-spacing: var(--a11y-letter-spacing);
   word-spacing: var(--a11y-word-spacing);
   font-family: var(--a11y-font-family);
+  font-weight: var(--a11y-font-weight);
 }
 
 /* ==========================================================================
@@ -127,6 +128,30 @@ html[data-a11y-text-align] body * {
 [data-a11y-text-align] svg,
 [data-a11y-text-align] svg * {
   text-align: initial !important;
+}
+
+/* FONT-WEIGHT */
+[data-a11y-font-weight] *,
+[data-a11y-font-weight] *::before,
+[data-a11y-font-weight] *::after,
+html[data-a11y-font-weight] body,
+html[data-a11y-font-weight] body * {
+  font-weight: var(--a11y-font-weight) !important;
+}
+[data-a11y-font-weight] .font-thin,
+[data-a11y-font-weight] .font-extralight,
+[data-a11y-font-weight] .font-light,
+[data-a11y-font-weight] .font-normal,
+[data-a11y-font-weight] .font-medium,
+[data-a11y-font-weight] .font-semibold,
+[data-a11y-font-weight] .font-bold,
+[data-a11y-font-weight] .font-extrabold,
+[data-a11y-font-weight] .font-black {
+  font-weight: var(--a11y-font-weight) !important;
+}
+[data-a11y-font-weight] svg,
+[data-a11y-font-weight] svg * {
+  font-weight: initial !important;
 }
 
 /* Dyslexia Font */

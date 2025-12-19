@@ -7,6 +7,12 @@ import {
   type A11yPreferences,
 } from "@/integrations/preferences/accessibility/components/types";
 
+const FONT_WEIGHT_MAP: Record<A11yPreferences["text"]["fontWeight"], string> = {
+  normal: "400",
+  semibold: "600",
+  bold: "700",
+};
+
 // Cursor tracking handlers
 let guideHandler: ((e: MouseEvent) => void) | null = null;
 let maskHandler: ((e: MouseEvent) => void) | null = null;
@@ -72,6 +78,8 @@ function detachReadingMask() {
 
 export function applyPreferences(prefs: A11yPreferences) {
   const root = document.documentElement;
+  const resolvedWeight =
+    FONT_WEIGHT_MAP[prefs.text.fontWeight] ?? FONT_WEIGHT_MAP.normal;
 
   console.log("🎨 Applying accessibility preferences:", prefs);
 
@@ -83,6 +91,7 @@ export function applyPreferences(prefs: A11yPreferences) {
     `${prefs.text.letterSpacing}em`
   );
   root.style.setProperty("--a11y-word-spacing", `${prefs.text.wordSpacing}em`);
+  root.style.setProperty("--a11y-font-weight", resolvedWeight);
   root.style.setProperty("--a11y-text-align", prefs.text.textAlign);
   root.setAttribute("data-a11y-font", prefs.text.fontFamily);
 
