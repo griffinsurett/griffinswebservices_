@@ -13,6 +13,7 @@ import GradientLayout from "@/layouts/GradientLayout.astro";
 import FrontPageHero from "@/layouts/FrontPageHero.astro";
 import ColorBorderLayout from "@/layouts/ColorBorderLayout.astro";
 import DoubleCard from "@/layouts/DoubleCard.astro";
+import { animationProps } from "@/integrations/scroll-animations/props";
 
 const heroHeading = {
   before: "Launch a website that works.",
@@ -48,7 +49,10 @@ const heroDescription =
       scrollToSection="#website-services"
     />
 
-    <div class="block md:hidden min-h-screen inner-section">
+    <div
+      class="block md:hidden min-h-screen inner-section"
+      {...animationProps("fade-in-up", { once: false, threshold: 0.2 })}
+    >
       <ContentRenderer
         query={query("projects")}
         variant="PortfolioScreenVariant"
