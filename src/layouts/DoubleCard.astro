@@ -14,7 +14,7 @@ import { animationProps } from "@/integrations/scroll-animations/props";
             class="group flex w-full lg:flex-1 flex-col min-h-[400px] rounded-3xl overflow-hidden relative card-bg"
             {...animationProps("fade-in-up", { once: false, threshold: 0.35, rootMargin: "-10% 0px -25% 0px" })}
         >
-            <div class="flex flex-col p-6 relative z-10">
+            <div class="flex flex-col p-6 space-y-2 relative z-10">
                 <h2 class="text-3xl lg:text-4xl xl:text-5xl font-bold">
                     <Counter end={100} client:visible />+
                 </h2>
@@ -51,8 +51,8 @@ import { animationProps } from "@/integrations/scroll-animations/props";
                             src: meoncompImg,
                             imageClass: "object-cover",
                             aboveTheFold: false,
-                            quality: 55,
-                            maxWidth: 960,
+                            quality: 40,
+                            maxWidth: 800,
                         },
                     }}
                 />
