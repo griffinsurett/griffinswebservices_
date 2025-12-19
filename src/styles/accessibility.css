@@ -9,20 +9,124 @@
   --a11y-letter-spacing: 0;
   --a11y-word-spacing: 0;
   --a11y-font-family: inherit;
+  --a11y-font-weight: 400;
+  --a11y-text-align: left;
   --a11y-animation-duration: 0.3s;
   --cursor-x: 50%;
   --cursor-y: 50%;
 }
 
+/* Font weight mappings - TODO: semibold override needs more work */
+[data-a11y-font-weight="semibold"] { --a11y-font-weight: 600; }
+[data-a11y-font-weight="bold"] { --a11y-font-weight: 700; }
+
 /* ============================================================================
    TEXT & TYPOGRAPHY
    ============================================================================ */
-body {
+
+/* Font size on html element - this scales ALL rem-based sizes across the site */
+html {
   font-size: var(--a11y-font-size);
+}
+
+/* Other text properties on body */
+body {
   line-height: var(--a11y-line-height);
   letter-spacing: var(--a11y-letter-spacing);
   word-spacing: var(--a11y-word-spacing);
   font-family: var(--a11y-font-family);
+}
+
+/* ==========================================================================
+   COMPREHENSIVE TEXT OVERRIDES
+   All text properties use the same pattern for maximum Tailwind compatibility:
+   1. Universal selector with !important
+   2. Explicit Tailwind class overrides
+   3. SVG exclusions where needed
+   ========================================================================== */
+
+/* LINE-HEIGHT */
+[data-a11y-line-height] *,
+[data-a11y-line-height] *::before,
+[data-a11y-line-height] *::after,
+html[data-a11y-line-height] body,
+html[data-a11y-line-height] body * {
+  line-height: var(--a11y-line-height) !important;
+}
+[data-a11y-line-height] [class*="leading-"],
+[data-a11y-line-height] .leading-none,
+[data-a11y-line-height] .leading-tight,
+[data-a11y-line-height] .leading-snug,
+[data-a11y-line-height] .leading-normal,
+[data-a11y-line-height] .leading-relaxed,
+[data-a11y-line-height] .leading-loose {
+  line-height: var(--a11y-line-height) !important;
+}
+[data-a11y-line-height] svg,
+[data-a11y-line-height] svg * {
+  line-height: initial !important;
+}
+
+/* LETTER-SPACING */
+[data-a11y-letter-spacing] *,
+[data-a11y-letter-spacing] *::before,
+[data-a11y-letter-spacing] *::after,
+html[data-a11y-letter-spacing] body,
+html[data-a11y-letter-spacing] body * {
+  letter-spacing: var(--a11y-letter-spacing) !important;
+}
+[data-a11y-letter-spacing] [class*="tracking-"],
+[data-a11y-letter-spacing] .tracking-tighter,
+[data-a11y-letter-spacing] .tracking-tight,
+[data-a11y-letter-spacing] .tracking-normal,
+[data-a11y-letter-spacing] .tracking-wide,
+[data-a11y-letter-spacing] .tracking-wider,
+[data-a11y-letter-spacing] .tracking-widest {
+  letter-spacing: var(--a11y-letter-spacing) !important;
+}
+[data-a11y-letter-spacing] svg,
+[data-a11y-letter-spacing] svg * {
+  letter-spacing: initial !important;
+}
+
+/* WORD-SPACING */
+[data-a11y-word-spacing] *,
+[data-a11y-word-spacing] *::before,
+[data-a11y-word-spacing] *::after,
+html[data-a11y-word-spacing] body,
+html[data-a11y-word-spacing] body * {
+  word-spacing: var(--a11y-word-spacing) !important;
+}
+[data-a11y-word-spacing] svg,
+[data-a11y-word-spacing] svg * {
+  word-spacing: initial !important;
+}
+
+/* TEXT-ALIGN */
+[data-a11y-text-align] *,
+[data-a11y-text-align] *::before,
+[data-a11y-text-align] *::after,
+html[data-a11y-text-align] body,
+html[data-a11y-text-align] body * {
+  text-align: var(--a11y-text-align) !important;
+}
+[data-a11y-text-align] [class*="text-left"],
+[data-a11y-text-align] [class*="text-center"],
+[data-a11y-text-align] [class*="text-right"],
+[data-a11y-text-align] [class*="text-justify"],
+[data-a11y-text-align] .text-left,
+[data-a11y-text-align] .text-center,
+[data-a11y-text-align] .text-right,
+[data-a11y-text-align] .text-justify {
+  text-align: var(--a11y-text-align) !important;
+}
+/* Exclude interactive elements from text-align changes */
+[data-a11y-text-align] button,
+[data-a11y-text-align] input,
+[data-a11y-text-align] select,
+[data-a11y-text-align] svg,
+[data-a11y-text-align] svg * {
+  text-align: initial !important;
 }
 
 /* Dyslexia Font */
@@ -40,6 +144,44 @@ body {
 
 [data-a11y-font="readable"] {
   --a11y-font-family: 'Verdana', 'Arial', sans-serif;
+}
+
+/* FONT-FAMILY - Dyslexia */
+[data-a11y-font="dyslexia"] *,
+[data-a11y-font="dyslexia"] *::before,
+[data-a11y-font="dyslexia"] *::after,
+html[data-a11y-font="dyslexia"] body,
+html[data-a11y-font="dyslexia"] body * {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+[data-a11y-font="dyslexia"] [class*="font-"],
+[data-a11y-font="dyslexia"] .font-sans,
+[data-a11y-font="dyslexia"] .font-serif,
+[data-a11y-font="dyslexia"] .font-mono {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+[data-a11y-font="dyslexia"] svg,
+[data-a11y-font="dyslexia"] svg * {
+  font-family: initial !important;
+}
+
+/* FONT-FAMILY - Readable */
+[data-a11y-font="readable"] *,
+[data-a11y-font="readable"] *::before,
+[data-a11y-font="readable"] *::after,
+html[data-a11y-font="readable"] body,
+html[data-a11y-font="readable"] body * {
+  font-family: 'Verdana', 'Arial', sans-serif !important;
+}
+[data-a11y-font="readable"] [class*="font-"],
+[data-a11y-font="readable"] .font-sans,
+[data-a11y-font="readable"] .font-serif,
+[data-a11y-font="readable"] .font-mono {
+  font-family: 'Verdana', 'Arial', sans-serif !important;
+}
+[data-a11y-font="readable"] svg,
+[data-a11y-font="readable"] svg * {
+  font-family: initial !important;
 }
 
 /* ============================================================================

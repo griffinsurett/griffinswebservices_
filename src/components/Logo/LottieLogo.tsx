@@ -14,6 +14,19 @@ interface LottieLogoProps {
 
 const ANIMATION_URL = "/lotties/Animation_logo_small_size.json";
 
+// Check if reduced motion is preferred (system or user accessibility settings)
+function shouldReduceMotion(): boolean {
+  if (typeof window === "undefined") return false;
+
+  // Check system preference
+  const systemPrefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  if (systemPrefersReduced) return true;
+
+  // Check user accessibility settings (data attribute set by AccessibilityScript)
+  const userPrefersReduced = document.documentElement.getAttribute("data-a11y-motion") === "reduced";
+  return userPrefersReduced;
+}
+
 export default function LottieLogo({
   alt = "",
   className = "logo-class",
@@ -24,6 +37,15 @@ export default function LottieLogo({
   loop = true,
   children,
 }: PropsWithChildren<LottieLogoProps>) {
+  // If reduced motion is enabled, just render the static fallback - don't load Lottie at all
+  if (respectReducedMotion && shouldReduceMotion()) {
+    return (
+      <div className={`${className} relative ${mediaClasses}`} aria-label={alt}>
+        {children}
+      </div>
+    );
+  }
+
   return (
     <OptimizedLottie
       animationUrl={ANIMATION_URL}

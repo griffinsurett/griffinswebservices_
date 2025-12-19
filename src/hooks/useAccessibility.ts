@@ -83,11 +83,38 @@ export function applyPreferences(prefs: A11yPreferences) {
     `${prefs.text.letterSpacing}em`
   );
   root.style.setProperty("--a11y-word-spacing", `${prefs.text.wordSpacing}em`);
+  root.style.setProperty("--a11y-text-align", prefs.text.textAlign);
   root.setAttribute("data-a11y-font", prefs.text.fontFamily);
-  root.style.fontWeight = prefs.text.fontWeight;
 
-  if (document.body) {
-    document.body.style.textAlign = prefs.text.textAlign;
+  // Set data attributes to trigger overrides when changed from defaults
+  if (prefs.text.lineHeight !== 1.5) {
+    root.setAttribute("data-a11y-line-height", "true");
+  } else {
+    root.removeAttribute("data-a11y-line-height");
+  }
+
+  if (prefs.text.letterSpacing !== 0) {
+    root.setAttribute("data-a11y-letter-spacing", "true");
+  } else {
+    root.removeAttribute("data-a11y-letter-spacing");
+  }
+
+  if (prefs.text.wordSpacing !== 0) {
+    root.setAttribute("data-a11y-word-spacing", "true");
+  } else {
+    root.removeAttribute("data-a11y-word-spacing");
+  }
+
+  if (prefs.text.fontWeight !== "normal") {
+    root.setAttribute("data-a11y-font-weight", prefs.text.fontWeight);
+  } else {
+    root.removeAttribute("data-a11y-font-weight");
+  }
+
+  if (prefs.text.textAlign !== "left") {
+    root.setAttribute("data-a11y-text-align", "true");
+  } else {
+    root.removeAttribute("data-a11y-text-align");
   }
 
   // VISUAL ENHANCEMENTS
@@ -168,15 +195,17 @@ function removePreferences() {
   root.style.removeProperty("--a11y-line-height");
   root.style.removeProperty("--a11y-letter-spacing");
   root.style.removeProperty("--a11y-word-spacing");
+  root.style.removeProperty("--a11y-font-weight");
+  root.style.removeProperty("--a11y-text-align");
   root.style.removeProperty("--a11y-animation-duration");
-  root.style.fontWeight = "";
-
-  if (document.body) {
-    document.body.style.textAlign = "";
-  }
 
   // Remove attributes
   root.removeAttribute("data-a11y-font");
+  root.removeAttribute("data-a11y-line-height");
+  root.removeAttribute("data-a11y-letter-spacing");
+  root.removeAttribute("data-a11y-word-spacing");
+  root.removeAttribute("data-a11y-font-weight");
+  root.removeAttribute("data-a11y-text-align");
   root.removeAttribute("data-a11y-links");
   root.removeAttribute("data-a11y-titles");
   root.removeAttribute("data-a11y-contrast");
