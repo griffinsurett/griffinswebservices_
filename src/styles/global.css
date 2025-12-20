@@ -378,7 +378,7 @@ body {
   }
 
   @utility sticky-section {
-    @apply lg:sticky lg:top-30;
+    @apply lg:sticky lg:top-20;
   }
 
   @utility head-foot-section {
