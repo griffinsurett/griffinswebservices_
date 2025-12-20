@@ -42,6 +42,13 @@ benefits:
   - title: "Get support for life"
     description: "We don't disappear after launch. Ongoing maintenance, updates, and support keep everything running smoothly."
     icon: "fa6-solid:handshake"
+quickFacts:
+  - title: "Timeline"
+    description: "8-16 weeks typical"
+  - title: "Process"
+    description: "Discovery, design, build, launch"
+  - title: "After launch"
+    description: "Hosting + support included"
 ---
 import ContentSection from "@/layouts/ContentSection.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro"
@@ -92,20 +99,12 @@ import {
     </p>
   </div>
 
-  <div slot="quick-facts" class="grid gap-4 md:grid-cols-3">
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">Timeline</p>
-      <p class="text-heading font-semibold">8-16 weeks typical</p>
-    </div>
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">Process</p>
-      <p class="text-heading font-semibold">Discovery, design, build, launch</p>
-    </div>
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">After launch</p>
-      <p class="text-heading font-semibold">Hosting + support included</p>
-    </div>
-  </div>
+  <ContentRenderer
+    slot="quick-facts"
+    items={frontmatter.quickFacts}
+    variant="QuickFactsVariant"
+    columns={3}
+  />
 
   <ul slot="proof-points" class="space-y-3">
     <li class="flex items-start gap-3">

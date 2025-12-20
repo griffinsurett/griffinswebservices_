@@ -42,6 +42,13 @@ benefits:
   - title: "Outrank your competition"
     description: "SEO-optimized architecture and fast load times help you beat slower, bloated competitor sites."
     icon: "fa6-solid:trophy"
+quickFacts:
+  - title: "Timeline"
+    description: "3-4 weeks to launch"
+  - title: "What's included"
+    description: "Design, CMS, SEO setup"
+  - title: "After launch"
+    description: "Training + ongoing support"
 ---
 import ContentSection from "@/layouts/ContentSection.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro"
@@ -92,20 +99,12 @@ import {
     </p>
   </div>
 
-  <div slot="quick-facts" class="grid gap-4 md:grid-cols-3">
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">Timeline</p>
-      <p class="text-heading font-semibold">3-4 weeks to launch</p>
-    </div>
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">What's included</p>
-      <p class="text-heading font-semibold">Design, CMS, SEO setup</p>
-    </div>
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">After launch</p>
-      <p class="text-heading font-semibold">Training + ongoing support</p>
-    </div>
-  </div>
+  <ContentRenderer
+    slot="quick-facts"
+    items={frontmatter.quickFacts}
+    variant="QuickFactsVariant"
+    columns={3}
+  />
 
   <ul slot="proof-points" class="space-y-3">
     <li class="flex items-start gap-3">

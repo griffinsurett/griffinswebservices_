@@ -10,17 +10,17 @@
  * - MDX content rendering
  * - Related services section (siblings from same parent)
  */
-import BaseLayout from '@/layouts/BaseLayout.astro';
-import QuoteHero from '@/layouts/QuoteHero.astro';
-import AboutSection from '@/layouts/AboutSection.astro';
-import { animationProps } from '@/integrations/scroll-animations/props';
-import ContentRenderer from '@/components/ContentRenderer/ContentRenderer.astro';
-import CTASection from '@/layouts/CTASection.astro';
-import { query, sortByOrder, related } from '@/utils/query';
-import { capitalizeWords } from '@/utils/string';
-import type { CollectionLayoutProps } from './types';
-import DoubleCard from '../DoubleCard.astro';
-    
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import QuoteHero from "@/layouts/QuoteHero.astro";
+import AboutSection from "@/layouts/AboutSection.astro";
+import { animationProps } from "@/integrations/scroll-animations/props";
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import CTASection from "@/layouts/CTASection.astro";
+import { query, sortByOrder, related } from "@/utils/query";
+import { capitalizeWords } from "@/utils/string";
+import type { CollectionLayoutProps } from "./types";
+import DoubleCard from "../DoubleCard.astro";
+
 const {
   entry,
   collection,
@@ -32,7 +32,15 @@ const {
 } = Astro.props as CollectionLayoutProps;
 
 const data = entry?.data || {};
-const { title, description, price, features = [], benefits = [], parent, heading } = data;
+const {
+  title,
+  description,
+  price,
+  features = [],
+  benefits = [],
+  parent,
+  heading,
+} = data;
 
 // Get the current entry's slug for filtering related capabilities
 const currentSlug = entry?.id;
@@ -51,14 +59,14 @@ const relatedCapabilitiesQuery = currentSlug
   : null;
 
 // Build the description with price if available
-const heroDescription = price
-  ? `${description} ${price}`
-  : description;
+const heroDescription = price ? `${description} ${price}` : description;
 
 // Capitalize the slug for display (e.g., "standard-websites" -> "Standard-Websites")
-const displayTitle = title || capitalizeWords(entry?.slug?.replace(/-/g, ' ') || '');
-const capitalizedSlug = capitalizeWords(entry?.slug?.replace(/-/g, ' ') || '');
+const displayTitle =
+  title || capitalizeWords(entry?.slug?.replace(/-/g, " ") || "");
+const capitalizedSlug = capitalizeWords(entry?.slug?.replace(/-/g, " ") || "");
 ---
+
 <BaseLayout {...seoProps}>
   <main class="flex-1">
     {/* Quote Hero Section */}
@@ -67,13 +75,13 @@ const capitalizedSlug = capitalizeWords(entry?.slug?.replace(/-/g, ' ') || '');
       heading={heading}
       description={heroDescription}
       primaryCTA={{
-        text: `View All ${collectionMeta?.data?.title || 'Services'}`,
+        text: `View All ${collectionMeta?.data?.title || "Services"}`,
         link: `/${collection}`,
-        rightIcon: "lu:arrow-left"
+        rightIcon: "lu:arrow-left",
       }}
-      id='services-quote-hero'
+      id="services-quote-hero"
     />
-        <div
+    <div
       class="block min-h-screen inner-section"
       {...animationProps("fade-in-up", { once: false, threshold: 0.2 })}
     >
@@ -85,29 +93,31 @@ const capitalizedSlug = capitalizeWords(entry?.slug?.replace(/-/g, ' ') || '');
       />
     </div>
 
-    {benefits.length > 0 && (
-      <ContentRenderer
-        items={benefits}
-        variant="CardVariant"
-        title="Benefits"
-        heading={{
-          before: "Why choose",
-          text: title,
-          after: "for your business.",
-        }}
-        description="Real results that matter for your bottom line."
-        ctaHref="#services-quote-hero"
-        ctaText="Get Your Free Quote"
-        columns={3}
-      />
-    )}
+    {
+      benefits.length > 0 && (
+        <ContentRenderer
+          items={benefits}
+          variant="CardVariant"
+          title="Benefits"
+          heading={{
+            before: "Why choose",
+            text: title,
+            after: "for your business.",
+          }}
+          description="Real results that matter for your bottom line."
+          ctaHref="#services-quote-hero"
+          ctaText="Get Your Free Quote"
+          columns={3}
+        />
+      )
+    }
+
+    {/* MDX Content */}
+    {Content && <Content />}
 
     <DoubleCard />
 
-        {/* MDX Content */}
-    {Content && <Content />}
-
-        <ContentRenderer
+    <ContentRenderer
       query={related("capabilities", "solutions", currentSlug)}
       variant="IconListVariant"
       title="What's Included"

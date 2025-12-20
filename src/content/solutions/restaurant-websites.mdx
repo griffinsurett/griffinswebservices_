@@ -42,6 +42,13 @@ benefits:
   - title: "Answer questions 24/7"
     description: "Hours, location, menu, and contact info always available so customers never have to call to find out."
     icon: "fa6-solid:clock"
+quickFacts:
+  - title: "Timeline"
+    description: "2-4 weeks to launch"
+  - title: "What's included"
+    description: "Design, menu setup, training"
+  - title: "Integrations"
+    description: "Reservations + ordering"
 ---
 import ContentSection from "@/layouts/ContentSection.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro"
@@ -92,20 +99,12 @@ import {
     </p>
   </div>
 
-  <div slot="quick-facts" class="grid gap-4 md:grid-cols-3">
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">Timeline</p>
-      <p class="text-heading font-semibold">2-4 weeks to launch</p>
-    </div>
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">What's included</p>
-      <p class="text-heading font-semibold">Design, menu setup, training</p>
-    </div>
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">Integrations</p>
-      <p class="text-heading font-semibold">Reservations + ordering</p>
-    </div>
-  </div>
+  <ContentRenderer
+    slot="quick-facts"
+    items={frontmatter.quickFacts}
+    variant="QuickFactsVariant"
+    columns={3}
+  />
 
   <ul slot="proof-points" class="space-y-3">
     <li class="flex items-start gap-3">

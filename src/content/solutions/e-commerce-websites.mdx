@@ -42,6 +42,13 @@ benefits:
   - title: "Understand your customers"
     description: "Built-in analytics show you best sellers, customer behavior, and revenue trends at a glance."
     icon: "fa6-solid:chart-pie"
+quickFacts:
+  - title: "Timeline"
+    description: "4-8 weeks to launch"
+  - title: "What's included"
+    description: "Design, store setup, training"
+  - title: "Platform"
+    description: "Shopify or custom build"
 ---
 import ContentSection from "@/layouts/ContentSection.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro"
@@ -92,20 +99,12 @@ import {
     </p>
   </div>
 
-  <div slot="quick-facts" class="grid gap-4 md:grid-cols-3">
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">Timeline</p>
-      <p class="text-heading font-semibold">4-8 weeks to launch</p>
-    </div>
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">What's included</p>
-      <p class="text-heading font-semibold">Design, store setup, training</p>
-    </div>
-    <div class="p-4 rounded-2xl border border-muted/20 bg-bg">
-      <p class="text-xs uppercase tracking-[0.2em] text-muted">Platform</p>
-      <p class="text-heading font-semibold">Shopify or custom build</p>
-    </div>
-  </div>
+  <ContentRenderer
+    slot="quick-facts"
+    items={frontmatter.quickFacts}
+    variant="QuickFactsVariant"
+    columns={3}
+  />
 
   <ul slot="proof-points" class="space-y-3">
     <li class="flex items-start gap-3">

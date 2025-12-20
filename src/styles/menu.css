@@ -5,8 +5,9 @@
   display: block;
 }
 
-/* Arrow rotation on hover */
-.menu-item:hover > a .menu-arrow {
+/* Arrow rotation on hover - works for both links and buttons */
+.menu-item:hover > a .menu-arrow,
+.menu-item:hover > button .menu-arrow {
   transform: rotate(180deg);
 }
 
