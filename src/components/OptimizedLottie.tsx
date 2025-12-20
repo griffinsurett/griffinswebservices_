@@ -3,6 +3,7 @@
 // Performance-optimized Lottie component with very conservative loading
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 import { useVisibility } from "../hooks/animations/useVisibility";
 import { useScrollInteraction } from "@/hooks/interactions/useScrollInteraction";
 
@@ -99,11 +100,8 @@ export default function OptimizedLottie({
     return pageScrollable ? "scroll" : "load";
   }, [trigger, pageScrollable]);
 
-  // Reduced motion guard
-  const prefersReduced =
-    respectReducedMotion &&
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+  // Reduced motion / pause-animations guard
+  const motionDisabled = useMotionPreference(respectReducedMotion);
 
   // Visibility helpers
   const seenOnce = useVisibility(containerRef, { threshold: 0.1, rootMargin: "0px", once: true });
@@ -112,7 +110,7 @@ export default function OptimizedLottie({
   // NEW: Conservative loading decision
   // Only load Lottie when we actually need it, not just when component mounts
   useEffect(() => {
-    if (prefersReduced) return; // Never load if reduced motion
+    if (motionDisabled) return; // Never load if reduced motion
     
     switch (effectiveTrigger) {
       case "load":
@@ -126,7 +124,7 @@ export default function OptimizedLottie({
         // This will be triggered by the scroll interaction hook
         break;
     }
-  }, [effectiveTrigger, visible, prefersReduced]);
+  }, [effectiveTrigger, visible, motionDisabled]);
 
   const handleMovement = useCallback(
     (deltaY) => {
@@ -191,6 +189,7 @@ export default function OptimizedLottie({
     
     // For scroll triggers, this is what loads the Lottie
     onScrollActivity: effectiveTrigger === "scroll" && seenOnce ? ({ dir, delta }) => {
+      if (motionDisabled) return;
       if (!shouldLoadLottie) {
         setShouldLoadLottie(true); // First scroll triggers loading
       }
@@ -202,6 +201,7 @@ export default function OptimizedLottie({
     } : undefined,
     
     onWheelActivity: effectiveTrigger === "scroll" && seenOnce ? ({ deltaY }) => {
+      if (motionDisabled) return;
       if (!shouldLoadLottie) {
         setShouldLoadLottie(true); // First wheel triggers loading
       }
@@ -214,7 +214,8 @@ export default function OptimizedLottie({
 
   // Detect when the page scroll position returns to the very top and rewind
   useEffect(() => {
-    if (!rewindToStartOnTop || effectiveTrigger !== "scroll") return;
+    if (!rewindToStartOnTop || effectiveTrigger !== "scroll" || motionDisabled)
+      return;
     if (typeof window === "undefined") return;
 
     wasAtTopRef.current = (window.scrollY || 0) <= SCROLL_TOP_THRESHOLD;
@@ -230,11 +231,13 @@ export default function OptimizedLottie({
 
     window.addEventListener("scroll", maybeRewind, { passive: true });
     return () => window.removeEventListener("scroll", maybeRewind);
-  }, [rewindToStartOnTop, effectiveTrigger, animateBackToStart]);
+  }, [rewindToStartOnTop, effectiveTrigger, animateBackToStart, motionDisabled]);
 
   // Initialize Lottie lazily - ONLY when shouldLoadLottie becomes true
   useEffect(() => {
-    if (!shouldLoadLottie || !lottieContainerRef.current || animationRef.current) return;
+    if (motionDisabled) return;
+    if (!shouldLoadLottie || !lottieContainerRef.current || animationRef.current)
+      return;
     if (!animationData && !animationUrl) {
       console.warn("OptimizedLottie: No animationData or animationUrl provided");
       return;
@@ -305,21 +308,44 @@ export default function OptimizedLottie({
       animationRef.current?.destroy?.();
       animationRef.current = null;
     };
-  }, [shouldLoadLottie, effectiveTrigger, animationData, animationUrl, renderer, loop, autoplay, speed, cancelTopReset]);
+  }, [
+    shouldLoadLottie,
+    effectiveTrigger,
+    animationData,
+    animationUrl,
+    renderer,
+    loop,
+    autoplay,
+    speed,
+    cancelTopReset,
+    motionDisabled,
+  ]);
+
+  // Tear down animation if motion gets disabled after load
+  useEffect(() => {
+    if (!motionDisabled) return;
+    setShowFallback(true);
+    setShouldLoadLottie(false);
+    cancelTopReset();
+    clearTimeout(pauseTimeout.current);
+    animationRef.current?.destroy?.();
+    animationRef.current = null;
+  }, [motionDisabled, cancelTopReset]);
 
   // Visible mode: play when in view
   useEffect(() => {
     if (effectiveTrigger !== "visible" || !animationRef.current) return;
+    if (motionDisabled) return;
     if (!showFallback && visible) {
       animationRef.current.setDirection(1);
       animationRef.current.play();
     }
-  }, [effectiveTrigger, visible, showFallback]);
+  }, [effectiveTrigger, visible, showFallback, motionDisabled]);
 
   // Cleanup
   useEffect(() => () => clearTimeout(pauseTimeout.current), []);
 
-  const shouldShowFallback = prefersReduced || showFallback;
+  const shouldShowFallback = motionDisabled || showFallback;
 
   return (
     <div
@@ -340,11 +366,11 @@ export default function OptimizedLottie({
       </div>
 
       {/* Lottie layer - only render when we've decided to load */}
-      {shouldLoadLottie && (
+      {shouldLoadLottie && !motionDisabled && (
         <div
           ref={lottieContainerRef}
           className="absolute inset-0"
-          style={{ visibility: prefersReduced ? "hidden" : "visible" }}
+          style={{ visibility: motionDisabled ? "hidden" : "visible" }}
           aria-hidden={shouldShowFallback}
         />
       )}
