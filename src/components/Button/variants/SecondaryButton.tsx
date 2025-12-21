@@ -28,7 +28,6 @@ export default function SecondaryButton({
       className={[
         fullWidth ? "inline-flex w-full" : "inline-flex w-full lg:w-auto",
         buttonWrapperClasses,
-        "group",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -41,7 +40,7 @@ export default function SecondaryButton({
         borderWidth={2}
         borderRadius={BORDER_RADIUS_CLASS}
         duration={800}
-        className="justify-center items-center w-full transition-all duration-700 ease-out group-hover:-translate-y-1"
+        className="justify-center items-center w-full transition-all duration-700 ease-out hover:-translate-y-1"
         innerClassName="p-0 shadow-none border-transparent justify-center items-center bg-transparent w-full"
       >
         <ButtonBase
