@@ -25,6 +25,7 @@ interface Props extends BaseVariantProps {
 const {
   items = [],
   title,
+  heading,
   description,
   className = "",
   collectionUrl,
@@ -41,7 +42,10 @@ const solutionEntries = safeItems.filter(
   (item: any) => item?.parent === "website-solutions",
 );
 const contentItems = solutionEntries.length > 0 ? solutionEntries : safeItems;
-const showHeader = Boolean(title || description);
+const sectionTitle = title ?? collectionTitle;
+
+// SectionHeader handles heading normalization automatically
+const showHeader = Boolean(sectionTitle || heading || description);
 
 async function resolveVideoPoster(
   src?: string,
@@ -97,10 +101,10 @@ const accordionItems = await Promise.all(
   <div class="inner-section">
     {showHeader && (
       <SectionHeader
-        title={collectionTitle ?? title}
-        heading={title ?? collectionTitle}
+        title={sectionTitle}
+        heading={heading}
         description={description}
-        className="text-center max-w-3xl mx-auto"
+        className="text-center max-w-5xl mx-auto"
         titleClassName="tracking-[0.25em]"
         descriptionClassName="large-text text-text/80"
       />

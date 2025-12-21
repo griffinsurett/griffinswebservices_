@@ -13,7 +13,6 @@ import Button from "@/components/Button/Button";
 import SectionHeader from "@/components/SectionHeader.astro";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import { toArray } from "@/utils/array";
-import type { HeadingContent } from "@/content/schema";
 
 interface Props extends BaseVariantProps {
   allowMultiple?: boolean;
@@ -24,6 +23,7 @@ interface Props extends BaseVariantProps {
 const {
   items = [],
   title,
+  heading,
   description,
   className = "",
   allowMultiple = false,
@@ -33,27 +33,13 @@ const {
   ctaHref,
   ctaText,
   showButtonSection = true,
-  heading,
 } = Astro.props as Props;
 
 const safeItems = toArray(items);
-const fallbackHeading = title ?? collectionTitle;
-const headingSource = heading ?? fallbackHeading;
-const isSegmentedHeading =
-  typeof headingSource === "object" && headingSource !== null;
-const segmentedHeading = isSegmentedHeading
-  ? (headingSource as HeadingContent)
-  : undefined;
-const resolvedHeading =
-  typeof headingSource === "string"
-    ? headingSource
-    : (segmentedHeading?.text ?? fallbackHeading);
-const headingPayload = segmentedHeading ?? resolvedHeading;
-const showHeader = Boolean(
-  (title ?? collectionTitle ?? "").trim() ||
-    headingPayload ||
-    description,
-);
+const sectionTitle = title ?? collectionTitle;
+
+// SectionHeader handles heading normalization automatically
+const showHeader = Boolean(sectionTitle || heading || description);
 ---
 
 <section
@@ -67,8 +53,8 @@ const showHeader = Boolean(
         showHeader && (
           <div class="lg:w-1/2 sticky-section lg:self-start">
             <SectionHeader
-              title={title ?? collectionTitle}
-              heading={headingPayload}
+              title={sectionTitle}
+              heading={heading}
               description={description}
               className="text-center lg:text-left max-w-3xl lg:max-w-none"
               titleClassName="tracking-[0.25em]"
