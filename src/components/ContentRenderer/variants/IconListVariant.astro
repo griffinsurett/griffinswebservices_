@@ -6,18 +6,9 @@ import FeatureCard from "@/components/LoopComponents/FeatureCard";
 import SectionHeader from "@/components/SectionHeader.astro";
 import { toArray } from "@/utils/array";
 
-interface HeadingContent {
-    title?: string;
-    before?: string;
-    text?: string;
-    after?: string;
-    description?: string;
-}
-
 interface Props extends BaseVariantProps {
     columns?: 1 | 2 | 3;
     gap?: "sm" | "md" | "lg";
-    heading?: HeadingContent;
     itemLayout?: "vertical" | "horizontal" | "horizontal-reverse";
     slotContainerClassName?: string;
 }
@@ -41,18 +32,8 @@ const {
 const hasSlotContent = Astro.slots.has("default");
 
 const safeItems = toArray(items);
-const headingTitle = heading?.title ?? title ?? collectionTitle;
-const headingBefore = heading?.before;
-const headingText = heading?.text;
-const headingAfter = heading?.after;
-const headingDescription = heading?.description ?? description;
-const showHeader = Boolean(
-    headingTitle ??
-        headingDescription ??
-        headingBefore ??
-        headingText ??
-        headingAfter,
-);
+const sectionTitle = title ?? collectionTitle;
+const showHeader = Boolean(sectionTitle ?? description ?? heading);
 
 const resolveItemUrl = (item: Record<string, any>): string | undefined => {
     if (!item || typeof item !== "object") return undefined;
@@ -81,11 +62,9 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                 showHeader && (
                     <div class="w-full lg:w-1/2 sticky-section lg:self-start">
                         <SectionHeader
-                            title={headingTitle}
-                            headingBefore={headingBefore}
-                            headingEmphasis={headingText}
-                            headingAfter={headingAfter}
-                            description={headingDescription}
+                            title={sectionTitle}
+                            heading={heading}
+                            description={description}
                             className="space-y-4 text-left w-full"
                             headingTag={headingTag}
                             headingClassName={headingClassName}

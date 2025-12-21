@@ -7,7 +7,6 @@
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import type { FeatureCardData, FeatureCardProps } from "@/components/LoopComponents/FeatureCard";
-import type { HeadingContent } from "@/content/schema";
 import CardRenderer from "@/components/LoopTemplates/CardRenderer";
 import SectionHeader from "@/components/SectionHeader.astro";
 import Button from "@/components/Button/Button";
@@ -19,7 +18,6 @@ interface Props extends BaseVariantProps {
   ctaHref?: string;
   ctaText?: string;
   card?: CardPropOverrides;
-  heading?: string | HeadingContent | null;
   ctaInlineOnDesktop?: boolean;
 }
 
@@ -30,6 +28,7 @@ type CardPropOverrides = Partial<Omit<FeatureCardProps, "data">> & {
 const {
   items = [],
   title,
+  heading,
   description,
   className = "outer-section",
   columns = 3,
@@ -40,7 +39,6 @@ const {
   ctaHref,
   ctaText,
   card,
-  heading: headingValue,
   ctaInlineOnDesktop = false,
 } = Astro.props as Props;
 
@@ -83,19 +81,8 @@ const resolveRingDuration = (item: FeatureCardData): number => {
   return typeof record?.ringDuration === "number" ? record.ringDuration : 800;
 };
 
-const normalizedHeading = headingValue ?? title;
-const isSegmentedHeading =
-  typeof normalizedHeading === "object" && normalizedHeading !== null;
-const headingString =
-  typeof normalizedHeading === "string"
-    ? normalizedHeading
-    : isSegmentedHeading
-    ? normalizedHeading.text ?? ""
-    : undefined;
-const segmentedHeading = isSegmentedHeading ? normalizedHeading : undefined;
-const resolvedHeading = headingString ?? (segmentedHeading ? segmentedHeading.text : undefined);
-const headingPayload = segmentedHeading ?? resolvedHeading;
-const showHeader = Boolean(title || headingPayload || description);
+// SectionHeader handles heading normalization automatically
+const showHeader = Boolean(title || heading || description);
 const gridMarginClass = showHeader ? "mt-12" : "";
 const showCTA =
   showButtonSection &&
@@ -118,7 +105,7 @@ const showCTA =
         <div class={ctaInlineOnDesktop && showCTA ? "lg:flex-1" : "heading-padding"}>
           <SectionHeader
             title={title}
-            heading={headingPayload}
+            heading={heading}
             description={description}
             className={
               ctaInlineOnDesktop && showCTA ? "text-section lg:text-left" : undefined

@@ -127,21 +127,9 @@ const processedItems = await Promise.all(
 const portfolioItems = processedItems.map((entry) => entry.data);
 const mediaEntries = processedItems.map((entry) => entry.mediaEntry);
 const sectionTitle = collectionTitle ?? title;
-const fallbackHeading = title ?? collectionTitle;
-const normalizedHeading = headingValue ?? fallbackHeading;
-const isSegmentedHeading =
-  typeof normalizedHeading === "object" && normalizedHeading !== null;
-const headingString =
-  typeof normalizedHeading === "string"
-    ? normalizedHeading
-    : isSegmentedHeading
-    ? normalizedHeading.text ?? ""
-    : undefined;
-const segmentedHeading = isSegmentedHeading ? normalizedHeading : undefined;
-const resolvedHeading =
-  headingString ?? (segmentedHeading ? segmentedHeading.text : undefined);
-const headingPayload = segmentedHeading ?? resolvedHeading;
-const showHeader = Boolean(sectionTitle || headingPayload || description);
+
+// SectionHeader handles heading normalization automatically
+const showHeader = Boolean(sectionTitle || headingValue || description);
 ---
 
 <section
@@ -152,7 +140,7 @@ const showHeader = Boolean(sectionTitle || headingPayload || description);
     {showHeader && (
       <SectionHeader
         title={sectionTitle}
-        heading={headingPayload}
+        heading={headingValue}
         description={description}
         className="text-center"
         headingClassName="h2 mb-6 heading-padding"

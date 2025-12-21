@@ -7,7 +7,6 @@
  */
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
-import type { HeadingContent } from "@/content/schema";
 import SectionHeader from "@/components/SectionHeader.astro";
 import IconListItem from "@/components/LoopComponents/IconListItem";
 import Button from "@/components/Button/Button";
@@ -18,12 +17,12 @@ interface Props extends BaseVariantProps {
   columns?: 1 | 2 | 3;
   ctaHref?: string;
   ctaText?: string;
-  heading?: string | HeadingContent | null;
 }
 
 const {
   items = [],
   title,
+  heading,
   description,
   className = "outer-section bg-bg",
   columns = 2,
@@ -33,7 +32,6 @@ const {
   showButtonSection = true,
   ctaHref,
   ctaText,
-  heading: headingValue,
 } = Astro.props as Props;
 
 const safeItems = toArray(items);
@@ -45,19 +43,8 @@ const columnClasses: Record<number, string> = {
   3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
 };
 
-// Heading normalization
-const normalizedHeading = headingValue ?? title;
-const isSegmentedHeading =
-  typeof normalizedHeading === "object" && normalizedHeading !== null;
-const headingString =
-  typeof normalizedHeading === "string"
-    ? normalizedHeading
-    : isSegmentedHeading
-    ? normalizedHeading.text ?? ""
-    : undefined;
-const segmentedHeading = isSegmentedHeading ? normalizedHeading : undefined;
-const headingPayload = segmentedHeading ?? headingString;
-const showHeader = Boolean(title || headingPayload || description);
+// SectionHeader handles heading normalization automatically
+const showHeader = Boolean(title || heading || description);
 
 const showCTA =
   showButtonSection &&
@@ -71,7 +58,7 @@ const showCTA =
     {showHeader && (
       <SectionHeader
         title={title}
-        heading={headingPayload}
+        heading={heading}
         description={description}
         className="text-section"
       />
