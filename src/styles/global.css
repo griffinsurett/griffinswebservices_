@@ -75,9 +75,12 @@
   --font-body: "TikTok Sans", "TikTok Sans Fallback", system-ui, -apple-system, sans-serif;
 }
 
+html, body {
+  overflow-x: clip;
+}
+
 body {
   font-family: var(--font-body, "TikTok Sans", Helvetica, Arial, sans-serif);
-  @apply overflow-x-hidden;
 }
 
 @layer components {

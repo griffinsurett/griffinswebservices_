@@ -51,7 +51,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
 };
 ---
 
-<section id={id} class={`py-16 overflow-x-hidden ${className}`.trim()}>
+<section id={id} class={`py-16 ${className}`.trim()}>
     <div class="mx-auto inner-section">
         <div
             class={`flex flex-col lg:space-x-15 ${
@@ -60,7 +60,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
         >
             {
                 showHeader && (
-                    <div class="w-full lg:w-1/2 sticky-section lg:self-start">
+                    <div class="w-full min-w-0 lg:w-1/2 sticky-section lg:self-start">
                         <SectionHeader
                             title={sectionTitle}
                             heading={heading}
@@ -84,7 +84,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
             {
                 safeItems.length > 0 && (
                     <div
-                        class={`w-full py-6 lg:py-0 ${showHeader ? "lg:w-1/2" : ""}`.trim()}
+                        class={`w-full min-w-0 py-6 lg:py-0 ${showHeader ? "lg:w-1/2" : ""}`.trim()}
                     >
                         <ul
                             class={`flex flex-col gap-4 list-none`.trim()}
@@ -100,7 +100,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
 
                                 return (
                                     <li
-                                        class="relative"
+                                        class="relative overflow-hidden"
                                         data-animate="fade-in-up"
                                         data-animate-once="true"
                                     >
@@ -121,7 +121,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                                                 }}
                                             />
                                         ) : (
-                                            <div class="p-4 md:p-6 lg:p-8">
+                                            // <div class="p-4 md:p-6 lg:p-8">
                                                 <IconListItem
                                                     data={item}
                                                     layout={itemLayout}
@@ -133,7 +133,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                                                     titleClassName="text-heading h3 my-4"
                                                     descriptionClassName="text-lg text-text"
                                                 />
-                                            </div>
+                                            // </div>
                                         )}
                                     </li>
                                 );
