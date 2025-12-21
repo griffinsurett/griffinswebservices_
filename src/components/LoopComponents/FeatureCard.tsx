@@ -160,8 +160,8 @@ export default function FeatureCard({
 
   const innerCardClass =
     resolvedLayout.includes("horizontal")
-      ? "lg:h-55 w-full px-8 py-6 relative flex flex-col justify-center items-center card-bg"
-      : "h-90 mx-auto px-10 flex flex-col justify-center items-center relative card-bg";
+      ? "lg:h-55 w-full px-4 md:px-8 py-6 relative flex flex-col justify-center items-center card-bg"
+      : "h-90 mx-auto px-6 md:px-10 flex flex-col justify-center items-center relative card-bg";
 
   const wrapperTextClass = resolvedLayout.includes("horizontal") ? "text-left" : "text-center";
   const hoverLift = !resolvedLayout.includes("horizontal") && isInteractive ? "hover:-translate-y-3" : "";

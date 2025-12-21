@@ -51,7 +51,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
 };
 ---
 
-<section id={id} class={`py-16 ${className}`.trim()}>
+<section id={id} class={`py-16 overflow-x-hidden ${className}`.trim()}>
     <div class="mx-auto inner-section">
         <div
             class={`flex flex-col lg:space-x-15 ${
@@ -121,7 +121,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                                                 }}
                                             />
                                         ) : (
-                                            <div class="p-6 lg:p-8">
+                                            <div class="p-4 md:p-6 lg:p-8">
                                                 <IconListItem
                                                     data={item}
                                                     layout={itemLayout}
