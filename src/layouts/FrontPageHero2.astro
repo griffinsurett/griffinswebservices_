@@ -31,8 +31,8 @@ const HeroServicesList = [
   "Website Design and Development",
   "Hosting, Maintenance, and Security.",
   "Full SEO Services.",
-  "Futuristic Ai Ready Web Experiences"
-]
+  "Futuristic Ai Ready Web Experiences",
+];
 
 const {
   heading,
@@ -54,55 +54,57 @@ const {
 >
   <div class="relative z-10 inner-section flex flex-wrap items-center">
     <div class="mx-auto px-2 lg:px-0 max-w-6xl lg:max-w-7xl w-full">
-      <div class="lg:flex lg:flex-row lg:items-center gap-15 space-y-4 lg:space-y-auto">
+      <div class="lg:flex lg:flex-row lg:items-center gap-20">
         <!-- Left side: Text content -->
         <div
           class="flex-1 flex flex-col gap-1 md:gap-3 lg:gap-6 justify-center hero-content"
-          data-animate="fade-in-up"
-          data-animate-once="false"
-          data-animate-threshold="0.4"
-          data-animate-root-margin="0px 0px -50% 0px"
-          data-animate-directional="true"
         >
           <SectionHeader
             className="text-left lg:text-left w-full"
             heading={heading}
             headingTag="h1"
-            headingClassName="text-4xl md:text-5xl lg:text-6xl xl:text-7xl"
+            headingClassName="text-4xl md:text-5xl lg:text-6xl xl:text-[75px] xl:leading-[1]"
           />
-
         </div>
 
         <!-- Right side: Portfolio showcase -->
         <div
-          class="flex-1 w-full h-full flex flex-col gap-5 lg:gap-10 justify-between hero-portfolio"
+          class="flex-1 w-full h-full flex flex-col justify-between hero-portfolio space-y-6 lg:space-y-10"
         >
-        <p class="text-xl md:text-2xl lg:text-3xl pr-4 lg:pr-auto">We're a New Jersey based Web Agency that creates fast, engaging websites built to grow your business.</p>
-        <ul class="space-y-1">
-          {HeroServicesList.map((service) => (
-            <li class="list-none flex items-center gap-2" data-animate="fade-in-up">
-              <span class="faded-bg p-1 rounded-full flex items-center justify-center text-primary flex-shrink-0">
-                <svg
-                  class="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </span>
-              <span class="text-text text-lg leading-relaxed">
-                {service}
-              </span>
-            </li>
-          ))}
-        </ul>
-        <div class="flex gap-3 flex-col sm:flex-row items-start lg:items-center lg:w-full">
-
+          <div class="flex flex-col gap-4">
+            <p class="text-xl md:text-2xl lg:text-3xl pr-4 lg:pr-auto">
+              We're a New Jersey based Web Agency that creates fast, engaging
+              websites built to grow your business.
+            </p>
+            <ul class="space-y-1">
+              {
+                HeroServicesList.map((service) => (
+                  <li class="list-none flex items-center gap-2">
+                    <span class="faded-bg p-1 rounded-full flex items-center justify-center text-primary flex-shrink-0">
+                      <svg
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </span>
+                    <span class="text-text text-lg leading-relaxed">
+                      {service}
+                    </span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+          <div
+            class="flex gap-3 flex-col sm:flex-row items-start lg:items-center lg:w-full"
+          >
             <Button
               href={primaryCTA.link}
               variant="primary"
@@ -112,7 +114,7 @@ const {
               {primaryCTA.text}
             </Button>
 
-                        <ContentRenderer
+            <ContentRenderer
               query={query("testimonials")
                 .where((entry) => entry.data.featured === true)
                 .limit(3)}
@@ -130,41 +132,7 @@ const {
     </div>
   </div>
 
-  <span class="hero-arrow" data-animate="fade-in" data-animate-once="false">
+  <span class="hero-arrow">
     <ScrollIndicator href={scrollToSection} />
   </span>
 </section>
-
-<style>
-  /* Very fast animation on mobile for better Speed Index */
-  .hero-content {
-    --animation-duration: 250ms;
-  }
-
-  .hero-portfolio {
-    --animation-delay: 300ms;
-    --animation-duration: 400ms;
-  }
-
-  .hero-arrow {
-    --animation-delay: 400ms;
-    --animation-duration: 300ms;
-  }
-
-  /* Normal animation on desktop */
-  @media (min-width: 1024px) {
-    .hero-content {
-      --animation-duration: 600ms;
-    }
-
-    .hero-portfolio {
-      --animation-delay: 600ms;
-      --animation-duration: 800ms;
-    }
-
-    .hero-arrow {
-      --animation-delay: 800ms;
-      --animation-duration: 800ms;
-    }
-  }
-</style>
