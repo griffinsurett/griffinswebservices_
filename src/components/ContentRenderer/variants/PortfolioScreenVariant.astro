@@ -17,7 +17,6 @@ interface ResponsivityConfig {
 
 interface Props extends BaseVariantProps {
   responsivity?: ResponsivityConfig;
-  clientLoadPlaceholder?: boolean;
   optimizeForLCP?: boolean;
   size?: "normal" | "large";
 }
@@ -66,17 +65,19 @@ if (!safeItems.length) {
   return;
 }
 
-// Target widths for responsive images - actual display is ~570px on desktop
-const IMAGE_WIDTHS = [320, 400, 480, 580];
-const SIZES = "(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) min(calc(100vw - 48px), 580px), 580px";
+// Target widths for responsive images - max-w-[920px] container, so ~850px actual display
+const IMAGE_WIDTHS = [480, 640, 850, 1024];
+const SIZES =
+  "(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) min(calc(100vw - 48px), 850px), 850px";
 // Clamp extremely tall screenshots
 const MAX_RENDER_HEIGHT = 2500;
 
 type OptimizedFormat = "avif" | "webp";
 const FALLBACK_FORMAT: OptimizedFormat = "webp";
+// Higher quality for website screenshots with text/UI - need sharpness
 const IMAGE_FORMATS: { format: OptimizedFormat; quality: number }[] = [
-  { format: "avif", quality: 35 },
-  { format: "webp", quality: 50 },
+  { format: "avif", quality: 60 },
+  { format: "webp", quality: 75 },
 ];
 
 // Process items and generate optimized images
@@ -86,7 +87,7 @@ const processedItems = await Promise.all(
     const metadata = resolveImageMetadata(primaryImage);
     const altText = primaryImage
       ? getImageAlt(primaryImage, item.title ?? "Project preview")
-      : item.title ?? "Project preview";
+      : (item.title ?? "Project preview");
 
     if (!metadata) {
       return { data: item, mediaEntry: undefined };
@@ -99,7 +100,10 @@ const processedItems = await Promise.all(
           IMAGE_WIDTHS.map((width) => {
             const aspectRatio = metadata.height / metadata.width;
             const naturalHeight = Math.round(aspectRatio * width);
-            const constrainedHeight = Math.min(naturalHeight, MAX_RENDER_HEIGHT);
+            const constrainedHeight = Math.min(
+              naturalHeight,
+              MAX_RENDER_HEIGHT,
+            );
             const shouldConstrain = constrainedHeight < naturalHeight;
             const resizeOptions = shouldConstrain
               ? {
@@ -116,10 +120,10 @@ const processedItems = await Promise.all(
               quality,
               ...resizeOptions,
             });
-          })
+          }),
         );
         return { format, images };
-      })
+      }),
     );
 
     const fallbackFormatEntry =
@@ -175,7 +179,7 @@ const processedItems = await Promise.all(
         sources: pictureSources,
       },
     };
-  })
+  }),
 );
 
 const portfolioItems = processedItems.map((entry) => entry.data);
@@ -202,13 +206,16 @@ if (responsivity?.show) {
 const firstMedia = showcaseMedia[0];
 const firstItem = portfolioItems[0];
 
-// Show placeholder when EITHER clientLoadPlaceholder is false OR optimizeForLCP is true
-const shouldShowPlaceholder = !clientLoadPlaceholder || optimizeForLCP;
+// Placeholder always shows if we have media - prevents blank screen while carousel hydrates
+// clientLoadPlaceholder controls loading strategy: false = eager (SSR), true = lazy (client)
+// optimizeForLCP overrides to eager regardless of clientLoadPlaceholder
+const shouldEagerLoad = optimizeForLCP || !clientLoadPlaceholder;
 
 // Height classes based on size prop - same on mobile/tablet, different on lg+
-const heightClasses = size === "large"
-  ? "h-[420px] sm:h-[520px] lg:h-[600px]"
-  : "h-[420px] sm:h-[520px] lg:h-[450px]";
+const heightClasses =
+  size === "large"
+    ? "h-[420px] sm:h-[520px] lg:h-[600px]"
+    : "h-[420px] sm:h-[520px] lg:h-[450px]";
 ---
 
 <div
@@ -216,58 +223,75 @@ const heightClasses = size === "large"
   class={`relative overflow-hidden z-10 ${className} ${visibilityClasses}`.trim()}
 >
   <div class={`relative w-full max-w-[920px] mx-auto ${heightClasses}`}>
-    <div class="relative h-full top-0 card-bg-2 rounded-lg">
+    <div class="relative h-full top-0 rounded-lg">
       <!-- ComputerScreen wrapper with client carousel inside -->
       <ComputerScreen>
-        <div class="relative h-full">
-          <!-- SSR LCP image for first item - uses full srcset, sits behind carousel -->
-          {shouldShowPlaceholder && firstMedia && (
-            <figure class="absolute inset-0 pointer-events-none overflow-hidden bg-black/40 z-0" data-ssr-placeholder>
-              <picture>
-                {firstMedia.sources?.map((source) => (
-                  <source
-                    type={source.type}
-                    srcset={source.srcSet}
-                    sizes={source.sizes || firstMedia.sizes}
+        <div
+          class="relative h-full [mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_55%,rgba(0,0,0,0.35)_78%,rgba(0,0,0,0)_92%)]
+    [-webkit-mask-image:linear-gradient(to_bottom,rgba(0,0,0,1)_55%,rgba(0,0,0,0.35)_78%,rgba(0,0,0,0)_92%)]"
+        >
+          <!-- SSR placeholder image - always shows to prevent blank screen while carousel hydrates -->
+          {
+            firstMedia && (
+              <figure
+                class="absolute inset-0 pointer-events-none overflow-hidden bg-black/40 z-0"
+                data-ssr-placeholder
+              >
+                <picture>
+                  {firstMedia.sources?.map((source) => (
+                    <source
+                      type={source.type}
+                      srcset={source.srcSet}
+                      sizes={source.sizes || firstMedia.sizes}
+                    />
+                  ))}
+                  <img
+                    src={firstMedia.src}
+                    srcset={firstMedia.srcSet}
+                    sizes={firstMedia.sizes}
+                    alt={
+                      firstMedia.alt || firstItem?.title || "Project preview"
+                    }
+                    width={firstMedia.width}
+                    height={firstMedia.height}
+                    loading={shouldEagerLoad ? "eager" : "lazy"}
+                    decoding={shouldEagerLoad ? "sync" : "async"}
+                    fetchpriority={shouldEagerLoad ? "high" : "auto"}
+                    draggable={false}
+                    class="block h-auto min-h-full w-full select-none object-cover object-top"
                   />
-                ))}
-                <img
-                  src={firstMedia.src}
-                  srcset={firstMedia.srcSet}
-                  sizes={firstMedia.sizes}
-                  alt={firstMedia.alt || firstItem?.title || "Project preview"}
-                  width={firstMedia.width}
-                  height={firstMedia.height}
-                  loading={optimizeForLCP ? "eager" : "lazy"}
-                  decoding={optimizeForLCP ? "sync" : "async"}
-                  fetchpriority={optimizeForLCP ? "high" : "auto"}
-                  draggable={false}
-                  class="block h-auto min-h-full w-full select-none object-cover object-top"
-                />
-              </picture>
-            </figure>
-          )}
+                </picture>
+              </figure>
+            )
+          }
 
           <!-- Client carousel loads here - sits on top with z-10 -->
           <div class="relative z-10 h-full">
-            {mediaQuery ? (
-              <PortfolioScreenShowcase client:media={mediaQuery} {...showcaseProps} />
-            ) : (
-              <PortfolioScreenShowcase client:visible {...showcaseProps} />
-            )}
+            {
+              mediaQuery ? (
+                <PortfolioScreenShowcase
+                  client:media={mediaQuery}
+                  {...showcaseProps}
+                />
+              ) : (
+                <PortfolioScreenShowcase client:visible {...showcaseProps} />
+              )
+            }
           </div>
         </div>
       </ComputerScreen>
     </div>
   </div>
-</section>
+</div>
 
 <style>
   /* SSR placeholder - visible until carousel loads, then fades out */
   [data-ssr-placeholder] {
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+    transition:
+      opacity 0.4s ease-out,
+      visibility 0.4s ease-out;
   }
 
   /* Hide placeholder when React component mounts (use global selector to reach into component) */

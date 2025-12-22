@@ -21,7 +21,7 @@ import AccessibilityScript from "@/integrations/preferences/accessibility/compon
 
 <!-- Color scheme support -->
 <meta name="color-scheme" content="dark light" />
-<meta name="theme-color" content="var(--color-bg)" />
+<meta name="theme-color" content="var(--color-bg3)" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
@@ -46,7 +46,7 @@ import AccessibilityScript from "@/integrations/preferences/accessibility/compon
   // Update theme-color meta after paint
   (function() {
     function updateThemeColor() {
-      var computed = getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim();
+      var computed = getComputedStyle(document.documentElement).getPropertyValue('--color-bg3').trim();
       if (computed) {
         var meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', computed);
