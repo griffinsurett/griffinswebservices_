@@ -1,6 +1,7 @@
 // src/components/AIChatSimulation.tsx
 import { useState, useEffect } from "react";
 import Icon from "@/components/Icon";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 
 export interface AIChatSimulationProps {
   /** Additional className */
@@ -12,12 +13,21 @@ const fullMessage = "Hello there! I'm here to answer customer questions 24/7 —
 export default function AIChatSimulation({
   className = "",
 }: AIChatSimulationProps) {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isTyping, setIsTyping] = useState(true);
+  const prefersReducedMotion = useMotionPreference();
+  // Final state: full message displayed, not typing
+  const [displayedText, setDisplayedText] = useState(prefersReducedMotion ? fullMessage : "");
+  const [isTyping, setIsTyping] = useState(prefersReducedMotion ? false : true);
   const [showCursor, setShowCursor] = useState(true);
 
   // Typing effect
   useEffect(() => {
+    // If user prefers reduced motion, show final state immediately
+    if (prefersReducedMotion) {
+      setDisplayedText(fullMessage);
+      setIsTyping(false);
+      return;
+    }
+
     if (displayedText.length < fullMessage.length) {
       const timeout = setTimeout(() => {
         setDisplayedText(fullMessage.slice(0, displayedText.length + 1));
@@ -32,15 +42,17 @@ export default function AIChatSimulation({
       }, 4000);
       return () => clearTimeout(resetTimeout);
     }
-  }, [displayedText]);
+  }, [displayedText, prefersReducedMotion]);
 
-  // Blinking cursor
+  // Blinking cursor - skip for reduced motion
   useEffect(() => {
+    if (prefersReducedMotion) return;
+
     const interval = setInterval(() => {
       setShowCursor((prev) => !prev);
     }, 530);
     return () => clearInterval(interval);
-  }, []);
+  }, [prefersReducedMotion]);
 
   return (
     <div className={`bg-text/10 rounded-lg overflow-hidden ${className}`}>
@@ -52,7 +64,7 @@ export default function AIChatSimulation({
         <div className="flex-1">
           <div className="text-sm font-medium text-text">AI Assistant</div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <div className={`w-2 h-2 rounded-full bg-green-500 ${prefersReducedMotion ? "" : "animate-pulse"}`} />
             <span className="text-xs text-text/70">Always online</span>
           </div>
         </div>

@@ -1,5 +1,7 @@
 // src/components/BarGraph.tsx
 import { useEffect, useRef, useState } from "react";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
+import Counter from "@/components/Counter";
 
 export interface BarGraphProps {
   /** Label displayed above or beside the bar */
@@ -26,13 +28,6 @@ export interface BarGraphProps {
   counterDuration?: number;
 }
 
-// Helper to get decimal places from a number
-const getDecimalPlaces = (value: number) => {
-  const str = value.toString();
-  const decimalIndex = str.indexOf(".");
-  return decimalIndex === -1 ? 0 : str.length - decimalIndex - 1;
-};
-
 export default function BarGraph({
   label,
   value,
@@ -46,16 +41,18 @@ export default function BarGraph({
   className = "",
   counterDuration = 1000,
 }: BarGraphProps) {
+  const prefersReducedMotion = useMotionPreference();
+  // Track when animation should start (for bar width and counter)
   const [animated, setAnimated] = useState(false);
-  const [displayValue, setDisplayValue] = useState(0);
-  const [displayStatValue, setDisplayStatValue] = useState(0);
   const barRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number | null>(null);
-
-  const valueDecimals = getDecimalPlaces(value);
-  const statDecimals = statValue !== undefined ? getDecimalPlaces(statValue) : 0;
 
   useEffect(() => {
+    // If user prefers reduced motion, show final state immediately
+    if (prefersReducedMotion) {
+      setAnimated(true);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -72,43 +69,7 @@ export default function BarGraph({
     }
 
     return () => observer.disconnect();
-  }, [animated, delay]);
-
-  // Counter animation effect
-  useEffect(() => {
-    if (!animated) return;
-
-    const startTime = performance.now();
-
-    const animate = (timestamp: number) => {
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / counterDuration, 1);
-      // Ease-out cubic curve (matches Counter.astro)
-      const eased = 1 - Math.pow(1 - progress, 3);
-
-      setDisplayValue(value * eased);
-      if (statValue !== undefined) {
-        setDisplayStatValue(statValue * eased);
-      }
-
-      if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
-      } else {
-        setDisplayValue(value);
-        if (statValue !== undefined) {
-          setDisplayStatValue(statValue);
-        }
-      }
-    };
-
-    animationRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [animated, value, statValue, counterDuration]);
+  }, [animated, delay, prefersReducedMotion]);
 
   const barClass =
     variant === "primary"
@@ -122,22 +83,21 @@ export default function BarGraph({
       ? "text-accent font-bold"
       : "text-text/60";
 
-  // Format display values with proper decimals
-  const formattedValue = valueDecimals > 0
-    ? displayValue.toFixed(valueDecimals)
-    : Math.round(displayValue).toString();
-
-  const formattedStatValue = statDecimals > 0
-    ? displayStatValue.toFixed(statDecimals)
-    : Math.round(displayStatValue).toString();
+  // Use instant duration when reduced motion is preferred
+  const effectiveDuration = prefersReducedMotion ? 0 : counterDuration;
 
   return (
     <div ref={barRef} className={`w-full ${className}`}>
       <div className="flex justify-between items-center">
         <span className="text-sm text-text/80">{label}</span>
         {statValue !== undefined ? (
-          <span className={`text-lg tabular-nums ${valueClass}`}>
-            {formattedStatValue}{statSuffix}
+          <span className={`text-lg ${valueClass}`}>
+            <Counter
+              start={0}
+              end={animated ? statValue : 0}
+              duration={effectiveDuration}
+            />
+            {statSuffix}
           </span>
         ) : stat ? (
           <span className={`text-lg ${valueClass}`}>
@@ -147,12 +107,17 @@ export default function BarGraph({
       </div>
       <div className={`w-full ${height} bg-text/10 rounded-sm overflow-hidden relative`}>
         <div
-          className={`h-full rounded-sm transition-all duration-1000 ease-out ${barClass}`}
+          className={`h-full rounded-sm ${prefersReducedMotion ? "" : "transition-all duration-1000 ease-out"} ${barClass}`}
           style={{ width: animated ? `${value}%` : "0%" }}
         />
         {showValue && (
-          <span className="absolute inset-0 flex items-center pl-3 text-sm font-semibold text-white tabular-nums">
-            {formattedValue}%
+          <span className="absolute inset-0 flex items-center pl-3 text-sm font-semibold text-white">
+            <Counter
+              start={0}
+              end={animated ? value : 0}
+              duration={effectiveDuration}
+            />
+            %
           </span>
         )}
       </div>

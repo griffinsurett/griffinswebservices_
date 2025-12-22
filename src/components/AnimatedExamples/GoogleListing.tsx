@@ -1,5 +1,6 @@
 // src/components/GoogleListing.tsx
 import Icon from "@/components/Icon";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 
 export interface GoogleListingProps {
   /** Site title */
@@ -24,6 +25,8 @@ export default function GoogleListing({
   favicon = "lu:globe",
   className = "",
 }: GoogleListingProps) {
+  const prefersReducedMotion = useMotionPreference();
+
   return (
     <div className={`relative bg-bg2 rounded-lg p-4 text-left border border-text/10 overflow-hidden ${className}`}>
       {/* Favicon + site name + URL */}
@@ -37,8 +40,12 @@ export default function GoogleListing({
         </div>
       </div>
 
-      {/* Headline with animated underline */}
-      <h3 className="text-lg text-primary mb-1 inline-block animate-[titleHighlight_3s_ease-in-out_infinite]">
+      {/* Headline with animated underline - show underline in final state for reduced motion */}
+      <h3
+        className={`text-lg text-primary mb-1 inline-block ${
+          prefersReducedMotion ? "underline" : "animate-[titleHighlight_3s_ease-in-out_infinite]"
+        }`}
+      >
         {title} — Home
       </h3>
 
@@ -50,10 +57,17 @@ export default function GoogleListing({
         <span className="text-primary ml-1 cursor-pointer hover:underline">Read more</span>
       </p>
 
-      {/* Animated cursor */}
+      {/* Animated cursor - show in final position for reduced motion */}
       <div
-        className="absolute pointer-events-none animate-[cursorMove_3s_ease-in-out_infinite]"
-        style={{ top: '50px', left: '-20px' }}
+        className={`absolute pointer-events-none ${
+          prefersReducedMotion ? "" : "animate-[cursorMove_3s_ease-in-out_infinite]"
+        }`}
+        style={{
+          top: '50px',
+          left: '-20px',
+          // Final state: cursor at position over the title
+          transform: prefersReducedMotion ? 'translate(80px, 10px)' : undefined,
+        }}
       >
         <svg
           width="24"

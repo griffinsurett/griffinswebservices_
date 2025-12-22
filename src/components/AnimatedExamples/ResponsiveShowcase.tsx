@@ -1,5 +1,6 @@
 // src/components/ResponsiveShowcase.tsx
 import { useState, useEffect } from "react";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 
 export interface ResponsiveShowcaseProps {
   /** Additional className */
@@ -9,11 +10,19 @@ export interface ResponsiveShowcaseProps {
 export default function ResponsiveShowcase({
   className = "",
 }: ResponsiveShowcaseProps) {
+  const prefersReducedMotion = useMotionPreference();
+  // Final state: show mobile width (40%) to display responsive hamburger menu
   const [widthPercent, setWidthPercent] = useState(100);
   const [direction, setDirection] = useState<"shrinking" | "growing">("shrinking");
 
   // Smooth animation: shrink from 100% to 40%, then grow back
   useEffect(() => {
+    // If user prefers reduced motion, show mobile width (final state)
+    if (prefersReducedMotion) {
+      setWidthPercent(40);
+      return;
+    }
+
     const interval = setInterval(() => {
       setWidthPercent((prev) => {
         if (direction === "shrinking") {
@@ -33,7 +42,7 @@ export default function ResponsiveShowcase({
     }, 40); // Smooth animation speed
 
     return () => clearInterval(interval);
-  }, [direction]);
+  }, [direction, prefersReducedMotion]);
 
   // Determine breakpoint for layout changes
   const isMobile = widthPercent < 50;

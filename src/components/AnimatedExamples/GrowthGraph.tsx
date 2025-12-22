@@ -1,15 +1,24 @@
 // src/components/AnimatedExamples/GrowthGraph.tsx
 import { useState, useEffect } from "react";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 
 export interface GrowthGraphProps {
   className?: string;
 }
 
 export default function GrowthGraph({ className = "" }: GrowthGraphProps) {
-  const [progress, setProgress] = useState(0);
-  const [fillOpacity, setFillOpacity] = useState(0);
+  const prefersReducedMotion = useMotionPreference();
+  const [progress, setProgress] = useState(prefersReducedMotion ? 100 : 0);
+  const [fillOpacity, setFillOpacity] = useState(prefersReducedMotion ? 1 : 0);
 
   useEffect(() => {
+    // If user prefers reduced motion, show final state immediately
+    if (prefersReducedMotion) {
+      setProgress(100);
+      setFillOpacity(1);
+      return;
+    }
+
     // Animate the line drawing
     const duration = 2000; // 2 seconds
     const steps = 60;
@@ -52,7 +61,7 @@ export default function GrowthGraph({ className = "" }: GrowthGraphProps) {
     }, duration / steps);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [prefersReducedMotion]);
 
   // Growth curve - natural aspect ratio
   const width = 400;
@@ -88,10 +97,10 @@ export default function GrowthGraph({ className = "" }: GrowthGraphProps) {
 
   return (
     <div
-      className={`-mx-6 -mb-6 mt-4 overflow-hidden rounded-b-2xl ${className}`}
+      className={`-mx-6 -mb-6 mt-4 overflow-hidden rounded-b-2xl bg-text/10 ${className}`}
     >
       {/* Labels above the graph */}
-      <div className="flex justify-between px-4 pb-2 text-xs text-text/60">
+      <div className="flex justify-between px-4 pt-3 pb-2 text-xs text-text/60">
         <span>Today</span>
         <span>Future</span>
       </div>
@@ -111,8 +120,8 @@ export default function GrowthGraph({ className = "" }: GrowthGraphProps) {
             x2="100%"
             y2="0%"
           >
-            <stop offset="0%" stopColor="var(--color-primary)" />
-            <stop offset="100%" stopColor="var(--color-primary-700)" />
+            <stop offset="0%" stopColor="var(--color-accent)" />
+            <stop offset="100%" stopColor="var(--color-accent-700)" />
           </linearGradient>
           <linearGradient
             id="growthFillGradient"
@@ -123,12 +132,12 @@ export default function GrowthGraph({ className = "" }: GrowthGraphProps) {
           >
             <stop
               offset="0%"
-              stopColor="var(--color-primary)"
+              stopColor="var(--color-accent)"
               stopOpacity="0.25"
             />
             <stop
               offset="100%"
-              stopColor="var(--color-primary)"
+              stopColor="var(--color-accent)"
               stopOpacity="0.05"
             />
           </linearGradient>
@@ -180,7 +189,7 @@ export default function GrowthGraph({ className = "" }: GrowthGraphProps) {
             cx={(progress / 100) * width}
             cy={height - 10 - (progress / 100) * 102}
             r="5"
-            className="fill-primary"
+            className="fill-accent"
             style={{
               filter: "url(#growthGlow)",
               opacity: progress < 100 ? 1 : 0.8,

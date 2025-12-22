@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 
 interface CounterProps {
   start?: number;
@@ -28,13 +29,22 @@ export default function Counter({
   decimals,
   onComplete,
 }: CounterProps) {
-  const [displayValue, setDisplayValue] = useState(start);
+  const prefersReducedMotion = useMotionPreference();
+  // If reduced motion preferred, start at end value
+  const [displayValue, setDisplayValue] = useState(prefersReducedMotion ? end : start);
   const resolvedDecimals =
     typeof decimals === "number" && !Number.isNaN(decimals)
       ? Math.max(0, decimals)
       : Math.max(getDecimalPlaces(start), getDecimalPlaces(end));
 
   useEffect(() => {
+    // If reduced motion preferred, show final value immediately
+    if (prefersReducedMotion) {
+      setDisplayValue(end);
+      onComplete?.();
+      return;
+    }
+
     let rafId: number;
     const range = end - start;
     if (range === 0) {
@@ -61,7 +71,7 @@ export default function Counter({
     rafId = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(rafId);
-  }, [start, end, duration, onComplete]);
+  }, [start, end, duration, onComplete, prefersReducedMotion]);
 
   const formattedTarget = formatValue(end, resolvedDecimals);
   const minWidthCh = Math.max(1, formattedTarget.length);

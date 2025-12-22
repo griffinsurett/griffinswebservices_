@@ -1,6 +1,7 @@
 // src/components/AnimatedExamples/SecureBrowserBar.tsx
 import { useState, useEffect } from "react";
 import Icon from "@/components/Icon";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 
 export interface SecureBrowserBarProps {
   /** URL to display */
@@ -13,15 +14,26 @@ export default function SecureBrowserBar({
   url = "yoursite.com",
   className = "",
 }: SecureBrowserBarProps) {
+  const prefersReducedMotion = useMotionPreference();
+  // Start with false, effect will set to true immediately if reduced motion
   const [showBadge, setShowBadge] = useState(false);
 
   useEffect(() => {
+    // If user prefers reduced motion, show final state immediately
+    if (prefersReducedMotion) {
+      setShowBadge(true);
+      return;
+    }
+
+    // Reset when animation starts
+    setShowBadge(false);
+
     // Animate badge in after a short delay
     const timer = setTimeout(() => {
       setShowBadge(true);
     }, 300);
     return () => clearTimeout(timer);
-  }, []);
+  }, [prefersReducedMotion]);
 
   return (
     <div className={`bg-text/10 rounded-lg p-3 ${className}`}>
@@ -36,9 +48,11 @@ export default function SecureBrowserBar({
 
         {/* URL bar */}
         <div className="flex-1 flex items-center gap-2 bg-bg2 rounded-md px-3 py-1.5">
-          {/* Secure badge - animates in */}
+          {/* Secure badge - animates in (no transition for reduced motion) */}
           <div
-            className={`flex items-center gap-1.5 primary-gradient rounded px-2 py-0.5 transition-all duration-500 ease-out ${
+            className={`flex items-center gap-1.5 primary-gradient rounded px-2 py-0.5 ${
+              prefersReducedMotion ? "" : "transition-all duration-500 ease-out"
+            } ${
               showBadge
                 ? "opacity-100 translate-x-0 scale-100"
                 : "opacity-0 -translate-x-4 scale-75"

@@ -1,15 +1,28 @@
 // src/components/AnimatedExamples/SupportChat.tsx
 import { useState, useEffect } from "react";
 import Icon from "@/components/Icon";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 
 export interface SupportChatProps {
   className?: string;
 }
 
 export default function SupportChat({ className = "" }: SupportChatProps) {
+  const prefersReducedMotion = useMotionPreference();
+  // Start at 0, effect will set to final state if reduced motion
   const [step, setStep] = useState(0);
+  const [animationKey, setAnimationKey] = useState(0);
 
   useEffect(() => {
+    // If user prefers reduced motion, show final state immediately
+    if (prefersReducedMotion) {
+      setStep(5);
+      return;
+    }
+
+    // Reset step for animation
+    setStep(0);
+
     const timings = [
       500,   // Step 1: User message appears
       1500,  // Step 2: GWS typing indicator
@@ -26,12 +39,12 @@ export default function SupportChat({ className = "" }: SupportChatProps) {
 
     // Reset and loop
     const resetTimer = setTimeout(() => {
-      setStep(0);
+      setAnimationKey(k => k + 1);
     }, 7000);
     timers.push(resetTimer);
 
     return () => timers.forEach(t => clearTimeout(t));
-  }, [step === 0]);
+  }, [animationKey, prefersReducedMotion]);
 
   return (
     <div className={`flex gap-4 ${className}`}>
@@ -53,7 +66,9 @@ export default function SupportChat({ className = "" }: SupportChatProps) {
         <div className="p-3 space-y-2 h-[120px] bg-bg2/50">
           {/* User message */}
           <div
-            className={`flex justify-end transition-all duration-300 ${
+            className={`flex justify-end ${
+              prefersReducedMotion ? "" : "transition-all duration-300"
+            } ${
               step >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
             }`}
           >
@@ -73,7 +88,9 @@ export default function SupportChat({ className = "" }: SupportChatProps) {
 
           {/* GWS response */}
           <div
-            className={`flex justify-start transition-all duration-300 ${
+            className={`flex justify-start ${
+              prefersReducedMotion ? "" : "transition-all duration-300"
+            } ${
               step >= 3 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
             }`}
           >
@@ -86,7 +103,9 @@ export default function SupportChat({ className = "" }: SupportChatProps) {
 
       {/* Website frame */}
       <div
-        className={`w-[100px] transition-all duration-500 ease-out ${
+        className={`w-[100px] ${
+          prefersReducedMotion ? "" : "transition-all duration-500 ease-out"
+        } ${
           step >= 4 ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
         }`}
       >
@@ -102,7 +121,9 @@ export default function SupportChat({ className = "" }: SupportChatProps) {
           <div className="p-2 space-y-1.5">
             {/* Image placeholder - animates in */}
             <div
-              className={`h-10 rounded bg-primary/30 flex items-center justify-center transition-all duration-500 ${
+              className={`h-10 rounded bg-primary/30 flex items-center justify-center ${
+                prefersReducedMotion ? "" : "transition-all duration-500"
+              } ${
                 step >= 5 ? "opacity-100 scale-100" : "opacity-0 scale-90"
               }`}
             >
