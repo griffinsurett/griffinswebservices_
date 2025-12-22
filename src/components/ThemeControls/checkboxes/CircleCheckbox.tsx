@@ -13,7 +13,7 @@ export function CircleCheckbox({
   ...props
 }: CircleCheckboxProps) {
   return (
-    <label className="inline-flex items-center cursor-pointer" role="button">
+    <label className="inline-flex items-center cursor-pointer">
       <input
         type="checkbox"
         checked={checked}
