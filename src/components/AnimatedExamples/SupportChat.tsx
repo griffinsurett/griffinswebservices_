@@ -39,8 +39,8 @@ export default function SupportChat({ className = "" }: SupportChatProps) {
       <div className="flex-1 bg-text/10 rounded-lg overflow-hidden">
         {/* Chat header */}
         <div className="bg-bg2 px-3 py-2 flex items-center gap-2 border-b border-text/10">
-          <div className="w-6 h-6 rounded-full primary-gradient flex items-center justify-center">
-            <Icon icon="lu:message-circle" size="sm" className="text-white" />
+          <div className="w-5 h-5 rounded-full overflow-hidden">
+            <img src="../../../public/2dfavicons/favicon-32x32.png" alt="GWS" className="w-full h-full object-cover" />
           </div>
           <span className="text-xs font-medium text-text">Griffin's Web Services</span>
           <div className="ml-auto flex items-center gap-1">
