@@ -49,7 +49,7 @@ export default function SecureBrowserBar({
           </div>
 
           {/* URL */}
-          <span className="text-sm text-text/70">{url}</span>
+          <span className="text-sm text-text">{url}</span>
         </div>
       </div>
     </div>

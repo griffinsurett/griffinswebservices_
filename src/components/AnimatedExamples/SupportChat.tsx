@@ -45,7 +45,7 @@ export default function SupportChat({ className = "" }: SupportChatProps) {
           <span className="text-xs font-medium text-text">Griffin's Web Services</span>
           <div className="ml-auto flex items-center gap-1">
             <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-            <span className="text-[10px] text-text/50">Online</span>
+            <span className="text-[10px] text-text/70">Online</span>
           </div>
         </div>
 

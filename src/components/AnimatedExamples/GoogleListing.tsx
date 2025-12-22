@@ -33,7 +33,7 @@ export default function GoogleListing({
         </div>
         <div className="flex flex-col leading-tight">
           <span className="text-sm text-text">{title}</span>
-          <span className="text-xs text-text/50">{url}</span>
+          <span className="text-xs text-text/70">{url}</span>
         </div>
       </div>
 
@@ -44,10 +44,10 @@ export default function GoogleListing({
 
       {/* Date and description */}
       <p className="text-sm text-text/60 leading-relaxed">
-        <span className="text-text/50">{date}</span>
+        <span className="text-text/70">{date}</span>
         <span className="text-text/40 mx-1">—</span>
         {description}
-        <span className="text-primary/80 ml-1 cursor-pointer hover:underline">Read more</span>
+        <span className="text-primary ml-1 cursor-pointer hover:underline">Read more</span>
       </p>
 
       {/* Animated cursor */}

@@ -53,7 +53,7 @@ export default function AIChatSimulation({
           <div className="text-sm font-medium text-text">AI Assistant</div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-xs text-text/50">Always online</span>
+            <span className="text-xs text-text/70">Always online</span>
           </div>
         </div>
       </div>
@@ -99,7 +99,10 @@ export default function AIChatSimulation({
             className="flex-1 bg-transparent text-sm text-text placeholder:text-text/40 outline-none"
             disabled
           />
-          <button className="w-8 h-8 rounded-full primary-gradient flex items-center justify-center shrink-0">
+          <button
+            className="w-8 h-8 rounded-full primary-gradient flex items-center justify-center shrink-0"
+            aria-label="Send message"
+          >
             <Icon icon="lu:send" size="sm" className="text-white" />
           </button>
         </div>
