@@ -13,13 +13,11 @@ import { useClickToScroll } from "@/hooks/interactions/useClickToScroll";
 
 const AUTO_SCROLL_START_DELAY_MS = 200;
 const AUTO_SCROLL_RESUME_DELAY_MS = 300;
-const AUTO_SCROLL_TARGET_DURATION_SEC = 14;
+const AUTO_SCROLL_TARGET_DURATION_SEC = 28;
 const AUTO_SCROLL_DEFAULT_CYCLE_MS = AUTO_SCROLL_TARGET_DURATION_SEC * 1000;
-const AUTO_SCROLL_MIN_SPEED = 15;
-const MIN_SCROLL_DELTA = 4;
-const CONTENT_STABLE_WINDOW_MS = 220;
-const CONTENT_STABLE_DELTA_PX = 16;
-const CONTENT_READY_TIMEOUT_MS = 2200;
+const AUTO_SCROLL_MIN_SPEED = 8;
+// Simple delay before considering content ready (allows images to load)
+const CONTENT_READY_DELAY_MS = 350;
 
 export interface ScrollableViewportProps {
   children: ReactNode;
@@ -52,7 +50,6 @@ export default function ScrollableViewport({
   showDevOverlay = false,
 }: ScrollableViewportProps) {
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const [mediaReady, setMediaReady] = useState(false);
   const [contentReady, setContentReady] = useState(false);
   const [scrollDurationMs, setScrollDurationMs] = useState(AUTO_SCROLL_DEFAULT_CYCLE_MS);
   const [progressPct, setProgressPct] = useState(0);
@@ -102,16 +99,26 @@ export default function ScrollableViewport({
     active: isActive,
   });
 
-  // Reset scroll position and content ready state when becoming active
+  // Simple content ready detection: just use a short delay when becoming active
+  // This replaces the complex mediaReady/contentReady stability detection
   useEffect(() => {
-    if (!isActive) return;
-    // Reset content ready to force re-measurement when slide becomes active
-    setContentReady(false);
-    setMediaReady(false);
+    if (!isActive) {
+      setContentReady(false);
+      return;
+    }
+
+    // Reset scroll position when becoming active
     if (resetOnActivate) {
       autoScroll.resetPosition(0);
       viewportRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
+
+    // Simple delay to allow content to render
+    const timer = window.setTimeout(() => {
+      setContentReady(true);
+    }, CONTENT_READY_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
   }, [isActive, resetOnActivate, autoScroll.resetPosition]);
 
   // Track scroll progress
@@ -132,165 +139,6 @@ export default function ScrollableViewport({
       if (raf) cancelAnimationFrame(raf);
     };
   }, [isActive]);
-
-  // Check when image is ready
-  useEffect(() => {
-    const host = viewportRef.current;
-    if (!host) return;
-
-    let cleanup: (() => void) | null = null;
-
-    const checkForImage = () => {
-      const imageEl =
-        (host.querySelector("picture img") as HTMLImageElement | null) ??
-        (host.querySelector("img") as HTMLImageElement | null);
-
-      if (!imageEl) {
-        // No image found - consider media ready (might be placeholder or no-image state)
-        setMediaReady(true);
-        return true;
-      }
-
-      if (imageEl.complete && imageEl.naturalHeight > 0) {
-        setMediaReady(true);
-        return true;
-      }
-
-      setMediaReady(false);
-      const handleReady = () => setMediaReady(true);
-      imageEl.addEventListener("load", handleReady, { once: true });
-      imageEl.addEventListener("error", handleReady, { once: true });
-
-      cleanup = () => {
-        imageEl.removeEventListener("load", handleReady);
-        imageEl.removeEventListener("error", handleReady);
-      };
-
-      return true;
-    };
-
-    // Try immediately
-    if (checkForImage()) {
-      return () => cleanup?.();
-    }
-
-    // If image not found, use MutationObserver to watch for it
-    const observer = new MutationObserver(() => {
-      if (checkForImage()) {
-        observer.disconnect();
-      }
-    });
-
-    observer.observe(host, {
-      childList: true,
-      subtree: true,
-    });
-
-    // Also try again after a short delay as fallback
-    const fallbackTimer = setTimeout(() => {
-      checkForImage();
-    }, 100);
-
-    return () => {
-      observer.disconnect();
-      clearTimeout(fallbackTimer);
-      cleanup?.();
-    };
-  }, [children]);
-
-  // Wait for content to stabilize before auto-scrolling
-  useEffect(() => {
-    if (!mediaReady) {
-      setContentReady(false);
-      return;
-    }
-
-    const host = viewportRef.current;
-    if (!host) return;
-
-    let resolved = false;
-    let stabilityCleanup: (() => void) | null = null;
-
-    const hasScrollableContent = () => {
-      const max = Math.max(0, host.scrollHeight - host.clientHeight);
-      return max > MIN_SCROLL_DELTA;
-    };
-
-    const markReady = () => {
-      if (resolved) return;
-      resolved = true;
-      stabilityCleanup?.();
-      stabilityCleanup = null;
-      setContentReady(true);
-    };
-
-    const waitForStableContent = () => {
-      if (typeof ResizeObserver === "undefined") {
-        markReady();
-        return;
-      }
-
-      let stabilityTimer: number | null = null;
-      let lastHeight = host.scrollHeight;
-
-      const scheduleReady = () => {
-        if (stabilityTimer) return;
-        stabilityTimer = window.setTimeout(() => {
-          stabilityTimer = null;
-          markReady();
-        }, CONTENT_STABLE_WINDOW_MS);
-      };
-
-      const resetReady = () => {
-        if (stabilityTimer) {
-          window.clearTimeout(stabilityTimer);
-          stabilityTimer = null;
-        }
-      };
-
-      const observer = new ResizeObserver(() => {
-        const nextHeight = host.scrollHeight;
-        if (Math.abs(nextHeight - lastHeight) > CONTENT_STABLE_DELTA_PX) {
-          lastHeight = nextHeight;
-          resetReady();
-        }
-        scheduleReady();
-      });
-
-      observer.observe(host);
-      scheduleReady();
-
-      stabilityCleanup = () => {
-        observer.disconnect();
-        if (stabilityTimer) {
-          window.clearTimeout(stabilityTimer);
-          stabilityTimer = null;
-        }
-      };
-    };
-
-    if (hasScrollableContent()) {
-      waitForStableContent();
-    } else if (typeof ResizeObserver !== "undefined") {
-      const observer = new ResizeObserver(() => {
-        if (hasScrollableContent()) {
-          observer.disconnect();
-          waitForStableContent();
-        }
-      });
-      observer.observe(host);
-      stabilityCleanup = () => observer.disconnect();
-    } else {
-      markReady();
-    }
-
-    const timeoutId = window.setTimeout(markReady, CONTENT_READY_TIMEOUT_MS);
-
-    return () => {
-      stabilityCleanup?.();
-      window.clearTimeout(timeoutId);
-    };
-  }, [mediaReady]);
 
   // Measure scroll duration when content is ready
   useEffect(() => {
@@ -372,6 +220,7 @@ export default function ScrollableViewport({
           <div>🖱️ Manual Scroll: {manualScrollEnabled ? "✅" : "❌"}</div>
           <div>📊 Progress: {progressPct}%</div>
           <div>📏 Duration: {(scrollDurationMs / 1000).toFixed(1)}s</div>
+          <div>✅ Content Ready: {contentReady ? "✅" : "❌"}</div>
         </div>
       )}
     </div>
