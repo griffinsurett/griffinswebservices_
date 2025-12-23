@@ -1,0 +1,643 @@
+// src/components/LoopTemplates/Portfolio/FilteredPortfolioCarousel.tsx
+/**
+ * FilteredPortfolioCarousel - Industry-filtered portfolio with 3D carousel transitions
+ *
+ * Combines the best of both portfolio variants:
+ * - 3D carousel transitions between industries (like PortfolioCarousel)
+ * - Image cycling within each industry (like PortfolioScreenShowcase)
+ *
+ * Uses the reusable useFilter hook for industry filtering.
+ */
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import { useFilter, type FilterConfig } from "@/hooks/useFilter";
+import FilterTabs from "../FilterTabs";
+import ScrollableViewport from "@/components/LoopComponents/Portfolio/ScrollableViewport";
+import ClientImage from "@/components/ClientImage";
+import { LeftArrow, RightArrow } from "@/components/Carousels/CarouselArrows";
+import { useSideDragNavigation } from "@/hooks/interactions/useSideDragNavigation";
+import { animationProps } from "@/integrations/scroll-animations";
+import {
+  type PortfolioItemData,
+  type PortfolioMediaEntry,
+  getPortfolioImageSrc,
+  normalizeItems,
+} from "@/components/LoopComponents/Portfolio/types";
+
+// Extended portfolio item with industry reference
+interface FilteredPortfolioItem extends PortfolioItemData {
+  industry?: string | { id?: string; slug?: string; title?: string; icon?: string };
+  parentData?: { title?: string; icon?: string };
+}
+
+interface IndustryGroup {
+  key: string;
+  label: string;
+  icon?: string;
+  items: FilteredPortfolioItem[];
+  mediaEntries: (PortfolioMediaEntry | undefined)[];
+}
+
+interface FilteredPortfolioCarouselProps {
+  items?: FilteredPortfolioItem[];
+  mediaEntries?: (PortfolioMediaEntry | undefined)[];
+  filter?: FilterConfig;
+  filterSize?: "sm" | "md" | "lg";
+  filterClassName?: string;
+  showArrows?: boolean;
+  showFilters?: boolean;
+  drag?: boolean;
+  className?: string;
+}
+
+const SLIDE_TRANSITION_DURATION_MS = 750;
+
+/**
+ * Individual industry slide that cycles through its project images
+ */
+interface IndustrySlideProps {
+  group: IndustryGroup;
+  isActive: boolean;
+  position: "center" | "left" | "right" | "hidden";
+  centerW: number;
+  centerH: number;
+  sideW: number;
+  sideH: number;
+  tx: number;
+  onSelect: () => void;
+  onCycleComplete: () => void;
+}
+
+function IndustrySlide({
+  group,
+  isActive,
+  position,
+  centerW,
+  centerH,
+  sideW,
+  sideH,
+  tx,
+  onSelect,
+  onCycleComplete,
+}: IndustrySlideProps) {
+  const [imageIndex, setImageIndex] = useState(0);
+  const [prevImageIndex, setPrevImageIndex] = useState<number | null>(null);
+  const [transitionStage, setTransitionStage] = useState<"idle" | "pre" | "animating">("idle");
+  const transitionTimerRef = useRef<number | null>(null);
+  const transitionFrameRef = useRef<number | null>(null);
+
+  const translateBase = isActive ? "translate(-50%, 0)" : "translate(-50%, -50%)";
+
+  const slideBase =
+    "absolute left-1/2 overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform bg-gray-900";
+
+  let style: CSSProperties = {
+    width: `${sideW}px`,
+    height: `${sideH}px`,
+    transform: `${translateBase} scale(0)`,
+    zIndex: 10,
+    opacity: 0,
+    pointerEvents: "none",
+  };
+
+  if (position === "center") {
+    style = {
+      width: `${centerW}px`,
+      height: `${centerH}px`,
+      transform: `${translateBase} scale(1) rotateY(0deg)`,
+      zIndex: 30,
+      opacity: 1,
+    };
+  } else if (position === "left") {
+    style = {
+      width: `${sideW}px`,
+      height: `${sideH}px`,
+      transform: `${translateBase} translateX(-${tx}px) scale(0.9) rotateY(22deg)`,
+      zIndex: 20,
+      opacity: 0.4,
+    };
+  } else if (position === "right") {
+    style = {
+      width: `${sideW}px`,
+      height: `${sideH}px`,
+      transform: `${translateBase} translateX(${tx}px) scale(0.9) rotateY(-22deg)`,
+      zIndex: 20,
+      opacity: 0.4,
+    };
+  }
+
+  // Reset image index when becoming active
+  useEffect(() => {
+    if (isActive) {
+      setImageIndex(0);
+      setPrevImageIndex(null);
+      setTransitionStage("idle");
+    }
+  }, [isActive]);
+
+  // Cleanup timers
+  useEffect(
+    () => () => {
+      if (transitionTimerRef.current) {
+        window.clearTimeout(transitionTimerRef.current);
+      }
+      if (transitionFrameRef.current) {
+        cancelAnimationFrame(transitionFrameRef.current);
+      }
+    },
+    []
+  );
+
+  const startImageTransition = useCallback(
+    (targetIndex: number) => {
+      if (typeof window === "undefined") return;
+      setPrevImageIndex(imageIndex);
+      setImageIndex(targetIndex);
+      setTransitionStage("pre");
+
+      if (transitionFrameRef.current) {
+        cancelAnimationFrame(transitionFrameRef.current);
+      }
+
+      transitionFrameRef.current = requestAnimationFrame(() => {
+        transitionFrameRef.current = requestAnimationFrame(() => {
+          setTransitionStage("animating");
+        });
+      });
+
+      if (transitionTimerRef.current) {
+        window.clearTimeout(transitionTimerRef.current);
+      }
+
+      transitionTimerRef.current = window.setTimeout(() => {
+        setTransitionStage("idle");
+        setPrevImageIndex(null);
+      }, SLIDE_TRANSITION_DURATION_MS);
+    },
+    [imageIndex]
+  );
+
+  // Handle scroll complete - either advance image or trigger industry change
+  const handleScrollComplete = useCallback(() => {
+    if (!isActive || group.items.length === 0) return;
+    if (transitionStage !== "idle") return;
+
+    const nextImageIndex = imageIndex + 1;
+
+    // If we have more images in this industry, cycle to next
+    if (nextImageIndex < group.items.length) {
+      startImageTransition(nextImageIndex);
+    } else {
+      // We've shown all images in this industry, trigger carousel advance
+      onCycleComplete();
+    }
+  }, [isActive, group.items.length, imageIndex, transitionStage, startImageTransition, onCycleComplete]);
+
+  const currentItem = group.items[imageIndex];
+  const currentMediaEntry = group.mediaEntries[imageIndex];
+
+  const renderMedia = (item: FilteredPortfolioItem, mediaEntry?: PortfolioMediaEntry) => {
+    const fallbackSrc = getPortfolioImageSrc(item);
+    const altText = mediaEntry?.alt || item.alt || item.title || "Project preview";
+
+    if (mediaEntry?.sources?.length) {
+      return (
+        <picture>
+          {mediaEntry.sources.map((source, idx) => (
+            <source
+              key={`source-${idx}`}
+              srcSet={source.srcSet}
+              sizes={source.sizes ?? mediaEntry.sizes}
+              type={source.type}
+            />
+          ))}
+          <img
+            src={mediaEntry.src}
+            srcSet={mediaEntry.srcSet}
+            sizes={mediaEntry.sizes}
+            alt={altText}
+            width={mediaEntry.width}
+            height={mediaEntry.height}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            className="block w-full h-auto min-h-full select-none object-cover object-top"
+          />
+        </picture>
+      );
+    }
+
+    if (mediaEntry?.src || fallbackSrc) {
+      return (
+        <ClientImage
+          src={mediaEntry?.src || fallbackSrc}
+          srcSet={mediaEntry?.srcSet}
+          sizes={mediaEntry?.sizes}
+          alt={altText}
+          width={mediaEntry?.width}
+          height={mediaEntry?.height}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          className="block w-full h-auto min-h-full select-none object-cover object-top"
+        />
+      );
+    }
+
+    return (
+      <div className="flex h-full w-full bg-gradient-to-b from-bg2 via-bg to-bg/80" />
+    );
+  };
+
+  // For screen showcase style cycling within the industry
+  const baseTransitionClass =
+    "absolute inset-0 transition-transform transition-opacity duration-[750ms] ease-[cubic-bezier(0.4,0,0.2,1)]";
+
+  return (
+    <div
+      className={`${slideBase} ${isActive ? "top-0" : "top-1/2"}`}
+      style={style}
+      data-carousel-item
+      data-industry={group.key}
+      data-active={isActive ? "true" : "false"}
+      onClick={() => {
+        if (!isActive) {
+          onSelect();
+        }
+      }}
+    >
+      {group.items.length === 1 ? (
+        // Single item - just use ScrollableViewport
+        <ScrollableViewport
+          isActive={isActive}
+          isTransitioning={false}
+          onScrollComplete={handleScrollComplete}
+          targetDurationSec={28}
+          resetOnActivate={true}
+          className="w-full h-full bg-gray-900 m-0 p-0"
+        >
+          {renderMedia(currentItem, currentMediaEntry)}
+        </ScrollableViewport>
+      ) : (
+        // Multiple items - cycle through with slide transitions
+        <div className="relative h-full w-full overflow-hidden">
+          {group.items.map((item, idx) => {
+            const isActiveImage = idx === imageIndex;
+            const isPrevImage = idx === prevImageIndex;
+            const shouldMount = isActiveImage || (isPrevImage && transitionStage !== "idle");
+
+            if (!shouldMount) return null;
+
+            let translateClass = "translate-x-full";
+            if (isPrevImage && transitionStage !== "idle") {
+              translateClass = "-translate-x-full";
+            } else if (isActiveImage) {
+              if (transitionStage === "idle" || prevImageIndex === null) {
+                translateClass = "translate-x-0";
+              } else if (transitionStage === "pre") {
+                translateClass = "translate-x-full";
+              } else {
+                translateClass = "translate-x-0";
+              }
+            }
+
+            const isVisible = isActiveImage || (isPrevImage && transitionStage !== "idle");
+
+            return (
+              <div
+                key={item.slug ?? item.id ?? idx}
+                className={`${baseTransitionClass} ${translateClass} ${
+                  isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+                }`}
+              >
+                <ScrollableViewport
+                  isActive={isActive && isActiveImage}
+                  isTransitioning={transitionStage !== "idle"}
+                  onScrollComplete={isActiveImage ? handleScrollComplete : undefined}
+                  targetDurationSec={28}
+                  resetOnActivate={true}
+                  className="w-full h-full bg-gray-900 m-0 p-0"
+                >
+                  {renderMedia(item, group.mediaEntries[idx])}
+                </ScrollableViewport>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function FilteredPortfolioCarousel({
+  items = [],
+  mediaEntries: mediaEntriesProp = [],
+  filter,
+  filterSize = "sm",
+  filterClassName = "",
+  showArrows = true,
+  showFilters = true,
+  drag = false,
+  className = "",
+}: FilteredPortfolioCarouselProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [containerW, setContainerW] = useState(0);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const safeItems = useMemo(() => normalizeItems(items) as FilteredPortfolioItem[], [items]);
+  const mediaEntries = useMemo(() => normalizeItems(mediaEntriesProp), [mediaEntriesProp]);
+
+  // Use the filter hook with industry field
+  const filterConfig: FilterConfig = useMemo(() => ({
+    field: "industry",
+    showAll: false,
+    ...filter,
+  }), [filter]);
+
+  const {
+    filterOptions,
+    activeFilter,
+    setActiveFilter,
+    showFilters: shouldShowFilters,
+    groupingField,
+  } = useFilter(safeItems, filterConfig);
+
+  // Group items by industry with their corresponding media entries
+  const industryGroups = useMemo(() => {
+    const groups: IndustryGroup[] = [];
+
+    for (const option of filterOptions) {
+      const groupItems: FilteredPortfolioItem[] = [];
+      const groupMediaEntries: (PortfolioMediaEntry | undefined)[] = [];
+
+      safeItems.forEach((item, idx) => {
+        const industryValue = item.industry;
+        let industryKey: string | null = null;
+
+        if (typeof industryValue === "string") {
+          industryKey = industryValue;
+        } else if (industryValue && typeof industryValue === "object") {
+          industryKey = industryValue.id || industryValue.slug || null;
+        }
+
+        if (industryKey === option.key) {
+          groupItems.push(item);
+          groupMediaEntries.push(isHydrated ? mediaEntries[idx] : undefined);
+        }
+      });
+
+      if (groupItems.length > 0) {
+        groups.push({
+          key: option.key,
+          label: option.label,
+          icon: option.icon,
+          items: groupItems,
+          mediaEntries: groupMediaEntries,
+        });
+      }
+    }
+
+    return groups;
+  }, [filterOptions, safeItems, mediaEntries, isHydrated]);
+
+  // Current industry index based on active filter
+  const [industryIndex, setIndustryIndex] = useState(0);
+
+  // Sync industry index with active filter
+  useEffect(() => {
+    const idx = industryGroups.findIndex((g) => g.key === activeFilter);
+    if (idx !== -1 && idx !== industryIndex) {
+      setIndustryIndex(idx);
+    }
+  }, [activeFilter, industryGroups, industryIndex]);
+
+  const ready = containerW > 0;
+
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    const element = containerRef.current;
+    if (!element) return;
+
+    const update = () => {
+      const width = element.getBoundingClientRect().width;
+      if (width && width !== containerW) setContainerW(width);
+    };
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    window.addEventListener("resize", update, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, [containerW]);
+
+  const getSizes = () => {
+    const width = containerW;
+    if (width < 640)
+      return { centerW: 280, centerH: 190, sideW: 180, sideH: 120 };
+    if (width < 768)
+      return { centerW: 340, centerH: 230, sideW: 220, sideH: 150 };
+    if (width < 1024)
+      return { centerW: 460, centerH: 310, sideW: 290, sideH: 190 };
+    if (width < 1280)
+      return { centerW: 680, centerH: 450, sideW: 420, sideH: 290 };
+    return { centerW: 860, centerH: 540, sideW: 520, sideH: 360 };
+  };
+
+  const getTranslateDistance = (sideW: number) => {
+    const width = containerW;
+    const bleed = width >= 1536 ? 72 : width >= 1280 ? 56 : width >= 1024 ? 40 : 20;
+    const edgeGutter = -bleed;
+    return width / 2 - sideW / 2 - edgeGutter;
+  };
+
+  const { centerW, centerH, sideW, sideH } = ready
+    ? getSizes()
+    : { centerW: 0, centerH: 0, sideW: 0, sideH: 0 };
+  const tx = ready ? getTranslateDistance(sideW) : 0;
+
+  const goToIndustry = useCallback((idx: number) => {
+    setIndustryIndex(idx);
+    if (industryGroups[idx]) {
+      setActiveFilter(industryGroups[idx].key);
+    }
+  }, [industryGroups, setActiveFilter]);
+
+  const goToPrevious = useCallback(() => {
+    const newIdx = industryIndex === 0 ? industryGroups.length - 1 : industryIndex - 1;
+    goToIndustry(newIdx);
+  }, [industryIndex, industryGroups.length, goToIndustry]);
+
+  const goToNext = useCallback(() => {
+    const newIdx = industryIndex === industryGroups.length - 1 ? 0 : industryIndex + 1;
+    goToIndustry(newIdx);
+  }, [industryIndex, industryGroups.length, goToIndustry]);
+
+  // Handle filter tab click
+  const handleFilterChange = useCallback((key: string) => {
+    const idx = industryGroups.findIndex((g) => g.key === key);
+    if (idx !== -1) {
+      goToIndustry(idx);
+    }
+  }, [industryGroups, goToIndustry]);
+
+  // Handle cycle complete from industry slide (all images shown)
+  const handleIndustryCycleComplete = useCallback(() => {
+    goToNext();
+  }, [goToNext]);
+
+  const arrowDiameter = containerW >= 768 ? 48 : 40;
+  const arrowRadius = arrowDiameter / 2;
+  const gap = containerW >= 1024 ? 20 : 16;
+  const isLarge = containerW >= 1280;
+
+  const sideOffsetFromCenterSlide = centerW / 2 + arrowRadius + gap;
+  const leftCalc = isLarge
+    ? `calc(50% - ${tx}px)`
+    : `calc(50% - ${sideOffsetFromCenterSlide}px)`;
+  const rightCalc = isLarge
+    ? `calc(50% + ${tx}px)`
+    : `calc(50% + ${sideOffsetFromCenterSlide}px)`;
+
+  const leftZoneRef = useRef<HTMLDivElement | null>(null);
+  const rightZoneRef = useRef<HTMLDivElement | null>(null);
+
+  useSideDragNavigation({
+    enabled: ready && drag && industryGroups.length > 1,
+    leftElRef: leftZoneRef,
+    rightElRef: rightZoneRef,
+    onLeft: goToPrevious,
+    onRight: goToNext,
+    dragThreshold: Math.max(40, Math.round(containerW * 0.05)),
+    tapThreshold: 12,
+  });
+
+  const sideZoneWidth = Math.max(140, Math.min(sideW, 520));
+  const baseZoneStyle = (leftPx: number): CSSProperties => ({
+    left: `calc(50% ${leftPx >= 0 ? "+" : "-"} ${Math.abs(leftPx)}px)`,
+    transform: "translateX(-50%)",
+    width: `${sideZoneWidth}px`,
+    top: 0,
+    height: "100%",
+  });
+
+  const leftZoneOffset = isLarge ? tx : sideOffsetFromCenterSlide;
+  const rightZoneOffset = isLarge ? tx : sideOffsetFromCenterSlide;
+
+  if (!industryGroups.length) return null;
+
+  return (
+    <div
+      ref={containerRef}
+      {...animationProps("fade-in", { once: true })}
+      data-filtered-carousel-container
+      suppressHydrationWarning
+      className={`w-full ${className}`.trim()}
+    >
+      {/* Filter Tabs */}
+      {showFilters && (
+        <FilterTabs
+          options={filterOptions}
+          activeFilter={activeFilter}
+          onFilterChange={handleFilterChange}
+          show={shouldShowFilters}
+          groupingField={groupingField}
+          size={filterSize}
+          showCount={filter?.showCount}
+          className={`mb-8 ${filterClassName}`.trim()}
+        />
+      )}
+
+      {ready && (
+        <>
+          <div
+            className="relative overflow-visible w-full leading-none"
+            style={{ height: `${centerH}px` }}
+          >
+            {industryGroups.map((group, groupIndex) => {
+              const diff = groupIndex - industryIndex;
+              const itemsLength = industryGroups.length;
+
+              let position: "center" | "left" | "right" | "hidden" = "hidden";
+              if (diff === 0) position = "center";
+              else if (diff === -1 || diff === itemsLength - 1) position = "left";
+              else if (diff === 1 || diff === -(itemsLength - 1)) position = "right";
+
+              return (
+                <IndustrySlide
+                  key={group.key}
+                  group={group}
+                  isActive={position === "center"}
+                  position={position}
+                  centerW={centerW}
+                  centerH={centerH}
+                  sideW={sideW}
+                  sideH={sideH}
+                  tx={tx}
+                  onSelect={() => goToIndustry(groupIndex)}
+                  onCycleComplete={handleIndustryCycleComplete}
+                />
+              );
+            })}
+
+            {drag && industryGroups.length > 1 && (
+              <>
+                <div
+                  ref={leftZoneRef}
+                  className="absolute z-30 cursor-grab touch-pan-x select-none"
+                  style={baseZoneStyle(-leftZoneOffset)}
+                  aria-hidden="true"
+                  data-drag-zone="left"
+                />
+                <div
+                  ref={rightZoneRef}
+                  className="absolute z-30 cursor-grab touch-pan-x select-none"
+                  style={baseZoneStyle(rightZoneOffset)}
+                  aria-hidden="true"
+                  data-drag-zone="right"
+                />
+              </>
+            )}
+
+            {showArrows && industryGroups.length > 1 && (
+              <>
+                <LeftArrow
+                  onClick={goToPrevious}
+                  variant="floating"
+                  position={{
+                    left: leftCalc,
+                    top: "50%",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                />
+                <RightArrow
+                  onClick={goToNext}
+                  variant="floating"
+                  position={{
+                    left: rightCalc,
+                    top: "50%",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                />
+              </>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

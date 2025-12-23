@@ -182,10 +182,15 @@ const heroDescription =
     />
 
     <!-- Portfolio with sorting -->
-    <ContentRenderer
-      query={query("projects").orderBy(sortByOrder("publishDate", "desc"))}
-      variant="PortfolioVariant"
-    />
+   <ContentRenderer
+  query={query('projects')}
+  variant="FilteredPortfolioVariant"
+  title="Our Work"
+  filter={{ showCount: true }}
+  showFilters={true}
+  showArrows={true}
+/>
+
 
     <!-- Technologies -->
     <ContentRenderer
