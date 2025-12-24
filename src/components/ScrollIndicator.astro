@@ -10,11 +10,11 @@ const { href = "#about-us", className = "" } = Astro.props;
 
 <a
   href={href}
-  class={`scroll-indicator absolute bottom-15 lg:bottom-12 left-1/2 -translate-x-1/2 cursor-pointer no-underline z-20 ${className}`}
+  class={`scroll-indicator absolute bottom-16 lg:bottom-12 left-1/2 -translate-x-1/2 cursor-pointer no-underline z-20 ${className}`}
   aria-label="Scroll down for more content"
 >
   <div
-    class="flex items-center justify-center p-1 border border-text rounded-full shadow-lg transition-all duration-300 ease-in-out"
+    class="flex items-center justify-center px-1 py-2 lg:py-1 border border-text rounded-full shadow-lg transition-all duration-300 ease-in-out"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
