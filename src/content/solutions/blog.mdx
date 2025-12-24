@@ -52,9 +52,7 @@ quickFacts:
 ---
 import ContentSection from "@/layouts/ContentSection.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro"
-import {
-  query,
-} from "@/utils/query";
+import { query, sortByOrder } from "@/utils/query";
 
 <ContentSection
   heading={{
@@ -106,10 +104,13 @@ import {
     columns={3}
   />
 
-  {/* <div slot="bottom-section">
-    <ContentRenderer
-      query={query("stats")}
-      variant="StatsVariant"
-    />
-  </div> */}
 </ContentSection>
+
+ <ContentRenderer
+      query={query("benefits").orderBy(sortByOrder())}
+      variant="BenefitsVariant"
+      columns={2}
+      gap="lg"
+      title="Why Choose Us"
+      heading="What Makes Our Websites Different"
+    />

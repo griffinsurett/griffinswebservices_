@@ -3,12 +3,11 @@
 
 import type { IconType } from 'react-icons';
 import { LuArrowLeft, LuArrowRight, LuArrowUpRight, LuBookOpen, LuBot, LuCheck, LuChevronRight, LuClock, LuCode, LuContact, LuGithub, LuGlobe, LuImage, LuInstagram, LuLayers, LuLinkedin, LuLock, LuMail, LuMinus, LuPhone, LuPlus, LuSend, LuSettings, LuSparkles } from 'react-icons/lu';
-import { FaArrowTrendUp, FaArrowsRotate, FaArrowsUpDownLeftRight, FaAward, FaAws, FaBagShopping, FaBolt, FaBoxOpen, FaBoxesStacked, FaBriefcase, FaBullseye, FaCalendarCheck, FaCamera, FaCartArrowDown, FaCartShopping, FaChartLine, FaChartPie, FaChartSimple, FaClock, FaClockRotateLeft, FaClone, FaCloudflare, FaCode, FaCoins, FaCrown, FaCss3Alt, FaCubes, FaDatabase, FaDumbbell, FaEnvelopeCircleCheck, FaEnvelopeOpenText, FaFeather, FaFeatherPointed, FaFigma, FaFileLines, FaFlask, FaGithub, FaHandshake, FaHeadset, FaHeartPulse, FaHelmetSafety, FaHtml5, FaJs, FaKey, FaLaptop, FaLayerGroup, FaLifeRing, FaListCheck, FaLocationDot, FaMagnifyingGlass, FaMagnifyingGlassChart, FaMobileScreenButton, FaNodeJs, FaPaintbrush, FaPenNib, FaPenToSquare, FaPhp, FaPlug, FaPuzzlePiece, FaPython, FaReact, FaRobot, FaRocket, FaScrewdriverWrench, FaServer, FaShieldHalved, FaShieldHeart, FaShopify, FaStore, FaTrophy, FaTruckFast, FaUniversalAccess, FaUtensils, FaWandMagicSparkles, FaWordpress } from 'react-icons/fa6';
+import { FaArrowTrendUp, FaArrowsUpDownLeftRight, FaAward, FaAws, FaBagShopping, FaBolt, FaBoxOpen, FaBoxesStacked, FaBriefcase, FaBullseye, FaCalendarCheck, FaCamera, FaCartArrowDown, FaCartShopping, FaChartLine, FaChartPie, FaChartSimple, FaClock, FaClockRotateLeft, FaClone, FaCloudflare, FaCode, FaCoins, FaCrown, FaCss3Alt, FaDumbbell, FaEnvelopeCircleCheck, FaEnvelopeOpenText, FaFeather, FaFeatherPointed, FaFigma, FaFileLines, FaFlask, FaGithub, FaHandshake, FaHeadset, FaHeartPulse, FaHelmetSafety, FaHtml5, FaJs, FaKey, FaLaptop, FaLayerGroup, FaLifeRing, FaListCheck, FaLocationDot, FaMagnifyingGlass, FaMagnifyingGlassChart, FaMobileScreenButton, FaNodeJs, FaPenNib, FaPenToSquare, FaPhp, FaPlug, FaPython, FaReact, FaRobot, FaRocket, FaScrewdriverWrench, FaServer, FaShieldHalved, FaShieldHeart, FaShopify, FaTrophy, FaTruckFast, FaUniversalAccess, FaUtensils, FaWandMagicSparkles, FaWordpress } from 'react-icons/fa6';
 import { SiAstro, SiElementor, SiFacebook, SiFramer, SiGatsby, SiNextdotjs, SiSvelte, SiVercel, SiWebflow } from 'react-icons/si';
 
 export const iconMap = {
   'fa6:arrow-trend-up': FaArrowTrendUp,
-  'fa6:arrows-rotate': FaArrowsRotate,
   'fa6:arrows-up-down-left-right': FaArrowsUpDownLeftRight,
   'fa6:award': FaAward,
   'fa6:aws': FaAws,
@@ -33,8 +32,6 @@ export const iconMap = {
   'fa6:coins': FaCoins,
   'fa6:crown': FaCrown,
   'fa6:css3-alt': FaCss3Alt,
-  'fa6:cubes': FaCubes,
-  'fa6:database': FaDatabase,
   'fa6:dumbbell': FaDumbbell,
   'fa6:envelope-circle-check': FaEnvelopeCircleCheck,
   'fa6:envelope-open-text': FaEnvelopeOpenText,
@@ -60,12 +57,10 @@ export const iconMap = {
   'fa6:magnifying-glass-chart': FaMagnifyingGlassChart,
   'fa6:mobile-screen-button': FaMobileScreenButton,
   'fa6:node-js': FaNodeJs,
-  'fa6:paintbrush': FaPaintbrush,
   'fa6:pen-nib': FaPenNib,
   'fa6:pen-to-square': FaPenToSquare,
   'fa6:php': FaPhp,
   'fa6:plug': FaPlug,
-  'fa6:puzzle-piece': FaPuzzlePiece,
   'fa6:python': FaPython,
   'fa6:react': FaReact,
   'fa6:robot': FaRobot,
@@ -75,7 +70,6 @@ export const iconMap = {
   'fa6:shield-halved': FaShieldHalved,
   'fa6:shield-heart': FaShieldHeart,
   'fa6:shopify': FaShopify,
-  'fa6:store': FaStore,
   'fa6:trophy': FaTrophy,
   'fa6:truck-fast': FaTruckFast,
   'fa6:universal-access': FaUniversalAccess,
