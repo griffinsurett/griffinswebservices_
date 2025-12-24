@@ -240,7 +240,7 @@ body {
     --color-primary: var(--color-accent);
     --color-heading: var(--color-primary-light);
     --color-text: var(--color-zinc-300);
-    --color-muted: var(--color-zinc-200);
+    --color-muted: var(--color-gray-100);
     --color-bg: var(--color-primary-dark);
     --color-bg2: var(--color-secondary-dark);
     --color-bg3: var(--color-tertiary-dark);

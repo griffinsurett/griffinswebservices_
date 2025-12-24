@@ -272,6 +272,7 @@ function GroupSlide({
         }
       }}
     >
+      <div className="relative h-full w-full">
       {group.items.length === 1 ? (
         // Single item - just use ScrollableViewport
         <ScrollableViewport
@@ -331,6 +332,7 @@ function GroupSlide({
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }
