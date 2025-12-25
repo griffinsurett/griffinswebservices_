@@ -39,6 +39,7 @@ export interface IconRenderOptions {
   className?: string;       // Additional CSS classes
   color?: string;          // Icon color
   ariaLabel?: string;      // Accessibility label
+  ariaHidden?: boolean;    // Explicitly set aria-hidden (default: true when no ariaLabel)
 }
 
 /**
@@ -139,7 +140,7 @@ function renderLibraryIcon(
   iconName: string,
   options: IconRenderOptions
 ): ReactNode {
-  const { size, className = '', color, ariaLabel } = options;
+  const { size, className = '', color, ariaLabel, ariaHidden } = options;
   const IconComponent = getIconComponent(library, iconName);
 
   if (!IconComponent) {
@@ -152,11 +153,17 @@ function renderLibraryIcon(
     color,
   };
 
-  // Add aria-label if provided, otherwise mark as decorative
+  // Handle accessibility attributes
+  // Priority: explicit ariaHidden > ariaLabel presence > default hidden
   if (ariaLabel) {
     iconProps['aria-label'] = ariaLabel;
+    // Only set aria-hidden if explicitly provided when there's a label
+    if (ariaHidden === true) {
+      iconProps['aria-hidden'] = 'true';
+    }
   } else {
-    iconProps['aria-hidden'] = 'true';
+    // No label - default to hidden unless explicitly set to false
+    iconProps['aria-hidden'] = ariaHidden === false ? 'false' : 'true';
   }
 
   return createElement(IconComponent, iconProps);
