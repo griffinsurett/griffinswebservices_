@@ -42,19 +42,12 @@ export default function EnhancedAccordionItem({
         className="transition-all duration-200"
         innerClassName="card-bg"
       >
-        <div
+        <button
+          type="button"
           className="w-full text-left flex items-center justify-between p-5 hover:bg-card/50 transition-colors duration-300 cursor-pointer relative z-20"
           onClick={onToggle}
           onMouseDown={(event) => event.preventDefault()}
-          role="button"
-          tabIndex={0}
           aria-expanded={isActive}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onToggle();
-            }
-          }}
         >
           <div className="flex items-center gap-4">
             {icon && (
@@ -71,26 +64,21 @@ export default function EnhancedAccordionItem({
             </div>
           </div>
 
-          <button
-            type="button"
+          <span
             className={`
               w-8 h-8 rounded-full flex items-center justify-center
-              transition-all duration-[600ms] text-xl font-semibold
+              transition-all duration-600 text-xl font-semibold
               ${
                 isActive
                   ? "bg-primary text-bg"
                   : "bg-primary/15 text-accent group-hover:bg-primary/25"
               }
             `}
-            aria-label={isActive ? "Collapse" : "Expand"}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle();
-            }}
+            aria-hidden="true"
           >
-            <span>{isActive ? "−" : "+"}</span>
-          </button>
-        </div>
+            {isActive ? "−" : "+"}
+          </span>
+        </button>
 
         <div
           className={`overflow-hidden transition-all duration-500 ease-in-out relative z-20 ${

@@ -34,5 +34,10 @@ export {
   type SideDragNavigationOptions,
 } from "./useSideDragNavigation";
 
+export {
+  useKeyboardInteraction,
+  type KeyboardInteractionOptions,
+} from "./useKeyboardInteraction";
+
 // Re-export utils for consumers that need them
 export { resolveHost, getPositionForHost, type HostElement } from "./utils";

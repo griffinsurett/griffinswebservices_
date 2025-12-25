@@ -7,7 +7,9 @@
 import {
   Children,
   isValidElement,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type FormEvent,
   type ReactNode,
@@ -72,6 +74,7 @@ export default function FormWrapper({
   >("idle");
   const [message, setMessage] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const stepContainerRef = useRef<HTMLDivElement>(null);
 
   const childrenArray = Children.toArray(children);
   const formSteps = childrenArray.filter(
@@ -80,6 +83,13 @@ export default function FormWrapper({
   );
   const isMultiStep = formSteps.length > 0;
   const totalSteps = isMultiStep ? formSteps.length : 1;
+
+  // Focus management: move focus to step container on step change
+  useEffect(() => {
+    if (isMultiStep && stepContainerRef.current) {
+      stepContainerRef.current.focus();
+    }
+  }, [currentStep, isMultiStep]);
 
   const goToStep = (stepIndex: number) => {
     if (!isMultiStep) return;
@@ -215,7 +225,19 @@ export default function FormWrapper({
           <ErrorMessage onDismiss={dismissMessage}>{message}</ErrorMessage>
         )}
 
-        {renderContent()}
+        {isMultiStep ? (
+          <div
+            ref={stepContainerRef}
+            tabIndex={-1}
+            aria-live="polite"
+            aria-atomic="true"
+            className="outline-none"
+          >
+            {renderContent()}
+          </div>
+        ) : (
+          renderContent()
+        )}
 
         {/* Terms checkbox - show on last step for multi-step, or always for single-step */}
         {includeTermsCheckbox && (!isMultiStep || currentStep === totalSteps - 1) && (

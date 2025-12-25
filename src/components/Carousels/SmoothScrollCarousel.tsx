@@ -12,6 +12,7 @@ import {
 } from "react";
 import { useVisibility } from "@/hooks/animations/useVisibility";
 import useEngagementAutoplay from "@/hooks/autoplay/useEngagementAutoplay";
+import { useKeyboardInteraction } from "@/hooks/interactions/useKeyboardInteraction";
 
 export interface SmoothScrollCarouselHandle {
   container: HTMLDivElement | null;
@@ -287,6 +288,28 @@ const SmoothScrollCarousel = forwardRef<
     return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
   }, [drag, handleDragEnd]);
 
+  // Keyboard navigation for accessibility
+  const scrollByAmount = useCallback((amount: number) => {
+    engageUser();
+    pause();
+    setCurrentOffset((prev) => {
+      let next = prev + amount;
+      if (totalWidth > 0) {
+        while (next > 0) next -= totalWidth;
+        while (next < -totalWidth) next += totalWidth;
+      }
+      return next;
+    });
+    scheduleHoverResume();
+  }, [engageUser, pause, totalWidth, scheduleHoverResume]);
+
+  useKeyboardInteraction({
+    elementRef: containerRef,
+    requireFocus: true,
+    onArrowLeft: () => scrollByAmount(itemWidth + gap),
+    onArrowRight: () => scrollByAmount(-(itemWidth + gap)),
+  });
+
   const handleItemInteraction = (payload: any, index: number, type: string) => {
     if (pauseOnEngage) {
       engageUser();
@@ -335,6 +358,9 @@ const SmoothScrollCarousel = forwardRef<
       data-smooth-carousel
       onMouseEnter={handleMouseEnterContainer}
       onMouseLeave={handleMouseLeaveContainer}
+      tabIndex={0}
+      role="region"
+      aria-label="Scrolling carousel. Use left and right arrow keys to navigate."
     >
       {gradientMask && (
         <>

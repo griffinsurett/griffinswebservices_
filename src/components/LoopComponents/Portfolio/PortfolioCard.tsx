@@ -1,11 +1,12 @@
 // src/components/LoopComponents/Portfolio/PortfolioCard.tsx
 import type { MouseEventHandler } from "react";
 import { type PortfolioItemData, getPortfolioImageSrc } from "./types";
+import Button from "@/components/Button/Button";
 
 interface PortfolioCardProps {
   item: PortfolioItemData;
   isActive?: boolean;
-  onSelect?: MouseEventHandler<HTMLDivElement>;
+  onSelect?: MouseEventHandler<HTMLButtonElement>;
 }
 
 export default function PortfolioCard({
@@ -25,26 +26,26 @@ export default function PortfolioCard({
 
   const link = item.projectUrl || item.url;
 
-  return (
-    <div
-      className={[
-        "snap-center shrink-0 w-[90vw] sm:w-[510px] lg:w-[640px]",
-        "bg-bg rounded-3xl border border-white/10 shadow-[0_25px_65px_-25px_rgba(15,15,35,0.9)]",
-        "transition-all duration-500 ease-out hover:border-accent/40",
-        isActive ? "ring-2 ring-accent shadow-accent/20" : "ring-1 ring-white/5",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      onClick={onSelect}
-    >
+  const cardClasses = [
+    "snap-center shrink-0 w-[90vw] sm:w-[510px] lg:w-[640px]",
+    "bg-bg rounded-3xl border border-white/10 shadow-[0_25px_65px_-25px_rgba(15,15,35,0.9)]",
+    "transition-all duration-500 ease-out hover:border-accent/40 text-left",
+    isActive ? "ring-2 ring-accent shadow-accent/20" : "ring-1 ring-white/5",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const cardContent = (
+    <>
       <div className="relative overflow-hidden rounded-t-3xl h-64 bg-gradient-to-br from-bg2 to-bg">
         {imageSrc ? (
           <img
             src={imageSrc}
-            alt={title}
+            alt=""
             loading="lazy"
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover"
+            aria-hidden="true"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-text/60 text-sm uppercase tracking-[0.2em]">
@@ -84,28 +85,35 @@ export default function PortfolioCard({
         )}
 
         {link && (
-          <a
+          <Button
+            variant="link"
             href={link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-primary font-semibold hover:gap-3 transition-all"
+            rightIcon="lu:arrow-right"
+            className="text-primary font-semibold"
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             View Project
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              viewBox="0 0 24 24"
-            >
-              <path d="M5 12h14"></path>
-              <path d="m12 5 7 7-7 7"></path>
-            </svg>
-          </a>
+          </Button>
         )}
       </div>
-    </div>
+    </>
   );
+
+  // Use semantic button when interactive, otherwise a div for static display
+  if (onSelect) {
+    return (
+      <button
+        type="button"
+        className={cardClasses}
+        onClick={onSelect}
+        aria-label={`Select ${title} project${category ? ` in ${category}` : ""}`}
+      >
+        {cardContent}
+      </button>
+    );
+  }
+
+  return <div className={cardClasses}>{cardContent}</div>;
 }
