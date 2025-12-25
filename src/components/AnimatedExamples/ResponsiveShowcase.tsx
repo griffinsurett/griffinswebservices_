@@ -1,6 +1,7 @@
 // src/components/ResponsiveShowcase.tsx
 import { useState, useEffect } from "react";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
+import DecorativeWrapper from "@/integrations/preferences/accessibility/components/DecorativeWrapper";
 
 export interface ResponsiveShowcaseProps {
   /** Additional className */
@@ -49,7 +50,7 @@ export default function ResponsiveShowcase({
   const isTablet = widthPercent >= 50 && widthPercent < 75;
 
   return (
-    <div className={`bg-text/10 rounded-lg p-4 overflow-hidden ${className}`} aria-hidden="true">
+    <DecorativeWrapper className={`bg-text/10 rounded-lg p-4 overflow-hidden ${className}`}>
       {/* Width indicator */}
       <div className="flex items-center justify-between mb-3 px-1">
         <span className="text-xs text-text/40">
@@ -131,6 +132,6 @@ export default function ResponsiveShowcase({
           </div>
         </div>
       </div>
-    </div>
+    </DecorativeWrapper>
   );
 }

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Icon from "@/components/Icon";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
+import DecorativeWrapper from "@/integrations/preferences/accessibility/components/DecorativeWrapper";
 
 export interface SecureBrowserBarProps {
   /** URL to display */
@@ -36,7 +37,7 @@ export default function SecureBrowserBar({
   }, [prefersReducedMotion]);
 
   return (
-    <div className={`bg-text/10 rounded-lg p-3 ${className}`} aria-hidden="true">
+    <DecorativeWrapper className={`bg-text/10 rounded-lg p-3 ${className}`}>
       {/* Browser bar */}
       <div className="flex items-center gap-2">
         {/* Browser dots */}
@@ -66,6 +67,6 @@ export default function SecureBrowserBar({
           <span className="text-sm text-text">{url}</span>
         </div>
       </div>
-    </div>
+    </DecorativeWrapper>
   );
 }

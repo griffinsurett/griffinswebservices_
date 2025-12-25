@@ -1,6 +1,7 @@
 // src/components/AnimatedExamples/GrowthGraph.tsx
 import { useState, useEffect } from "react";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
+import DecorativeWrapper from "@/integrations/preferences/accessibility/components/DecorativeWrapper";
 
 export interface GrowthGraphProps {
   className?: string;
@@ -96,9 +97,8 @@ export default function GrowthGraph({ className = "" }: GrowthGraphProps) {
   const pathLength = 500;
 
   return (
-    <div
+    <DecorativeWrapper
       className={`-mx-6 -mb-6 mt-4 overflow-hidden rounded-b-2xl bg-text/10 ${className}`}
-      aria-hidden="true"
     >
       {/* Labels above the graph */}
       <div className="flex justify-between px-4 pt-3 pb-2 text-xs text-text/60">
@@ -198,6 +198,6 @@ export default function GrowthGraph({ className = "" }: GrowthGraphProps) {
           />
         )}
       </svg>
-    </div>
+    </DecorativeWrapper>
   );
 }

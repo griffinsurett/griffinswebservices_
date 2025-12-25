@@ -1,6 +1,7 @@
 // src/components/GoogleListing.tsx
 import Icon from "@/components/Icon";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
+import DecorativeWrapper from "@/integrations/preferences/accessibility/components/DecorativeWrapper";
 
 export interface GoogleListingProps {
   /** Site title */
@@ -28,7 +29,7 @@ export default function GoogleListing({
   const prefersReducedMotion = useMotionPreference();
 
   return (
-    <div className={`relative bg-bg2 rounded-lg p-4 text-left border border-text/10 overflow-hidden ${className}`} aria-hidden="true">
+    <DecorativeWrapper className={`relative bg-bg2 rounded-lg p-4 text-left border border-text/10 overflow-hidden ${className}`}>
       {/* Favicon + site name + URL */}
       <div className="flex items-center gap-3 mb-2">
         <div className="w-7 h-7 rounded-full bg-bg3 flex items-center justify-center shrink-0">
@@ -118,6 +119,6 @@ export default function GoogleListing({
           }
         }
       `}</style>
-    </div>
+    </DecorativeWrapper>
   );
 }

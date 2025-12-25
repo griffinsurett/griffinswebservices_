@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Icon from "@/components/Icon";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
+import DecorativeWrapper from "@/integrations/preferences/accessibility/components/DecorativeWrapper";
 
 export interface SupportChatProps {
   className?: string;
@@ -47,7 +48,7 @@ export default function SupportChat({ className = "" }: SupportChatProps) {
   }, [animationKey, prefersReducedMotion]);
 
   return (
-    <div className={`flex gap-4 ${className}`} aria-hidden="true">
+    <DecorativeWrapper className={`flex gap-4 ${className}`}>
       {/* Chat section */}
       <div className="flex-1 bg-text/10 rounded-lg overflow-hidden">
         {/* Chat header */}
@@ -137,6 +138,6 @@ export default function SupportChat({ className = "" }: SupportChatProps) {
           </div>
         </div>
       </div>
-    </div>
+    </DecorativeWrapper>
   );
 }

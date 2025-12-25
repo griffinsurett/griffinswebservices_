@@ -2,6 +2,7 @@
 // Lightweight bar graph with inline counter animation - no external Counter dependency
 import { useEffect, useRef, useState } from "react";
 import { useMotionPreference } from "@/hooks/useMotionPreference";
+import DecorativeWrapper from "@/integrations/preferences/accessibility/components/DecorativeWrapper";
 
 // Inline animated number component to avoid importing heavy Counter chunk
 function AnimatedNumber({
@@ -145,8 +146,8 @@ export default function BarGraph({
     : 0;
 
   return (
-    <div ref={barRef} className={`w-full ${className}`} aria-hidden="true">
-      <div className="flex justify-between items-center">
+    <DecorativeWrapper className={`w-full ${className}`}>
+      <div ref={barRef} className="flex justify-between items-center">
         <span className="text-sm text-text/80">{label}</span>
         {statValue !== undefined ? (
           <span className={`text-lg ${valueClass}`}>
@@ -178,6 +179,6 @@ export default function BarGraph({
           </span>
         )}
       </div>
-    </div>
+    </DecorativeWrapper>
   );
 }
