@@ -59,7 +59,9 @@ const initialDisplay = resolvedDecimals > 0
     data-end={end}
     data-duration={duration}
     data-decimals={resolvedDecimals}
+    data-final={finalDisplay}
     style={`display: inline-block; min-width: ${minWidthCh}ch;`}
+    aria-label={`${prefix}${finalDisplay}${suffix}`}
   >{initialDisplay}</span>
   {suffix && <span class="counter-suffix">{suffix}</span>}
 </span>
@@ -86,49 +88,58 @@ const initialDisplay = resolvedDecimals > 0
       return systemPrefers || userPrefers || animationsPaused;
     };
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const el = entry.target as HTMLElement;
-          observer.unobserve(el);
-
-          const start = parseFloat(el.dataset.start || '0');
-          const end = parseFloat(el.dataset.end || '0');
-          const duration = parseInt(el.dataset.duration || '2000', 10);
-          const decimals = parseInt(el.dataset.decimals || '0', 10);
-
-          // Format final value
-          const formatValue = (val: number) =>
-            decimals > 0 ? val.toFixed(decimals) : Math.round(val).toString();
-
-          // If reduced motion or start equals end, show final value immediately
-          if (shouldReduceMotion() || start === end) {
-            el.textContent = formatValue(end);
-            return;
-          }
-
-          const startTime = performance.now();
-          const range = end - start;
-
-          const animate = (timestamp: number) => {
-            const elapsed = timestamp - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            // Ease-out cubic curve
-            const eased = 1 - Math.pow(1 - progress, 3);
-            const current = start + range * eased;
-
-            el.textContent = formatValue(current);
-
-            if (progress < 1) {
-              requestAnimationFrame(animate);
-            }
-          };
-
-          requestAnimationFrame(animate);
-        }
+    // If reduced motion is preferred, show final values immediately
+    if (shouldReduceMotion()) {
+      counters.forEach((el) => {
+        const finalValue = (el as HTMLElement).dataset.final;
+        if (finalValue) el.textContent = finalValue;
       });
-    }, { threshold: 0.1 });
+    } else {
+      // Normal behavior: animate counters when they come into view
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            observer.unobserve(el);
 
-    counters.forEach((counter) => observer.observe(counter));
+            const start = parseFloat(el.dataset.start || '0');
+            const end = parseFloat(el.dataset.end || '0');
+            const duration = parseInt(el.dataset.duration || '2000', 10);
+            const decimals = parseInt(el.dataset.decimals || '0', 10);
+
+            // Format value
+            const formatValue = (val: number) =>
+              decimals > 0 ? val.toFixed(decimals) : Math.round(val).toString();
+
+            // If start equals end, no animation needed
+            if (start === end) {
+              el.textContent = formatValue(end);
+              return;
+            }
+
+            const startTime = performance.now();
+            const range = end - start;
+
+            const animate = (timestamp: number) => {
+              const elapsed = timestamp - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              // Ease-out cubic curve
+              const eased = 1 - Math.pow(1 - progress, 3);
+              const current = start + range * eased;
+
+              el.textContent = formatValue(current);
+
+              if (progress < 1) {
+                requestAnimationFrame(animate);
+              }
+            };
+
+            requestAnimationFrame(animate);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      counters.forEach((counter) => observer.observe(counter));
+    }
   }
 </script>

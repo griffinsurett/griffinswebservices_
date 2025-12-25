@@ -85,7 +85,11 @@ export default function Counter({
   };
 
   return (
-    <span className={baseClasses} style={mergedStyles}>
+    <span
+      className={baseClasses}
+      style={mergedStyles}
+      aria-label={formattedTarget}
+    >
       {formatValue(displayValue, resolvedDecimals)}
     </span>
   );
