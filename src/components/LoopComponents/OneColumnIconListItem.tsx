@@ -4,6 +4,39 @@ import Icon from "@/components/Icon";
 import type { IconType } from "@/content/schema";
 import type { IconSize } from "@/integrations/icons";
 
+/**
+ * Extracts text content from React children for aria-label generation
+ */
+function extractTextContent(node: ReactNode): string {
+  if (typeof node === 'string') return node;
+  if (typeof node === 'number') return String(node);
+  if (!node) return '';
+  if (Array.isArray(node)) {
+    return node.map(extractTextContent).filter(Boolean).join(' ');
+  }
+  if (typeof node === 'object' && 'props' in node) {
+    const props = node.props as Record<string, unknown>;
+    return extractTextContent(props?.children as ReactNode);
+  }
+  return '';
+}
+
+/**
+ * Generates aria-label from title and href for accessibility
+ */
+function generateCardAriaLabel(title: ReactNode, href: string): string {
+  const titleText = extractTextContent(title).trim();
+  if (titleText) {
+    return `${titleText} - View details`;
+  }
+  // Fallback to href-based label
+  const path = href.split('?')[0].split('#')[0];
+  const segments = path.split('/').filter(Boolean);
+  const lastSegment = segments[segments.length - 1] || 'page';
+  const readable = lastSegment.replace(/-/g, ' ').replace(/^\w/, c => c.toUpperCase());
+  return `Navigate to ${readable}`;
+}
+
 type IconValue = IconType | ReactNode | IconRenderConfig;
 
 interface IconRenderConfig {
@@ -162,8 +195,9 @@ export default function OneColumnIconListItem({
   );
 
   if (href) {
+    const ariaLabel = generateCardAriaLabel(title, href);
     return (
-      <a href={href} target={target} rel={relValue} className={containerClass}>
+      <a href={href} target={target} rel={relValue} className={containerClass} aria-label={ariaLabel}>
         {content}
       </a>
     );

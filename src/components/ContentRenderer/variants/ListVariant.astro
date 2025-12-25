@@ -45,7 +45,7 @@ const safeItems = toArray(items);
   )}
 
   {safeItems.length > 0 && (
-    <nav class="flex flex-col gap-2 list-none">
+    <nav class="flex flex-col gap-2 list-none" aria-label={title ? `${title} links` : undefined}>
       {safeItems.map((item) => (
         <Button href={item.url} className="text-text" variant="link">
           {item.title}

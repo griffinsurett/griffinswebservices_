@@ -720,6 +720,21 @@ const {
   } else {
     init();
   }
+
+  // Fix accessibility: Add title to Google Translate iframes
+  function fixGoogleTranslateIframes() {
+    const iframes = document.querySelectorAll('iframe.goog-te-menu-frame, iframe.skiptranslate, iframe[id^="goog-gt"]');
+    iframes.forEach((iframe) => {
+      if (!iframe.getAttribute('title')) {
+        iframe.setAttribute('title', 'Google Translate');
+      }
+    });
+  }
+
+  // Run periodically to catch dynamically injected iframes
+  const iframeObserver = new MutationObserver(fixGoogleTranslateIframes);
+  iframeObserver.observe(document.body, { childList: true, subtree: true });
+  fixGoogleTranslateIframes();
 })();
 </script>
 
