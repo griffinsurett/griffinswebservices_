@@ -52,15 +52,12 @@ const buttonId = id ? `${id}-menu-toggle` : "mobile-menu-toggle";
 
 ---
 
-<div id={id} class={`menu-variant ${className}`}>
+<nav id={id} role="navigation" aria-label="Main navigation" class={`menu-variant ${className}`}>
   {
     showDesktop && (
-      <nav
-        class={`menu-desktop ${desktopClasses}`}
-        aria-label="Main navigation"
-      >
+      <div class={`menu-desktop ${desktopClasses}`}>
         <MenuList items={menuTree} level={0} />
-      </nav>
+      </div>
     )
   }
 
@@ -81,4 +78,4 @@ const buttonId = id ? `${id}-menu-toggle` : "mobile-menu-toggle";
       </div>
     )
   }
-</div>
+</nav>
