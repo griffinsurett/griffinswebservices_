@@ -339,11 +339,11 @@ body {
 }
 
 @utility input-bg {
-  @apply dark:bg-primary-light/5 light:bg-primary-dark/5 transition-all main-duration;
+  @apply dark:bg-primary-light/3 light:bg-primary-dark/3 transition-all main-duration;
 }
 
 @utility card-bg {
-  @apply dark:bg-primary-light/5 light:bg-primary-dark/5 faded-accent-border transition-all main-duration;
+  @apply dark:bg-primary-light/3 light:bg-primary-dark/3 faded-accent-border transition-all main-duration;
 }
 
 @utility card-bg-2 {

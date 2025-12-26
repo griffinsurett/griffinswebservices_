@@ -70,6 +70,8 @@ const clickDirective: ClientDirective = (load, options, el) => {
   const controller = new AbortController();
   let hydrated = false;
 
+  console.log('[client:click] Directive initialized', { selector, handlerKey, once, replay });
+
   const doc = el.ownerDocument ?? (typeof document !== 'undefined' ? document : null);
   const eventTarget: EventTarget = selector && doc ? doc : el;
 
@@ -151,15 +153,20 @@ const clickDirective: ClientDirective = (load, options, el) => {
   };
 
   const hydrateOnDemand = async (event: Event) => {
+    console.log('[client:click] hydrateOnDemand called', { hydrated, shouldHydrate: shouldHydrate(event) });
     if (hydrated || !shouldHydrate(event)) {
+      console.log('[client:click] Skipping hydration (already hydrated or wrong target)');
       return;
     }
 
     hydrated = true;
+    console.log('[client:click] Starting hydration...');
     const hydrate = await load();
+    console.log('[client:click] Aborting pre-hydration listener');
     controller.abort();
     await hydrate();
     await waitForHydrationReady();
+    console.log('[client:click] Hydration complete');
 
     if (handlerKey) {
       const context = {

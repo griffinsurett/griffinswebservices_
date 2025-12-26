@@ -98,23 +98,49 @@ export default function MobileMenuDrawer({
     return () => unregisterClientClickHandler(clientClickHandlerKey, handler);
   }, [clientClickHandlerKey]);
 
+  // Track component mount/unmount
+  useEffect(() => {
+    console.log('[MenuDrawer] Component MOUNTED');
+    return () => {
+      console.log('[MenuDrawer] Component UNMOUNTED');
+    };
+  }, []);
+
   // Direct click listener for all clicks after component mounts
   // This works for both useExternalTrigger and clientClickHandlerKey cases
   useEffect(() => {
-    console.log('[MenuDrawer] Direct click effect', { useExternalTrigger, triggerId });
-    if (!useExternalTrigger) return;
-    const button = document.getElementById(triggerId);
-    console.log('[MenuDrawer] Button found:', !!button, triggerId);
-    if (!button) return;
+    console.log('[MenuDrawer] Direct click effect running', { useExternalTrigger, triggerId });
+    if (!useExternalTrigger) {
+      console.log('[MenuDrawer] useExternalTrigger is false, skipping listener');
+      return;
+    }
 
-    const handleClick = () => {
-      console.log('[MenuDrawer] Direct click handler fired');
+    const button = document.getElementById(triggerId);
+    console.log('[MenuDrawer] Button element:', button ? 'found' : 'NOT FOUND', triggerId);
+    if (!button) {
+      console.warn('[MenuDrawer] WARNING: Button not found, cannot attach click listener');
+      return;
+    }
+
+    const handleClick = (e: Event) => {
+      console.log('[MenuDrawer] Direct click handler fired at', new Date().toISOString());
       toggleMenuRef.current();
     };
+
     button.addEventListener("click", handleClick);
-    console.log('[MenuDrawer] Click listener attached');
+    console.log('[MenuDrawer] Click listener ATTACHED to button');
+
+    // Log button state periodically to see if it's still in DOM
+    const checkButtonInterval = setInterval(() => {
+      const stillExists = document.getElementById(triggerId);
+      if (!stillExists) {
+        console.warn('[MenuDrawer] WARNING: Button no longer in DOM!');
+      }
+    }, 5000);
+
     return () => {
-      console.log('[MenuDrawer] Click listener removed');
+      console.log('[MenuDrawer] Click listener REMOVED from button');
+      clearInterval(checkButtonInterval);
       button.removeEventListener("click", handleClick);
     };
   }, [triggerId, useExternalTrigger]);
