@@ -81,39 +81,34 @@ export default function MobileMenuDrawer({
     syncTriggerState(isOpen);
   }, [isOpen, syncTriggerState]);
 
-  // Track whether the clientClickHandler handled the current click
-  const handledByClientClick = useRef(false);
+  // Stable ref to toggleMenu to avoid effect re-runs
+  const toggleMenuRef = useRef(toggleMenu);
+  toggleMenuRef.current = toggleMenu;
 
-  useEffect(() => {
-    if (!useExternalTrigger) return;
-    const button = document.getElementById(triggerId);
-    if (!button) return;
-
-    const handleClick = () => {
-      // Skip if clientClickHandler already handled this click
-      if (handledByClientClick.current) {
-        handledByClientClick.current = false;
-        return;
-      }
-      toggleMenu();
-    };
-    button.addEventListener("click", handleClick);
-
-    return () => button.removeEventListener("click", handleClick);
-  }, [triggerId, toggleMenu, useExternalTrigger]);
-
+  // Register handler for client:click directive (handles the initial hydration click)
   useEffect(() => {
     if (!clientClickHandlerKey) return;
 
     const handler = () => {
-      handledByClientClick.current = true;
-      toggleMenu();
+      toggleMenuRef.current();
       return true;
     };
 
     registerClientClickHandler(clientClickHandlerKey, handler);
     return () => unregisterClientClickHandler(clientClickHandlerKey, handler);
-  }, [clientClickHandlerKey, toggleMenu]);
+  }, [clientClickHandlerKey]);
+
+  // Direct click listener for all clicks after component mounts
+  // This works for both useExternalTrigger and clientClickHandlerKey cases
+  useEffect(() => {
+    if (!useExternalTrigger) return;
+    const button = document.getElementById(triggerId);
+    if (!button) return;
+
+    const handleClick = () => toggleMenuRef.current();
+    button.addEventListener("click", handleClick);
+    return () => button.removeEventListener("click", handleClick);
+  }, [triggerId, useExternalTrigger]);
 
   const handleNavigate = () => {
     toggleMenu(false);

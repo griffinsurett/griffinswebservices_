@@ -226,6 +226,7 @@ const clickDirective: ClientDirective = (load, options, el) => {
     replayEvent(event);
   };
 
+  // Pre-hydration listener (removed after hydration via controller.abort())
   for (const eventName of events) {
     eventTarget.addEventListener(
       eventName,
