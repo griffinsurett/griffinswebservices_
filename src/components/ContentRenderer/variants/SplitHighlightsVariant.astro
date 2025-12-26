@@ -123,12 +123,16 @@ const getItemEyebrow = (record: Record<string, any>) =>
             return null;
           }
 
+          // Stagger delay: 100ms between each card
+          const staggerDelay = index * 100;
+
           return (
             <article
               key={key}
               class="relative overflow-hidden rounded-3xl border border-white/10 card-bg p-6 lg:p-8 shadow-2xl"
               data-animate="fade-in-up"
-              data-animate-once="true"
+              data-animate-directional="true"
+              data-animate-delay={staggerDelay}
             >
               {eyebrow && (
                 <p class="text-xs uppercase tracking-[0.3em] text-accent font-semibold mb-3">

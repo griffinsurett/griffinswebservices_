@@ -1,0 +1,119 @@
+---
+// src/layouts/CapabilitiesSection.astro
+/**
+ * Reusable section for capability pages
+ * Renders children capabilities, highlights, and CTA
+ */
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import CTASection from "@/layouts/CTASection.astro";
+import { children, query, related } from "@/utils/query";
+
+interface Highlight {
+  title: string;
+  description: string;
+}
+
+interface HeadingContent {
+  before?: string;
+  text?: string;
+  after?: string;
+}
+
+interface CTAButton {
+  text: string;
+  link: string;
+}
+
+interface Props {
+  /** Current capability slug for querying children and FAQs */
+  slug: string;
+  /** Capability title for dynamic headings */
+  title?: string;
+  /** Heading for child capabilities section */
+  capabilitiesHeading?: string;
+  /** Highlights to display */
+  highlights?: Highlight[];
+  /** Title for highlights section */
+  highlightsTitle?: string;
+  /** Heading for highlights section */
+  highlightsHeading?: string;
+  /** Description for highlights section */
+  highlightsDescription?: string;
+  /** FAQ section title */
+  faqTitle?: string;
+  /** FAQ section heading */
+  faqHeading?: string;
+  /** CTA section title */
+  ctaTitle?: string;
+  /** CTA section heading */
+  ctaHeading?: string | HeadingContent;
+  /** CTA section description */
+  ctaDescription?: string;
+  /** CTA primary button */
+  ctaPrimaryButton?: CTAButton;
+  /** CTA section ID */
+  ctaId?: string;
+}
+
+const {
+  slug,
+  title,
+  capabilitiesHeading,
+  highlights = [],
+  highlightsTitle,
+  highlightsHeading,
+  highlightsDescription,
+  faqTitle = "FAQs",
+  faqHeading,
+  ctaTitle,
+  ctaHeading,
+  ctaDescription,
+  ctaPrimaryButton,
+  ctaId = "capabilities-cta",
+} = Astro.props;
+---
+
+{capabilitiesHeading && slug && (
+  <ContentRenderer
+    variant="CardVariant"
+    query={children("capabilities", slug)}
+    heading={capabilitiesHeading}
+  />
+)}
+
+{highlights.length > 0 && (
+  <ContentRenderer
+    items={highlights}
+    variant="SplitHighlightsVariant"
+    title={highlightsTitle}
+    heading={highlightsHeading}
+    description={highlightsDescription}
+  />
+)}
+
+<ContentRenderer
+  query={query("testimonials")}
+  variant="TestimonialCarouselVariant"
+/>
+
+<ContentRenderer
+  query={related("faq", "capabilities", slug)}
+  variant="AccordionVariant"
+  allowMultiple={false}
+  title={faqTitle}
+  heading={faqHeading || `Common Questions About ${title || "This Capability"}`}
+/>
+
+{ctaHeading && (
+  <CTASection
+    id={ctaId}
+    className="min-h-[60vh]"
+    title={ctaTitle}
+    heading={ctaHeading}
+    description={ctaDescription}
+    primaryCTA={ctaPrimaryButton || {
+      text: "Get Your Free Quote",
+      link: "#capabilities-quote-hero",
+    }}
+  />
+)}

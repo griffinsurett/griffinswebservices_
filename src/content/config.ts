@@ -121,6 +121,8 @@ export const collections = {
     schema: ({ image }) =>
       baseSchema({ image }).extend({
         category: z.string().optional(),
+        solutions: refSchema("solutions"),
+        capabilities: refSchema("capabilities"),
       }),
   }),
 
@@ -130,46 +132,6 @@ export const collections = {
       baseSchema({ image }).extend({
         price: z.string().optional(),
         featured: z.boolean().optional(),
-        features: z
-          .array(
-            z.union([
-              z.string(),
-              z.object({
-                title: z.string(),
-                description: z.string().optional(),
-              }),
-            ]),
-          )
-          .default([]),
-        benefits: z
-          .array(
-            z.object({
-              title: z.string(),
-              description: z.string().optional(),
-              icon: z.string().optional(),
-            }),
-          )
-          .default([]),
-        cta: z
-          .object({
-            title: z.string().optional(),
-            heading: z
-              .object({
-                before: z.string().optional(),
-                text: z.string().optional(),
-                after: z.string().optional(),
-              })
-              .optional(),
-            buttons: z
-              .array(
-                z.object({
-                  text: z.string(),
-                  link: z.string(),
-                }),
-              )
-              .optional(),
-          })
-          .optional(),
       }),
   }),
 
@@ -178,14 +140,6 @@ export const collections = {
     schema: ({ image }) =>
       baseSchema({ image }).extend({
         features: z.array(z.string()).default([]),
-        highlights: z
-          .array(
-            z.object({
-              title: z.string(),
-              description: z.string(),
-            }),
-          )
-          .default([]),
         solutions: refSchema("solutions"),
       }),
   }),
