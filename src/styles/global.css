@@ -219,6 +219,11 @@ body {
     @apply overflow-x-hidden;
   }
 
+  /* Remove focus outlines globally - using custom focus indicators instead */
+  *:focus {
+    outline: none;
+  }
+
   ::selection {
     color: var(--color-accent);
     transition: all 0.3s ease-in-out;

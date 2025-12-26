@@ -107,18 +107,17 @@ export default function AIChatSimulation({
       <div className="px-4 py-3 bg-bg2 border-t border-text/10">
         <div className="flex items-center gap-2 bg-bg3 rounded-full px-4 py-2">
           <input
-            aria-label="Decorative search"
             type="text"
             placeholder="Ask anything..."
             className="flex-1 bg-transparent text-sm text-text placeholder:text-text/40 outline-none"
             disabled
+            tabIndex={-1}
           />
-          <button
+          <div
             className="w-8 h-8 rounded-full primary-gradient flex items-center justify-center shrink-0"
-            aria-label="Send message"
           >
             <Icon icon="lu:send" size="sm" className="text-white" />
-          </button>
+          </div>
         </div>
       </div>
     </DecorativeWrapper>

@@ -63,7 +63,7 @@ export default function TechStackSection({
         </div>
 
         <SmoothScrollCarousel
-          startDelay={5000}
+          startDelay={1500}
           speed={30}
           gap={32}
           itemWidth={120}

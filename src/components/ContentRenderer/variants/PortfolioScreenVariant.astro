@@ -228,6 +228,7 @@ const heightClasses =
       <ComputerScreen>
         <div
           class="relative h-full bottom-image-fade"
+          data-portfolio-container
         >
           <!-- SSR placeholder image - always shows to prevent blank screen while carousel hydrates -->
           {
@@ -284,23 +285,12 @@ const heightClasses =
 </div>
 
 <style>
-  /* SSR placeholder - visible until carousel loads, then fades out */
+  /* SSR placeholder - visible until carousel loads, then hidden via JS */
   [data-ssr-placeholder] {
     opacity: 1;
     visibility: visible;
     transition:
-      opacity 0.4s ease-out,
-      visibility 0.4s ease-out;
-  }
-
-  /* Hide placeholder when React component mounts (use global selector to reach into component) */
-  :global([data-astro-cid-*]) :global(.portfolio-showcase-mounted) {
-    /* Placeholder fades out when carousel is ready */
-  }
-
-  /* Alternative: Hide when any child has hydrated */
-  :has(:global(.portfolio-showcase-mounted)) [data-ssr-placeholder] {
-    opacity: 0;
-    visibility: hidden;
+      opacity 0.3s ease-out,
+      visibility 0.3s ease-out;
   }
 </style>

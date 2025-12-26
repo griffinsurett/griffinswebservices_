@@ -6,6 +6,7 @@ import TestimonialCard, {
 import { LeftArrow, RightArrow } from "@/components/Carousels/CarouselArrows";
 import useCarouselAutoplay from "@/components/Carousels/useCarouselAutoplay";
 import { useSideDragNavigation } from "@/hooks/interactions/useSideDragNavigation";
+import { useKeyboardInteraction } from "@/hooks/interactions/useKeyboardInteraction";
 import { staggeredAnimationProps } from "@/integrations/scroll-animations";
 
 type SlidesPerViewConfig = {
@@ -129,10 +130,25 @@ export default function TestimonialCarousel({
     tapThreshold: 12,
   });
 
+  // Keyboard navigation for accessibility
+  useKeyboardInteraction({
+    elementRef: containerRef,
+    requireFocus: true,
+    onArrowLeft: goPrev,
+    onArrowRight: goNext,
+  });
+
   const STAGGER_MS = 120;
 
   return (
-    <div ref={containerRef} className={`relative w-full ${className}`.trim()}>
+    <div
+      ref={containerRef}
+      className={`relative w-full ${className}`.trim()}
+      tabIndex={0}
+      role="region"
+      aria-label="Testimonials carousel. Use left and right arrow keys to navigate."
+      aria-roledescription="carousel"
+    >
       <div
         className={`relative grid items-center gap-x-4 md:gap-x-6 ${
           showArrows && pageCount > 1 ? "grid-cols-[auto_1fr_auto]" : "grid-cols-1"

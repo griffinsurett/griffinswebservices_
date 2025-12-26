@@ -22,7 +22,9 @@ import FilterTabs from "../FilterTabs";
 import ScrollableViewport from "@/components/LoopComponents/Portfolio/ScrollableViewport";
 import ClientImage from "@/components/ClientImage";
 import FilterNavigation from "../FilterNavigation";
+import KeyboardNavigableContainer from "./KeyboardNavigableContainer";
 import { useSideDragNavigation } from "@/hooks/interactions/useSideDragNavigation";
+import { useImageCycling } from "./useImageCycling";
 import { animationProps } from "@/integrations/scroll-animations";
 import {
   type PortfolioItemData,
@@ -56,8 +58,6 @@ interface FilteredPortfolioCarouselProps {
   className?: string;
 }
 
-const SLIDE_TRANSITION_DURATION_MS = 750;
-
 /**
  * Individual slide that cycles through its project images
  */
@@ -72,6 +72,8 @@ interface SlideProps {
   tx: number;
   onSelect: () => void;
   onCycleComplete: () => void;
+  /** Register keyboard handlers when this slide is active */
+  onRegisterHandlers?: (handlers: { goToPrevious: () => boolean; goToNext: () => boolean }) => void;
 }
 
 function GroupSlide({
@@ -85,12 +87,29 @@ function GroupSlide({
   tx,
   onSelect,
   onCycleComplete,
+  onRegisterHandlers,
 }: SlideProps) {
-  const [imageIndex, setImageIndex] = useState(0);
-  const [prevImageIndex, setPrevImageIndex] = useState<number | null>(null);
-  const [transitionStage, setTransitionStage] = useState<"idle" | "pre" | "animating">("idle");
-  const transitionTimerRef = useRef<number | null>(null);
-  const transitionFrameRef = useRef<number | null>(null);
+  // Use shared image cycling hook
+  const {
+    imageIndex,
+    prevImageIndex,
+    transitionStage,
+    goToPrevious,
+    goToNext,
+    handleScrollComplete,
+    isTransitioning,
+  } = useImageCycling({
+    totalImages: group.items.length,
+    isActive,
+    onCycleComplete,
+  });
+
+  // Register handlers with parent when active
+  useEffect(() => {
+    if (isActive && onRegisterHandlers) {
+      onRegisterHandlers({ goToPrevious, goToNext });
+    }
+  }, [isActive, onRegisterHandlers, goToPrevious, goToNext]);
 
   const translateBase = isActive ? "translate(-50%, 0)" : "translate(-50%, -50%)";
 
@@ -131,73 +150,6 @@ function GroupSlide({
       opacity: 0.4,
     };
   }
-
-  // Reset image index when becoming active
-  useEffect(() => {
-    if (isActive) {
-      setImageIndex(0);
-      setPrevImageIndex(null);
-      setTransitionStage("idle");
-    }
-  }, [isActive]);
-
-  // Cleanup timers
-  useEffect(
-    () => () => {
-      if (transitionTimerRef.current) {
-        window.clearTimeout(transitionTimerRef.current);
-      }
-      if (transitionFrameRef.current) {
-        cancelAnimationFrame(transitionFrameRef.current);
-      }
-    },
-    []
-  );
-
-  const startImageTransition = useCallback(
-    (targetIndex: number) => {
-      if (typeof window === "undefined") return;
-      setPrevImageIndex(imageIndex);
-      setImageIndex(targetIndex);
-      setTransitionStage("pre");
-
-      if (transitionFrameRef.current) {
-        cancelAnimationFrame(transitionFrameRef.current);
-      }
-
-      transitionFrameRef.current = requestAnimationFrame(() => {
-        transitionFrameRef.current = requestAnimationFrame(() => {
-          setTransitionStage("animating");
-        });
-      });
-
-      if (transitionTimerRef.current) {
-        window.clearTimeout(transitionTimerRef.current);
-      }
-
-      transitionTimerRef.current = window.setTimeout(() => {
-        setTransitionStage("idle");
-        setPrevImageIndex(null);
-      }, SLIDE_TRANSITION_DURATION_MS);
-    },
-    [imageIndex]
-  );
-
-  // Handle scroll complete - either advance image or trigger industry change
-  const handleScrollComplete = useCallback(() => {
-    if (!isActive || group.items.length === 0) return;
-    if (transitionStage !== "idle") return;
-
-    const nextImageIndex = imageIndex + 1;
-
-    // If we have more images in this industry, cycle to next
-    if (nextImageIndex < group.items.length) {
-      startImageTransition(nextImageIndex);
-    } else {
-      // We've shown all images in this industry, trigger carousel advance
-      onCycleComplete();
-    }
-  }, [isActive, group.items.length, imageIndex, transitionStage, startImageTransition, onCycleComplete]);
 
   const currentItem = group.items[imageIndex];
   const currentMediaEntry = group.mediaEntries[imageIndex];
@@ -292,15 +244,15 @@ function GroupSlide({
           {group.items.map((item, idx) => {
             const isActiveImage = idx === imageIndex;
             const isPrevImage = idx === prevImageIndex;
-            const shouldMount = isActiveImage || (isPrevImage && transitionStage !== "idle");
+            const shouldMount = isActiveImage || (isPrevImage && isTransitioning);
 
             if (!shouldMount) return null;
 
             let translateClass = "translate-x-full";
-            if (isPrevImage && transitionStage !== "idle") {
+            if (isPrevImage && isTransitioning) {
               translateClass = "-translate-x-full";
             } else if (isActiveImage) {
-              if (transitionStage === "idle" || prevImageIndex === null) {
+              if (!isTransitioning || prevImageIndex === null) {
                 translateClass = "translate-x-0";
               } else if (transitionStage === "pre") {
                 translateClass = "translate-x-full";
@@ -309,7 +261,7 @@ function GroupSlide({
               }
             }
 
-            const isVisible = isActiveImage || (isPrevImage && transitionStage !== "idle");
+            const isVisible = isActiveImage || (isPrevImage && isTransitioning);
 
             return (
               <div
@@ -320,7 +272,7 @@ function GroupSlide({
               >
                 <ScrollableViewport
                   isActive={isActive && isActiveImage}
-                  isTransitioning={transitionStage !== "idle"}
+                  isTransitioning={isTransitioning}
                   onScrollComplete={isActiveImage ? handleScrollComplete : undefined}
                   speedPxPerSec={98}
                   resetOnActivate={true}
@@ -367,6 +319,17 @@ export default function FilteredPortfolioCarousel({
   // Current group index and active filter state
   const [groupIndex, setGroupIndex] = useState(0);
   const [activeFilter, setActiveFilter] = useState(filterGroups[0]?.key ?? "");
+
+  // Track handlers from active slide for within-slide keyboard navigation
+  // Using ref to avoid stale closures in keyboard handlers
+  const activeSlideHandlersRef = useRef<{
+    goToPrevious: () => boolean;
+    goToNext: () => boolean;
+  } | null>(null);
+
+  const setActiveSlideHandlers = useCallback((handlers: { goToPrevious: () => boolean; goToNext: () => boolean } | null) => {
+    activeSlideHandlersRef.current = handlers;
+  }, []);
 
   // Sync group index with active filter
   useEffect(() => {
@@ -485,88 +448,98 @@ export default function FilteredPortfolioCarousel({
   if (!filterGroups.length) return null;
 
   return (
-    <div
-      ref={containerRef}
-      {...animationProps("fade-in", { once: true })}
-      data-filtered-carousel-container
-      suppressHydrationWarning
+    <KeyboardNavigableContainer
+      containerRef={containerRef}
+      onPrevious={goToPrevious}
+      onNext={goToNext}
+      onPreviousWithinSlide={() => activeSlideHandlersRef.current?.goToPrevious() ?? false}
+      onNextWithinSlide={() => activeSlideHandlersRef.current?.goToNext() ?? false}
       className={`w-full ${className}`.trim()}
+      ariaLabel="Portfolio carousel. Use left and right arrow keys to navigate between categories."
     >
-      {/* Filter Tabs with Arrows */}
-      {showFilters && shouldShowFilters && (
-        <FilterNavigation
-          onPrevious={goToPrevious}
-          onNext={goToNext}
-          className={`mb-8 ${filterClassName}`.trim()}
-        >
-          <FilterTabs
-            options={filterOptions}
-            activeFilter={activeFilter}
-            onFilterChange={handleFilterChange}
-            show={shouldShowFilters}
-            groupingField="filter"
-            size={filterSize}
-            showCount={filter?.showCount}
-            className="px-6"
-            variant="filterIcon"
-          />
-        </FilterNavigation>
-      )}
-
-      {ready && (
-        <>
-          <div
-            className="relative overflow-visible w-full leading-none"
-            style={{ height: `${centerH}px` }}
+      <div
+        {...animationProps("fade-in", { once: true })}
+        data-filtered-carousel-container
+        suppressHydrationWarning
+      >
+        {/* Filter Tabs with Arrows */}
+        {showFilters && shouldShowFilters && (
+          <FilterNavigation
+            onPrevious={goToPrevious}
+            onNext={goToNext}
+            className={`mb-8 ${filterClassName}`.trim()}
           >
-            {filterGroups.map((group, idx) => {
-              const diff = idx - groupIndex;
-              const itemsLength = filterGroups.length;
+            <FilterTabs
+              options={filterOptions}
+              activeFilter={activeFilter}
+              onFilterChange={handleFilterChange}
+              show={shouldShowFilters}
+              groupingField="filter"
+              size={filterSize}
+              showCount={filter?.showCount}
+              className="px-6"
+              variant="filterIcon"
+            />
+          </FilterNavigation>
+        )}
 
-              let position: "center" | "left" | "right" | "hidden" = "hidden";
-              if (diff === 0) position = "center";
-              else if (diff === -1 || diff === itemsLength - 1) position = "left";
-              else if (diff === 1 || diff === -(itemsLength - 1)) position = "right";
+        {ready && (
+          <>
+            <div
+              className="relative overflow-visible w-full leading-none"
+              style={{ height: `${centerH}px` }}
+            >
+              {filterGroups.map((group, idx) => {
+                const diff = idx - groupIndex;
+                const itemsLength = filterGroups.length;
 
-              return (
-                <GroupSlide
-                  key={group.key}
-                  group={group}
-                  isActive={position === "center"}
-                  position={position}
-                  centerW={centerW}
-                  centerH={centerH}
-                  sideW={sideW}
-                  sideH={sideH}
-                  tx={tx}
-                  onSelect={() => goToGroup(idx)}
-                  onCycleComplete={handleGroupCycleComplete}
-                />
-              );
-            })}
+                let position: "center" | "left" | "right" | "hidden" = "hidden";
+                if (diff === 0) position = "center";
+                else if (diff === -1 || diff === itemsLength - 1) position = "left";
+                else if (diff === 1 || diff === -(itemsLength - 1)) position = "right";
 
-            {drag && filterGroups.length > 1 && (
-              <>
-                <div
-                  ref={leftZoneRef}
-                  className="absolute z-30 cursor-grab touch-pan-x select-none"
-                  style={baseZoneStyle(-leftZoneOffset)}
-                  aria-hidden="true"
-                  data-drag-zone="left"
-                />
-                <div
-                  ref={rightZoneRef}
-                  className="absolute z-30 cursor-grab touch-pan-x select-none"
-                  style={baseZoneStyle(rightZoneOffset)}
-                  aria-hidden="true"
-                  data-drag-zone="right"
-                />
-              </>
-            )}
+                const isActiveSlide = position === "center";
+                return (
+                  <GroupSlide
+                    key={group.key}
+                    group={group}
+                    isActive={isActiveSlide}
+                    position={position}
+                    centerW={centerW}
+                    centerH={centerH}
+                    sideW={sideW}
+                    sideH={sideH}
+                    tx={tx}
+                    onSelect={() => goToGroup(idx)}
+                    onCycleComplete={handleGroupCycleComplete}
+                    onRegisterHandlers={isActiveSlide ? setActiveSlideHandlers : undefined}
+                  />
+                );
+              })}
 
-          </div>
-        </>
-      )}
-    </div>
+              {drag && filterGroups.length > 1 && (
+                <>
+                  <div
+                    ref={leftZoneRef}
+                    className="absolute z-30 cursor-grab touch-pan-x select-none"
+                    style={baseZoneStyle(-leftZoneOffset)}
+                    aria-hidden="true"
+                    data-drag-zone="left"
+                  />
+                  <div
+                    ref={rightZoneRef}
+                    className="absolute z-30 cursor-grab touch-pan-x select-none"
+                    style={baseZoneStyle(rightZoneOffset)}
+                    aria-hidden="true"
+                    data-drag-zone="right"
+                  />
+                </>
+              )}
+
+            </div>
+          </>
+        )}
+      </div>
+    </KeyboardNavigableContainer>
   );
 }

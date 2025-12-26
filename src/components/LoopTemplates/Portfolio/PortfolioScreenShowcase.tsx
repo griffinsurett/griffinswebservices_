@@ -9,6 +9,7 @@ import {
 } from "react";
 import ClientImage from "@/components/ClientImage";
 import ScrollableViewport from "@/components/LoopComponents/Portfolio/ScrollableViewport";
+import KeyboardNavigableContainer from "./KeyboardNavigableContainer";
 import {
   type PortfolioItemData,
   type PortfolioMediaEntry,
@@ -115,6 +116,17 @@ export default function PortfolioScreenShowcase({
   const transitionFrameRef = useRef<number | null>(null);
   const readyEventSentRef = useRef(false);
 
+  // Hide SSR placeholder when component mounts
+  useEffect(() => {
+    const container = document.querySelector('[data-portfolio-container]');
+    const placeholder = container?.querySelector('[data-ssr-placeholder]');
+    if (placeholder instanceof HTMLElement) {
+      placeholder.style.opacity = '0';
+      placeholder.style.visibility = 'hidden';
+      placeholder.style.pointerEvents = 'none';
+    }
+  }, []);
+
   useEffect(() => {
     if (!slides.length || readyEventSentRef.current) return;
     readyEventSentRef.current = true;
@@ -186,13 +198,32 @@ export default function PortfolioScreenShowcase({
     startSlideTransition(nextIndex);
   }, [activeIndex, slides.length, startSlideTransition, transitionStage]);
 
+  const goToPrevious = useCallback(() => {
+    if (!slides.length || slides.length <= 1) return;
+    if (transitionStage !== "idle") return;
+    const prevIdx = activeIndex === 0 ? slides.length - 1 : activeIndex - 1;
+    startSlideTransition(prevIdx);
+  }, [activeIndex, slides.length, startSlideTransition, transitionStage]);
+
+  const goToNext = useCallback(() => {
+    if (!slides.length || slides.length <= 1) return;
+    if (transitionStage !== "idle") return;
+    const nextIdx = (activeIndex + 1) % slides.length;
+    startSlideTransition(nextIdx);
+  }, [activeIndex, slides.length, startSlideTransition, transitionStage]);
+
   if (!slides.length) return null;
 
   const baseTransitionClass =
     "absolute inset-0 transition-transform transition-opacity duration-[750ms] ease-[cubic-bezier(0.4,0,0.2,1)]";
 
   return (
-    <div className={`portfolio-showcase-mounted relative h-full ${className}`.trim()}>
+    <KeyboardNavigableContainer
+      onPrevious={goToPrevious}
+      onNext={goToNext}
+      className={`portfolio-showcase-mounted relative h-full ${className}`.trim()}
+      ariaLabel="Portfolio showcase. Use left and right arrow keys to navigate."
+    >
       <div className="relative h-full w-full overflow-hidden">
         {slides.map((item, slideIndex) => {
           const isActive = slideIndex === activeIndex;
@@ -235,6 +266,6 @@ export default function PortfolioScreenShowcase({
           );
         })}
       </div>
-    </div>
+    </KeyboardNavigableContainer>
   );
 }

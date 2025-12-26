@@ -12,6 +12,7 @@ import PortfolioItemComponent from "@/components/LoopComponents/Portfolio/Portfo
 import { type PortfolioItemData, type PortfolioMediaEntry, normalizeItems } from "@/components/LoopComponents/Portfolio/types";
 import { LeftArrow, RightArrow } from "@/components/Carousels/CarouselArrows";
 import { useSideDragNavigation } from "@/hooks/interactions/useSideDragNavigation";
+import { useKeyboardInteraction } from "@/hooks/interactions/useKeyboardInteraction";
 import { animationProps } from "@/integrations/scroll-animations";
 
 interface PortfolioCarouselProps {
@@ -130,6 +131,14 @@ export default function PortfolioCarousel({
     tapThreshold: 12,
   });
 
+  // Keyboard navigation for accessibility
+  useKeyboardInteraction({
+    elementRef: containerRef,
+    requireFocus: true,
+    onArrowLeft: goToPrevious,
+    onArrowRight: goToNext,
+  });
+
   const sideZoneWidth = Math.max(140, Math.min(sideW, 520));
   const baseZoneStyle = (leftPx: number): CSSProperties => ({
     left: `calc(50% ${leftPx >= 0 ? "+" : "-"} ${Math.abs(leftPx)}px)`,
@@ -151,6 +160,10 @@ export default function PortfolioCarousel({
       data-carousel-container
       suppressHydrationWarning
       className={`w-full ${className}`.trim()}
+      tabIndex={0}
+      role="region"
+      aria-label="Portfolio carousel. Use left and right arrow keys to navigate."
+      aria-roledescription="carousel"
     >
       {ready && (
         <>

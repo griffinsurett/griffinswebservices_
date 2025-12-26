@@ -362,20 +362,16 @@ const SmoothScrollCarousel = forwardRef<
       role="region"
       aria-label="Scrolling carousel. Use left and right arrow keys to navigate."
     >
-      {gradientMask && (
-        <>
-          <div
-            className="absolute left-0 top-0 bottom-0 z-10 pointer-events-none bg-linear-to-r from-bg to-transparent"
-            style={{ width: `${gradientPx}px` }}
-          />
-          <div
-            className="absolute right-0 top-0 bottom-0 z-10 pointer-events-none bg-linear-to-l from-bg to-transparent"
-            style={{ width: `${gradientPx}px` }}
-          />
-        </>
-      )}
-
-      <div className="overflow-hidden" style={{ paddingInline: `${gradientPx}px` }}>
+      <div
+        className="overflow-hidden"
+        style={{
+          paddingInline: `${gradientPx}px`,
+          ...(gradientMask && {
+            maskImage: `linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) ${gradientPx}px, rgba(0,0,0,1) calc(100% - ${gradientPx}px), rgba(0,0,0,0) 100%)`,
+            WebkitMaskImage: `linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,1) ${gradientPx}px, rgba(0,0,0,1) calc(100% - ${gradientPx}px), rgba(0,0,0,0) 100%)`,
+          }),
+        }}
+      >
         <div
           ref={trackRef}
           className={`flex items-center ${drag ? "cursor-grab active:cursor-grabbing select-none" : ""} ${trackClassName}`.trim()}
