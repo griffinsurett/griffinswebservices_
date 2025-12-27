@@ -7,6 +7,7 @@
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import Button from "@/components/Button/Button";
+import Section from "@/components/Section.astro";
 import DividerHeading from "@/components/DividerHeading/DividerHeading";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import { toArray } from "@/utils/array";
@@ -34,7 +35,7 @@ const {
 const safeItems = toArray(items);
 ---
 
-<section id={id} class={`${className}`}>
+<Section id={id} class={`${className}`}>
   {showHeadingSection && (title || description) && (
     <DividerHeading
       title={title}
@@ -77,4 +78,4 @@ const safeItems = toArray(items);
       </Button>
     </div>
   )}
-</section>
+</Section>

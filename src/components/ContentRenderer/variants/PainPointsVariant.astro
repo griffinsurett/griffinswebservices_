@@ -9,6 +9,7 @@
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import type { HeadingContent } from "@/content/schema";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import { toArray } from "@/utils/array";
 
@@ -73,7 +74,7 @@ const layoutClasses = {
 };
 ---
 
-<section id={id} class={`outer-section bg-bg2 relative ${className}`.trim()}>
+<Section id={id} class={`outer-section bg-bg2 relative ${className}`.trim()}>
   <div class="inner-section">
     {showHeader && (
       <SectionHeader
@@ -149,4 +150,4 @@ const layoutClasses = {
       </div>
     )}
   </div>
-</section>
+</Section>

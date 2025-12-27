@@ -4,6 +4,7 @@ import type { BaseVariantProps } from "../ContentRenderer.types";
 import IconListItem from "@/components/LoopComponents/IconListItem";
 import FeatureCard from "@/components/LoopComponents/FeatureCard";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import { toArray } from "@/utils/array";
 
 interface Props extends BaseVariantProps {
@@ -51,7 +52,7 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
 };
 ---
 
-<section id={id} class={`py-16 ${className}`.trim()}>
+<Section id={id} class={`py-16 ${className}`.trim()}>
     <div class="mx-auto inner-section">
         <div
             class={`flex flex-col lg:space-x-15 ${
@@ -151,4 +152,4 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
             </div>
         )}
     </div>
-</section>
+</Section>

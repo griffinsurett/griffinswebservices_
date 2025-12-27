@@ -7,6 +7,7 @@
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import FeatureCard from "@/components/LoopComponents/FeatureCard";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import { toArray } from "@/utils/array";
@@ -58,7 +59,7 @@ const getRingDuration = (item: Record<string, any>) =>
   typeof item?.ringDuration === "number" ? item.ringDuration : 800;
 ---
 
-<section id={id} class={`py-16 ${className}`}>
+<Section id={id} class={`py-16 ${className}`}>
   {(title || description) && (
     <div class="text-center mb-12">
       {title && <h2 class="text-4xl text-heading font-bold mb-4">{title}</h2>}
@@ -97,4 +98,4 @@ const getRingDuration = (item: Record<string, any>) =>
       </Button>
     </div>
   )}
-</section>
+</Section>

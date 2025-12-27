@@ -10,6 +10,7 @@
 import { getImage } from "astro:assets";
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import PortfolioCarousel from "@/components/LoopTemplates/Portfolio/PortfolioCarousel";
 import { shouldShowCollectionCTA } from "../utils/helpers";
@@ -132,7 +133,7 @@ const sectionTitle = collectionTitle ?? title;
 const showHeader = Boolean(sectionTitle || headingValue || description);
 ---
 
-<section
+<Section
   id={id}
   class={`outer-section relative overflow-hidden ${className}`.trim()}
 >
@@ -175,4 +176,4 @@ const showHeader = Boolean(sectionTitle || headingValue || description);
       </div>
     )}
   </div>
-</section>
+</Section>

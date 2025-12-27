@@ -20,6 +20,7 @@
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import IconListItem from "@/components/LoopComponents/IconListItem";
 import Button from "@/components/Button/Button";
 import type { HeadingContent } from "@/content/schema";
@@ -107,7 +108,7 @@ const contentOrderClass = imagePosition === "left"
   : "order-1 lg:order-1";
 ---
 
-<section id={id} class={`outer-section ${bgClass} relative ${className}`.trim()}>
+<Section id={id} class={`outer-section ${bgClass} relative ${className}`.trim()}>
   {borderClass && <div class={borderClass}></div>}
 
   <div class="inner-section">
@@ -210,4 +211,4 @@ const contentOrderClass = imagePosition === "left"
       </div>
     </div>
   </div>
-</section>
+</Section>

@@ -7,6 +7,7 @@
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import VideoAccordion from "@/components/LoopTemplates/VideoAccordion";
 import Button from "@/components/Button/Button";
 import ContentBridge from "@/components/ContentRenderer/ContentBridge/ContentBridge.astro";
@@ -97,7 +98,7 @@ const accordionItems = await Promise.all(
 );
 ---
 
-<section id={id} class={`outer-section relative ${className}`.trim()}>
+<Section id={id} class={`outer-section relative ${className}`.trim()}>
   <div class="inner-section">
     {showHeader && (
       <SectionHeader
@@ -137,4 +138,4 @@ const accordionItems = await Promise.all(
       </div>
     )}
   </div>
-</section>
+</Section>

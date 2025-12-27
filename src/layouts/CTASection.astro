@@ -3,6 +3,7 @@
 import Button from "@/components/Button/Button";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import { query } from "@/utils/query";
 import { siteData } from "@/content/siteData";
 import type { HeadingContent } from "@/content/schema";
@@ -38,7 +39,7 @@ const {
 
 ---
 
-<section
+<Section
   id={id}
   class={`min-h-screen flex items-center justify-center relative overflow-hidden ${className}`}
 >
@@ -84,4 +85,4 @@ const {
       </div>
     </div>
   </div>
-</section>
+</Section>

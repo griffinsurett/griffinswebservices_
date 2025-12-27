@@ -8,6 +8,7 @@
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import IconListItem from "@/components/LoopComponents/IconListItem";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
@@ -53,7 +54,7 @@ const showCTA =
   (ctaHref || collectionUrl);
 ---
 
-<section id={id} class={`relative ${className}`.trim()}>
+<Section id={id} class={`relative ${className}`.trim()}>
   <div class="inner-section">
     {showHeader && (
       <SectionHeader
@@ -106,4 +107,4 @@ const showCTA =
       </div>
     )}
   </div>
-</section>
+</Section>

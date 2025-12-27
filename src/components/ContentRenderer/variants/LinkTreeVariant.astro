@@ -6,6 +6,7 @@
  */
 
 import Button from "@/components/Button/Button";
+import Section from "@/components/Section.astro";
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import { toArray } from "@/utils/array";
 
@@ -32,7 +33,7 @@ const isExternalLink = (item: any): boolean => {
 };
 ---
 
-<section id={id} class={`min-h-screen py-8 sm:py-12 lg:py-16 ${className}`}>
+<Section id={id} class={`min-h-screen py-8 sm:py-12 lg:py-16 ${className}`}>
   <div class="max-w-[680px] mx-auto px-4 sm:px-8">
     {(title || description) && (
       <header class="text-center mb-8 sm:mb-12">
@@ -99,4 +100,4 @@ const isExternalLink = (item: any): boolean => {
       </nav>
     )}
   </div>
-</section>
+</Section>

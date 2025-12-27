@@ -9,6 +9,7 @@
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import type { HeadingContent } from "@/content/schema";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import { toArray } from "@/utils/array";
 
@@ -50,7 +51,7 @@ const safeLeftItems = toArray(leftItems);
 const safeRightItems = toArray(rightItems);
 ---
 
-<section id={id} class={`outer-section bg-bg relative ${className}`.trim()}>
+<Section id={id} class={`outer-section bg-bg relative ${className}`.trim()}>
   <div class="inner-section">
     {showHeader && (
       <SectionHeader
@@ -135,4 +136,4 @@ const safeRightItems = toArray(rightItems);
       </div>
     )}
   </div>
-</section>
+</Section>

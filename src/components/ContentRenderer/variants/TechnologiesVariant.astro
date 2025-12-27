@@ -1,6 +1,7 @@
 ---
 // src/components/ContentRenderer/variants/TechnologiesVariant.astro
 import type { BaseVariantProps } from "../ContentRenderer.types";
+import Section from "@/components/Section.astro";
 import TechStackSection from "@/components/LoopTemplates/TechStackSection";
 import { toArray } from "@/utils/array";
 
@@ -18,7 +19,7 @@ const {
 const safeItems = toArray(items);
 ---
 
-<section
+<Section
   id={id}
   class={`outer-section relative overflow-hidden ${className}`.trim()}
 >
@@ -33,4 +34,4 @@ const safeItems = toArray(items);
       description={description}
     />
   )}
-</section>
+</Section>

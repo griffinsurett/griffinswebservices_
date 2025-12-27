@@ -9,6 +9,7 @@
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import MasonryGrid from "@/components/LoopTemplates/MasonryGrid.astro";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import { toArray } from "@/utils/array";
@@ -45,7 +46,7 @@ const showCTA =
   (ctaHref || collectionUrl);
 ---
 
-<section id={id} class={`relative overflow-hidden ${className}`.trim()}>
+<Section id={id} class={`relative overflow-hidden ${className}`.trim()}>
   <div class="inner-section">
     {showHeader && (
       <div class="heading-padding">
@@ -73,4 +74,4 @@ const showCTA =
       </div>
     )}
   </div>
-</section>
+</Section>

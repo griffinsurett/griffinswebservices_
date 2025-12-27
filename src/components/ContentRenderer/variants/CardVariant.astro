@@ -10,6 +10,7 @@ import type { FeatureCardData, FeatureCardProps } from "@/components/LoopCompone
 import CardRenderer from "@/components/LoopTemplates/CardRenderer";
 import ContentBridge from "../ContentBridge/ContentBridge.astro";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import { toArray } from "@/utils/array";
@@ -101,7 +102,7 @@ const showCTA =
 
 ---
 
-<section id={id} class={`relative overflow-hidden ${className}`.trim()}>
+<Section id={id} class={`relative overflow-hidden ${className}`.trim()}>
   <div class="inner-section">
     {showHeader && (
       <div
@@ -175,4 +176,4 @@ const showCTA =
       </div>
     )}
   </div>
-</section>
+</Section>

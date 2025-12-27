@@ -26,6 +26,7 @@ import type { CollectionKey } from "astro:content";
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import type { FilterConfig } from "@/hooks/useFilter";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import FilteredPortfolioCarousel from "@/components/LoopTemplates/Portfolio/FilteredPortfolioCarousel";
 import { shouldShowCollectionCTA } from "../utils/helpers";
@@ -212,7 +213,7 @@ const sectionTitle = collectionTitle ?? title;
 const showHeader = Boolean(sectionTitle || headingValue || description);
 ---
 
-<section
+<Section
   id={id}
   class={`outer-section relative overflow-hidden ${className}`.trim()}
 >
@@ -258,4 +259,4 @@ const showHeader = Boolean(sectionTitle || headingValue || description);
       </div>
     )}
   </div>
-</section>
+</Section>

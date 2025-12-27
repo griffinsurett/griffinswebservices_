@@ -7,6 +7,7 @@
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import ArticleCard from "@/components/LoopComponents/ArticleCard.astro";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import { toArray } from "@/utils/array";
@@ -40,7 +41,7 @@ const columnClasses = {
 };
 ---
 
-<section id={id} class={`py-16 ${className}`}>
+<Section id={id} class={`py-16 ${className}`}>
   {(title || description) && (
     <div class="text-center mb-12">
       {title && <h2 class="text-4xl font-bold mb-4">{title}</h2>}
@@ -75,4 +76,4 @@ const columnClasses = {
       </Button>
     </div>
   )}
-</section>
+</Section>

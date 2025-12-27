@@ -14,6 +14,7 @@ import { siteData, ctaData } from "@/content/siteData";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import { query } from "@/utils/query";
 import PreferencesLayout from "./PreferencesLayout.astro";
+import Section from "@/components/Section.astro";
 import { roots, related } from "@/utils/query/snippets";
 import Logo from "@/components/Logo/Logo.astro";
 import Button from "@/components/Button/Button";
@@ -94,7 +95,7 @@ import Button from "@/components/Button/Button";
 
     <div class="relative">
       <div class="section-dim-border"></div>
-      <section
+      <Section
         class="inner-section flex flex-col gap-4 text-text text-sm py-6 sm:flex-row sm:items-center sm:justify-between"
       >
         <p class="text-center sm:text-right">
@@ -106,7 +107,7 @@ import Button from "@/components/Button/Button";
           layout="horizontal"
           class="w-full sm:w-auto"
         />
-      </section>
+      </Section>
     </div>
   </div>
 </footer>

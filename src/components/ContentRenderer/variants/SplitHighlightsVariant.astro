@@ -10,6 +10,7 @@
 
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import { toArray } from "@/utils/array";
@@ -88,7 +89,7 @@ const getItemEyebrow = (record: Record<string, any>) =>
   pickString(record, ["eyebrow", "tagline", "label", "before"]);
 ---
 
-<section id={id} class={`outer-section relative ${className}`.trim()}>
+<Section id={id} class={`outer-section relative ${className}`.trim()}>
   <div class="inner-section space-y-16">
     {showTopRegion && (
       <div class="grid gap-10 lg:gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]">
@@ -164,4 +165,4 @@ const getItemEyebrow = (record: Record<string, any>) =>
       </div>
     )}
   </div>
-</section>
+</Section>

@@ -4,6 +4,7 @@
 import Button from "@/components/Button/Button";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import ScrollIndicator from "@/components/ScrollIndicator.astro";
 import { query } from "@/utils/query";
 import { siteData } from "@/content/siteData";
@@ -48,7 +49,7 @@ const {
 } = Astro.props as Props;
 ---
 
-<section
+<Section
   id={id}
   class={`min-h-screen flex items-center justify-center relative overflow-hidden ${className}`}
 >
@@ -133,4 +134,4 @@ const {
   </div>
 
 <ScrollIndicator href={scrollToSection} />
-</section>
+</Section>

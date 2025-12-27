@@ -2,6 +2,7 @@
 // src/components/ContentRenderer/variants/TestimonialCarouselVariant.astro
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import TestimonialCarousel from "@/components/LoopTemplates/TestimonialCarousel";
@@ -29,7 +30,7 @@ const {
 const safeItems = toArray(items);
 ---
 
-<section
+<Section
   id={id}
   class={`outer-section relative overflow-hidden ${className}`.trim()}
 >
@@ -69,4 +70,4 @@ const safeItems = toArray(items);
       </div>
     )}
   </div>
-</section>
+</Section>

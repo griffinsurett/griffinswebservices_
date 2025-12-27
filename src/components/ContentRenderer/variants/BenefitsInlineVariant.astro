@@ -3,6 +3,7 @@
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import type { FeatureCardData } from "@/components/LoopComponents/FeatureCard";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import CardRenderer from "@/components/LoopTemplates/CardRenderer";
 import { toArray } from "@/utils/array";
 
@@ -38,7 +39,7 @@ const featureCardProps = {
 };
 ---
 
-<section
+<Section
   id={id}
   class={`outer-section relative ${className}`.trim()}
 >
@@ -63,4 +64,4 @@ const featureCardProps = {
       />
     )}
   </div>
-</section>
+</Section>

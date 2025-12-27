@@ -6,6 +6,7 @@
  */
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import SectionHeader from "@/components/SectionHeader.astro";
+import Section from "@/components/Section.astro";
 import TestimonialCard from "@/components/LoopComponents/TestimonialCard";
 import { toArray } from "@/utils/array";
 
@@ -44,7 +45,7 @@ const getRingDuration = (item: Record<string, any>) =>
   typeof item?.ringDuration === "number" ? item.ringDuration : 800;
 ---
 
-<section
+<Section
   id={id}
   class={`outer-section relative ${className}`.trim()}
 >
@@ -71,4 +72,4 @@ const getRingDuration = (item: Record<string, any>) =>
       </ul>
     )}
   </div>
-</section>
+</Section>
