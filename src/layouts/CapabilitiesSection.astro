@@ -3,10 +3,14 @@
 /**
  * Reusable section for capability pages
  * Renders children capabilities, highlights, and CTA
+ *
+ * Automatically derives slug from URL and fetches title from content collection
  */
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import CTASection from "@/layouts/CTASection.astro";
-import { children, query, related } from "@/utils/query";
+import { children, query, related, safeGetEntry } from "@/utils/query";
+import { capitalizeWords } from "@/utils/string";
+import { parseUrlPath } from "@/utils/paths";
 
 interface Highlight {
   title: string;
@@ -25,10 +29,6 @@ interface CTAButton {
 }
 
 interface Props {
-  /** Current capability slug for querying children and FAQs */
-  slug: string;
-  /** Capability title for dynamic headings */
-  title?: string;
   /** Heading for child capabilities section */
   capabilitiesHeading?: string;
   /** Highlights to display */
@@ -56,8 +56,6 @@ interface Props {
 }
 
 const {
-  slug,
-  title,
   capabilitiesHeading,
   highlights = [],
   highlightsTitle,
@@ -71,6 +69,13 @@ const {
   ctaPrimaryButton,
   ctaId = "capabilities-cta",
 } = Astro.props;
+
+// Derive slug from URL path using utility
+const { slug } = parseUrlPath(Astro.url.pathname);
+
+// Fetch the entry to get the title
+const entry = slug ? await safeGetEntry("capabilities", slug) : undefined;
+const title = entry?.data?.title || capitalizeWords(slug?.replace(/-/g, " ") || "");
 ---
 
 {capabilitiesHeading && slug && (
@@ -96,20 +101,24 @@ const {
   variant="TestimonialCarouselVariant"
 />
 
-<ContentRenderer
-  query={related("faq", "capabilities", slug)}
-  variant="AccordionVariant"
-  allowMultiple={false}
-  title={faqTitle}
-  heading={faqHeading || `Common Questions About ${title || "This Capability"}`}
-/>
+{slug && (
+  <ContentRenderer
+    query={related("faq", "capabilities", slug)}
+    variant="AccordionVariant"
+    allowMultiple={false}
+    title={faqTitle}
+    heading={faqHeading || `Common Questions About ${title || "This Capability"}`}
+  />
+)}
 
-<ContentRenderer
-  query={related("technologies", "capabilities", slug)}
-  variant="TechnologiesVariant"
-  title="Technologies"
-  description={`The tools and frameworks we use to deliver ${title?.toLowerCase() || "this capability"}.`}
-/>
+{slug && (
+  <ContentRenderer
+    query={related("technologies", "capabilities", slug)}
+    variant="TechnologiesVariant"
+    title="Technologies"
+    description={`The tools and frameworks we use to deliver ${title?.toLowerCase() || "this capability"}.`}
+  />
+)}
 
 <slot />
 

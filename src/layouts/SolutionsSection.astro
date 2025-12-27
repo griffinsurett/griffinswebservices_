@@ -4,13 +4,14 @@
  * Reusable section for solution pages
  * Renders ContentSection, benefits, testimonials, and CTA
  *
- * Similar to CapabilitiesSection - this is rendered in the MDX body
- * with all content-specific props passed in.
+ * Automatically derives slug from URL and fetches title from content collection
  */
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import ContentSection from "@/layouts/ContentSection.astro";
 import CTASection from "@/layouts/CTASection.astro";
-import { query, sortByOrder, related } from "@/utils/query";
+import { query, sortByOrder, related, safeGetEntry } from "@/utils/query";
+import { capitalizeWords } from "@/utils/string";
+import { parseUrlPath } from "@/utils/paths";
 
 interface Feature {
   title: string;
@@ -55,10 +56,6 @@ interface SidebarContent {
 }
 
 interface Props {
-  /** Solution title for dynamic headings */
-  title: string;
-  /** Solution slug for querying related FAQs */
-  slug: string;
   /** Solution icon */
   icon?: string;
   /** Features list (displayed in sidebar) */
@@ -96,8 +93,6 @@ interface Props {
 }
 
 const {
-  title,
-  slug,
   icon,
   features = [],
   quickFacts = [],
@@ -123,6 +118,13 @@ const {
   ctaPrimaryButton,
   ctaId = "solutions-cta",
 } = Astro.props;
+
+// Derive slug from URL path using utility
+const { slug } = parseUrlPath(Astro.url.pathname);
+
+// Fetch the entry to get the title
+const entry = slug ? await safeGetEntry("solutions", slug) : undefined;
+const title = entry?.data?.title || capitalizeWords(slug?.replace(/-/g, " ") || "");
 
 // Build the full sidebar with features included
 const fullSidebar = sidebar ? {
@@ -168,13 +170,15 @@ const fullSidebar = sidebar ? {
   variant="TestimonialCarouselVariant"
 />
 
-<ContentRenderer
-  query={related("faq", "solutions", slug)}
-  variant="AccordionVariant"
-  allowMultiple={false}
-  title={faqTitle}
-  heading={faqHeading || `Common Questions About ${title}`}
-/>
+{slug && (
+  <ContentRenderer
+    query={related("faq", "solutions", slug)}
+    variant="AccordionVariant"
+    allowMultiple={false}
+    title={faqTitle}
+    heading={faqHeading || `Common Questions About ${title || "This Solution"}`}
+  />
+)}
 
 {ctaHeading && (
   <CTASection

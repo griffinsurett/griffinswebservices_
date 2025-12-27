@@ -105,7 +105,7 @@ export default function MobileMenuDrawer({
             className="inner-section my-auto py-4"
             style={{ maxHeight: "calc(100vh - 6rem)" }}
           >
-            <div className="relative w-full h-full overflow-hidden">
+            <div className="relative w-full h-full overflow-hidden flex justify-left lg:justify-center">
               <div
                 className="flex h-full transition-transform duration-300 ease-in-out"
                 style={{ transform: `translateX(-${slideOffset}%)` }}
