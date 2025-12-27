@@ -112,15 +112,14 @@ class ScrollAnimationObserver {
       return;
     }
 
-    // Track scroll direction
-    this.lastScrollY = window.scrollY;
+    // Track scroll direction - defer scrollY read to first scroll event to avoid forced reflow
     window.addEventListener("scroll", this.handleScroll, { passive: true });
 
-    // Observe initial elements
-    this.observeAll();
-
-    // Watch for dynamically added elements (React hydration, etc.)
-    this.setupMutationObserver();
+    // Defer observation to avoid blocking main thread during page load
+    requestAnimationFrame(() => {
+      this.observeAll();
+      this.setupMutationObserver();
+    });
   }
 
   private handleScroll = () => {
@@ -268,11 +267,20 @@ export function initScrollAnimations(options?: AnimationObserverOptions) {
   return instance;
 }
 
-// Auto-initialize when DOM is ready
+// Auto-initialize when DOM is ready, deferred to avoid blocking
 if (typeof window !== "undefined") {
+  const deferInit = () => {
+    // Use requestIdleCallback for non-critical initialization, fallback to setTimeout
+    if ("requestIdleCallback" in window) {
+      (window as any).requestIdleCallback(() => initScrollAnimations(), { timeout: 100 });
+    } else {
+      setTimeout(() => initScrollAnimations(), 0);
+    }
+  };
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => initScrollAnimations());
+    document.addEventListener("DOMContentLoaded", deferInit);
   } else {
-    initScrollAnimations();
+    deferInit();
   }
 }

@@ -119,10 +119,10 @@ const restOfTitle = words.slice(1).join(" ");
       }
     };
 
-    // Initial check
-    updateFade();
-
     // Listen for scroll
     window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Defer initial check to avoid forced reflow during page load
+    requestAnimationFrame(updateFade);
   })();
 </script>
