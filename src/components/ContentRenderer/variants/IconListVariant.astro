@@ -102,7 +102,8 @@ const resolveItemUrl = (item: Record<string, any>): string | undefined => {
                                     <li
                                         class="relative overflow-hidden"
                                         data-animate="fade-in-up"
-                                        data-animate-once="true"
+                                        data-animate-threshold="0.15"
+                                        data-animate-root-margin="-10% 0px -10% 0px"
                                     >
                                         {route ? (
                                             <FeatureCard

@@ -5,5 +5,25 @@ heading: "Hear it from our clients themselves."
 hasPage: true
 itemsHasPage: false
 addToMenu:
+  - menu: "main-menu"
   - menu: "footer-menu-2"
 ---
+import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
+import { query } from "@/utils/query";
+import CTASection from "@/layouts/CTASection.astro"
+
+<ContentRenderer
+  query={query("testimonials")}
+  variant="TestimonialGridVariant"
+  columns={2}
+  gap="lg"
+/>
+
+ <CTASection
+      title="Get Started"
+      heading={{
+        before: "Ready to Transform Your Online Presence into a ",
+        text: "High-Performance Growth Engine?",
+      }}
+      description="Join hundreds of successful businesses who trust Griffin's Web Services. While others juggle dozens of services, we've mastered one: building lightning-fast, secure, and scalable sites that turn visitors into customers."
+    />

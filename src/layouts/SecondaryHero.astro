@@ -60,7 +60,7 @@ const backgroundMedia = {
 };
 ---
 
-<section class={`relative card-bg min-h-[60vh] flex justify-center items-center ${className}`}>
+<section class={`relative card-bg min-h-[65vh] flex justify-center items-center ${className}`}>
   <div
     class="relative flex items-center justify-center overflow-hidden"
     style={`min-height: ${minHeight}`}
@@ -73,11 +73,12 @@ const backgroundMedia = {
       <div class="max-w-4xl mx-auto text-center text-bg">
         <SectionHeader
           title={displayTitle}
+          titleClassName="mb-0"
           heading={displayHeading}
           headingTag="h1"
-          headingClassName="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-lg"
+          headingClassName="text-4xl md:text-5xl lg:text-6xl font-bold drop-shadow-lg"
           description={description}
-          descriptionClassName="text-xl md:text-2xl mb-8 opacity-95 drop-shadow-md leading-relaxed"
+          descriptionClassName="text-xl md:text-2xl opacity-95 drop-shadow-md leading-relaxed"
           className="text-center"
         />
 
