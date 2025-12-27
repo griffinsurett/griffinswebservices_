@@ -53,6 +53,8 @@ export interface Props {
   animateThreshold?: number;
   /** IntersectionObserver root margin (JS animations only) */
   animateRootMargin?: string;
+  /** Skip animation on mobile for above-the-fold content */
+  skipMobileAnimation?: boolean;
   [key: string]: any;
 }
 
@@ -68,6 +70,7 @@ const {
   animateDelay,
   animateThreshold,
   animateRootMargin,
+  skipMobileAnimation,
   ...rest
 } = Astro.props;
 
@@ -94,6 +97,9 @@ if (animate) {
     }
     if (animateRootMargin) {
       animationAttrs["data-animate-root-margin"] = animateRootMargin;
+    }
+    if (skipMobileAnimation) {
+      animationAttrs["data-skip-mobile-animation"] = "";
     }
   }
   if (animateDelay !== undefined) {

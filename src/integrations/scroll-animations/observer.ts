@@ -156,6 +156,34 @@ class ScrollAnimationObserver {
       : this.defaultThreshold;
     const rootMargin = el.dataset.animateRootMargin || this.defaultRootMargin;
 
+    // Check for data-skip-mobile-animation attribute
+    // If set, skip animation on mobile (<1024px) for above-the-fold content
+    const skipMobileAnimation = el.dataset.skipMobileAnimation !== undefined;
+
+    if (skipMobileAnimation) {
+      const rect = el.getBoundingClientRect();
+      const isAboveTheFold = rect.top < window.innerHeight && rect.bottom > 0;
+      const isMobile = window.innerWidth < 1024;
+
+      if (isAboveTheFold && isMobile) {
+        // Mobile: show immediately without animation
+        el.style.transition = 'none';
+        el.dataset.visible = "true";
+        this.seenElements.add(el);
+        // Re-enable transitions after paint
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            el.style.transition = '';
+          });
+        });
+
+        // If once is true, no need to observe further
+        if (once) {
+          return;
+        }
+      }
+    }
+
     const { disconnect } = createIntersectionObserver(el, {
       threshold,
       rootMargin,
