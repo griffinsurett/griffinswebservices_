@@ -27,12 +27,11 @@ const BUTTON_SIZE_CLASSES: Record<ButtonSize, string> = {
 };
 
 export function getButtonBaseClasses(size?: ButtonSize): string {
-  const normalizedSize = size ?? 'md';
+  const normalizedSize = size ?? 'lg';
 
   return [
     'inline-flex items-center justify-center gap-2',
     'rounded-full font-semibold',
-    'h4',
     'shadow-accent/30',
     'button-style',
     'button-transition',
