@@ -32,7 +32,6 @@ export function getButtonBaseClasses(size?: ButtonSize): string {
   return [
     'inline-flex items-center justify-center gap-2',
     'rounded-full font-semibold',
-    'shadow-accent/30',
     'button-style',
     'button-transition',
     'button-hover-transition',
