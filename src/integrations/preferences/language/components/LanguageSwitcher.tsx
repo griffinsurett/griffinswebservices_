@@ -1,39 +1,30 @@
-// src/components/preferences/language/LanguageSwitcher.tsx
+// src/integrations/preferences/language/components/LanguageSwitcher.tsx
 /**
- * Language Switcher Component
+ * Language Switcher Component (Integration Default)
  *
- * Simple dropdown that reads current language from localStorage
- * and calls window.changeLanguage() to switch.
+ * Full-featured language dropdown with consent checking.
+ * Uses the useLanguageSwitcher hook for all functionality.
  *
- * NOW WITH CONSENT CHECKING:
- * - Only allows language switching if functional consent is given
- * - Shows warning message if consent not granted
+ * For custom designs, use the useLanguageSwitcher hook directly
+ * in your own component.
  */
 
 import { useState, useRef, useEffect } from "react";
-import {
-  supportedLanguages,
-  getLanguageByCode,
-} from "@/integrations/preferences/language/utils/languages";
-import { useConsent } from "@/hooks/useConsent";
-import "@/integrations/preferences/language/language-switcher.css";
+import { useLanguageSwitcher } from "../hooks/useLanguageSwitcher";
+import "../language-switcher.css";
 
 export default function LanguageSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { hasConsentFor } = useConsent();
 
-  const hasFunctionalConsent = hasConsentFor("functional");
-
-  // Get current language from localStorage
-  const getCurrentLanguage = () => {
-    if (typeof window === "undefined") return supportedLanguages[0];
-    const code = localStorage.getItem("user-language") || "en";
-    return getLanguageByCode(code) || supportedLanguages[0];
-  };
-
-  const [currentLanguage, setCurrentLanguage] = useState(getCurrentLanguage);
+  const {
+    currentLanguage,
+    hasFunctionalConsent,
+    requiresConsent,
+    supportedLanguages,
+    changeLanguage,
+  } = useLanguageSwitcher();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -70,37 +61,13 @@ export default function LanguageSwitcher() {
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    const handler = (event: StorageEvent) => {
-      if (event.key !== "user-language") return;
-      const next = getLanguageByCode(event.newValue || "en") || supportedLanguages[0];
-      setCurrentLanguage(next);
-    };
-
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
-
   const handleLanguageChange = (code: string) => {
-    // Check for functional consent before allowing language change
-    if (!hasFunctionalConsent) {
-      alert(
-        "Please enable functional cookies to use the language switcher. You can manage your preferences in the cookie settings."
-      );
+    const result = changeLanguage(code);
+    if (!result.success && result.error) {
+      alert(result.error);
       return;
     }
-
     setIsOpen(false);
-
-    const nextLanguage = getLanguageByCode(code);
-    if (nextLanguage) {
-      setCurrentLanguage(nextLanguage);
-    }
-
-    // Persist preference and trigger translation
-    if (typeof window !== "undefined" && (window as any).changeLanguage) {
-      (window as any).changeLanguage(code);
-    }
   };
 
   return (
@@ -150,7 +117,7 @@ export default function LanguageSwitcher() {
         aria-hidden={!isOpen}
         aria-label="Available languages"
       >
-        {!hasFunctionalConsent && (
+        {requiresConsent && (
           <div className="px-4 py-3 bg-yellow-50 border-b border-yellow-200 text-sm text-yellow-800">
             Enable functional cookies to use translation
           </div>
@@ -164,9 +131,9 @@ export default function LanguageSwitcher() {
             aria-selected={language.code === currentLanguage.code}
             className="language-option notranslate"
             onClick={() => handleLanguageChange(language.code)}
-            disabled={!hasFunctionalConsent}
+            disabled={requiresConsent && language.code !== "en"}
             style={
-              !hasFunctionalConsent
+              requiresConsent && language.code !== "en"
                 ? { opacity: 0.5, cursor: "not-allowed" }
                 : undefined
             }
@@ -187,7 +154,7 @@ export default function LanguageSwitcher() {
             </div>
             {language.code === currentLanguage.code && (
               <svg
-                className="w-5 h-5 text-primary flex-shrink-0"
+                className="w-5 h-5 text-primary shrink-0"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 aria-hidden="true"

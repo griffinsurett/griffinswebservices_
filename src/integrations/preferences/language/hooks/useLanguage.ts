@@ -1,4 +1,4 @@
-// src/hooks/useLanguage.ts
+// src/integrations/preferences/language/hooks/useLanguage.ts
 /**
  * Language Preference Hook
  *
@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import useLocalStorage from "./useLocalStorage";
+import useLocalStorage from "@/hooks/useLocalStorage";
 import {
   defaultLanguage,
   getLanguageByCode,

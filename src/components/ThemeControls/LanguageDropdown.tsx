@@ -1,103 +1,115 @@
-import { useEffect, useRef, useState } from "react";
-import { CircleCheckbox } from "./checkboxes/CircleCheckbox";
-import LanguageDropdownContent from "./LanguageDropdownContent";
+// src/components/ThemeControls/LanguageDropdown.tsx
+/**
+ * Language Dropdown (ThemeControls Design)
+ *
+ * Custom styled dropdown for the ThemeControls language selector.
+ * Uses the useLanguageSwitcher hook from integrations for all functionality.
+ */
 
-// Get stored language code from localStorage (lightweight)
-function getStoredLanguageCode(): string {
-  if (typeof window === "undefined") return "en";
-  return localStorage.getItem("user-language") || "en";
+import { useLanguageSwitcher } from "@/integrations/preferences/language/hooks/useLanguageSwitcher";
+
+interface Props {
+  open: boolean;
+  onClose: () => void;
+  onLanguageChange: (code: string) => void;
 }
 
-// Flag map now covers all supported languages (lowercase keys for easier lookups)
-const FLAG_MAP: Record<string, string> = {
-  en: "🇺🇸",
-  es: "🇪🇸",
-  hi: "🇮🇳",
-  iw: "🇮🇱",
-  de: "🇩🇪",
-  ru: "🇷🇺",
-  uk: "🇺🇦",
-  it: "🇮🇹",
-  fr: "🇫🇷",
-  pt: "🇵🇹",
-  "zh-cn": "🇨🇳",
-  zh: "🇨🇳",
-  "zh-tw": "🇹🇼",
-  ja: "🇯🇵",
-  ko: "🇰🇷",
-  ar: "🇸🇦",
-};
+export default function LanguageDropdown({ open, onClose, onLanguageChange }: Props) {
+  const {
+    currentLanguage,
+    requiresConsent,
+    supportedLanguages,
+    changeLanguage,
+    openConsentModal,
+  } = useLanguageSwitcher();
 
-export default function LanguageDropdown() {
-  const [open, setOpen] = useState(false);
-  const [currentCode, setCurrentCode] = useState("en");
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  // Read stored language after hydration
-  useEffect(() => {
-    setCurrentCode(getStoredLanguageCode());
-  }, []);
-
-  // Listen for language changes
-  useEffect(() => {
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === "user-language") {
-        setCurrentCode(event.newValue || "en");
-      }
-    };
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, []);
-
-  // Close on outside click
-  useEffect(() => {
-    if (!open) return;
-    const handleClick = (event: MouseEvent) => {
-      if (containerRef.current?.contains(event.target as Node)) return;
-      setOpen(false);
-    };
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", handleClick);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [open]);
-
-  const handleToggle = () => {
-    setOpen((v) => !v);
+  const handleOpenConsentModal = () => {
+    openConsentModal();
+    onClose();
   };
 
-  const normalizedCode = currentCode.toLowerCase();
-  const currentFlag =
-    FLAG_MAP[normalizedCode] || FLAG_MAP[normalizedCode.split("-")[0]] || FLAG_MAP.en;
+  const handleLanguageChange = (code: string) => {
+    const result = changeLanguage(code);
+
+    if (!result.success && result.error) {
+      alert(result.error);
+      return;
+    }
+
+    onLanguageChange(code);
+    onClose();
+  };
+
+  if (!open) return null;
 
   return (
-    <div ref={containerRef} className="relative contents">
-      <CircleCheckbox
-        checked={open}
-        onChange={handleToggle}
-        aria-label="Choose display language"
-        title="Choose your site language"
-        className={`faded-bg text-primary ${open ? "ring-2 ring-primary/60" : ""}`}
-      >
-        <div className="flex items-center justify-center">
-          <span className="text-xl leading-none" aria-hidden="true">
-            {currentFlag}
+    <div
+      className="absolute top-full left-1/2 z-[60] mt-3 min-w-[220px] -translate-x-1/2 rounded-2xl border card-bg p-3 shadow-2xl backdrop-blur-xl"
+      onWheel={(event) => event.stopPropagation()}
+      onWheelCapture={(event) => event.stopPropagation()}
+    >
+      {requiresConsent && (
+        <button
+          type="button"
+          onClick={handleOpenConsentModal}
+          className="mb-2 rounded-xl border border-yellow-400/40 bg-yellow-500/15 px-3 py-2 text-xs text-text text-left transition hover:border-yellow-400 hover:bg-yellow-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400"
+        >
+          Enable functional cookies to switch languages.
+          <span className="mt-1 block text-[11px] font-semibold uppercase tracking-wide text-primary">
+            Manage consent preferences
           </span>
-        </div>
-      </CircleCheckbox>
-
-      {open && (
-        <LanguageDropdownContent
-          open={open}
-          onClose={() => setOpen(false)}
-          onLanguageChange={(code) => setCurrentCode(code)}
-        />
+        </button>
       )}
+
+      <div className="flex max-h-64 flex-col overflow-y-auto">
+        {supportedLanguages.map((language) => {
+          const isActive = language.code === currentLanguage.code;
+          const isDisabled = requiresConsent && language.code !== "en";
+          return (
+            <button
+              key={language.code}
+              type="button"
+              className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${
+                isActive
+                  ? "bg-primary/20 text-primary font-semibold"
+                  : "hover:bg-white/5 text-text"
+              } ${isDisabled ? "cursor-not-allowed opacity-60" : ""}`}
+              onClick={() => handleLanguageChange(language.code)}
+              disabled={isDisabled}
+            >
+              {language.flag && (
+                <span className="text-lg" aria-hidden="true">
+                  {language.flag}
+                </span>
+              )}
+              <span className="flex-1 text-left">
+                <span className="block text-base leading-tight">
+                  {language.nativeName}
+                </span>
+                <span className="text-xs text-text/70">
+                  {language.name}
+                </span>
+              </span>
+              {isActive && (
+                <span className="text-primary" aria-label="Currently selected language">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12l4 4L19 7" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

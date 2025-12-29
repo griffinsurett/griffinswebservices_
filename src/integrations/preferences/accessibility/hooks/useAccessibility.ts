@@ -1,7 +1,7 @@
-// src/hooks/useAccessibility.ts - REPLACE ENTIRE FILE
+// src/integrations/preferences/accessibility/hooks/useAccessibility.ts
 
 import { useEffect } from "react";
-import useLocalStorage from "./useLocalStorage";
+import useLocalStorage from "@/hooks/useLocalStorage";
 import {
   DEFAULT_PREFS,
   type A11yPreferences,

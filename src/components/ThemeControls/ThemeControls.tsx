@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import DarkLightToggle from "./DarkLightToggle";
 import AccentPicker from "./AccentPicker";
-import LanguageDropdown from "./LanguageDropdown";
+import LanguagePicker from "./LanguagePicker";
 
 interface ThemeControlsProps {
   className?: string;
@@ -26,7 +26,7 @@ export default function ThemeControls({ className = "" }: ThemeControlsProps) {
         .filter(Boolean)
         .join(" ")}
     >
-      <LanguageDropdown />
+      <LanguagePicker />
       <DarkLightToggle />
       <AccentPicker />
     </div>
