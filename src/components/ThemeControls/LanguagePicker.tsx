@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CircleCheckbox } from "./checkboxes/CircleCheckbox";
-import LanguageDropdown from "./LanguageDropdown";
+import LanguageDropdown from "@/integrations/preferences/language/components/LanguageDropdown";
 import { useLanguageSwitcher } from "@/integrations/preferences/language/hooks/useLanguageSwitcher";
 
 export default function LanguagePicker() {
@@ -60,6 +60,7 @@ export default function LanguagePicker() {
           open={open}
           onClose={() => setOpen(false)}
           onLanguageChange={() => {}}
+          className="left-1/2 -translate-x-1/2"
         />
       )}
     </div>

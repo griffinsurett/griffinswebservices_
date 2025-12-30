@@ -8,7 +8,7 @@
  */
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import CTASection from "@/layouts/CTASection.astro";
-import { children, query, related, safeGetEntry } from "@/utils/query";
+import { children, query, related, safeGetEntry, sortByDate } from "@/utils/query";
 import { capitalizeWords } from "@/utils/string";
 import { parseUrlPath } from "@/utils/paths";
 
@@ -121,6 +121,20 @@ const title = entry?.data?.title || capitalizeWords(slug?.replace(/-/g, " ") || 
 )}
 
 <slot />
+
+{slug && (
+  <ContentRenderer
+    query={related("blog", "capabilities", slug).orderBy(sortByDate("publishDate", "desc"))}
+    variant="BlogVariant"
+    columns={3}
+    title="Related Articles"
+    heading={{
+      before: "Learn more about",
+      text: title,
+    }}
+    description={`Insights and guides related to ${title?.toLowerCase() || "this capability"}.`}
+  />
+)}
 
 {ctaHeading && (
   <CTASection

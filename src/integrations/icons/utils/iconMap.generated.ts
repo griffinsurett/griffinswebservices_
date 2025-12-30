@@ -3,7 +3,7 @@
 
 import type { IconType } from 'react-icons';
 import { LuArrowLeft, LuArrowRight, LuArrowUpRight, LuBookOpen, LuBot, LuCheck, LuChevronRight, LuClock, LuCode, LuGithub, LuGlobe, LuImage, LuInstagram, LuLayers, LuLinkedin, LuLock, LuMail, LuMinus, LuPhone, LuPlus, LuSend, LuSettings, LuSparkles } from 'react-icons/lu';
-import { FaArrowsUpDownLeftRight, FaAws, FaBolt, FaBoxOpen, FaBriefcase, FaBullseye, FaCartShopping, FaChartLine, FaClockRotateLeft, FaCloudflare, FaCode, FaCompass, FaCookieBite, FaCss3Alt, FaDisplay, FaDumbbell, FaEye, FaFeather, FaFigma, FaFileLines, FaGears, FaGithub, FaHandshake, FaHeadset, FaHeartPulse, FaHelmetSafety, FaHtml5, FaJs, FaLaptop, FaLayerGroup, FaLifeRing, FaLink, FaMagnifyingGlassChart, FaMobileScreenButton, FaNodeJs, FaPalette, FaPenNib, FaPhp, FaPython, FaReact, FaRobot, FaRocket, FaScaleBalanced, FaScrewdriverWrench, FaServer, FaShieldHalved, FaShieldHeart, FaShopify, FaUniversalAccess, FaUtensils, FaWandMagicSparkles, FaWordpress } from 'react-icons/fa6';
+import { FaArrowsUpDownLeftRight, FaAws, FaBolt, FaBoxOpen, FaBriefcase, FaBullseye, FaCartShopping, FaChartLine, FaClockRotateLeft, FaCloudflare, FaCode, FaCompass, FaCookieBite, FaCss3Alt, FaDisplay, FaDumbbell, FaEye, FaFeather, FaFigma, FaFileLines, FaGears, FaGithub, FaHandshake, FaHeadset, FaHeartPulse, FaHelmetSafety, FaHtml5, FaJs, FaLaptop, FaLayerGroup, FaLifeRing, FaLink, FaMagnifyingGlassChart, FaMobileScreenButton, FaNodeJs, FaPalette, FaPenNib, FaPhp, FaPython, FaReact, FaRobot, FaRocket, FaRotateLeft, FaScaleBalanced, FaScrewdriverWrench, FaServer, FaShieldHalved, FaShieldHeart, FaShopify, FaUniversalAccess, FaUtensils, FaWandMagicSparkles, FaWordpress, FaXmark } from 'react-icons/fa6';
 import { SiAstro, SiElementor, SiFacebook, SiFramer, SiGatsby, SiNextdotjs, SiSvelte, SiVercel, SiWebflow } from 'react-icons/si';
 
 export const iconMap = {
@@ -49,6 +49,7 @@ export const iconMap = {
   'fa6:react': FaReact,
   'fa6:robot': FaRobot,
   'fa6:rocket': FaRocket,
+  'fa6:rotate-left': FaRotateLeft,
   'fa6:scale-balanced': FaScaleBalanced,
   'fa6:screwdriver-wrench': FaScrewdriverWrench,
   'fa6:server': FaServer,
@@ -59,6 +60,7 @@ export const iconMap = {
   'fa6:utensils': FaUtensils,
   'fa6:wand-magic-sparkles': FaWandMagicSparkles,
   'fa6:wordpress': FaWordpress,
+  'fa6:xmark': FaXmark,
   'lu:arrow-left': LuArrowLeft,
   'lu:arrow-right': LuArrowRight,
   'lu:arrow-up-right': LuArrowUpRight,

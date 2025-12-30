@@ -41,7 +41,10 @@ export function manualChunks(id) {
   if (id.includes('ThemeControls/AccentPicker')) {
     return 'theme-accent';
   }
-  if (id.includes('ThemeControls/LanguageDropdown')) {
+  if (
+    id.includes('ThemeControls/LanguageDropdown') ||
+    id.includes('integrations/preferences/language/components/LanguageDropdown')
+  ) {
     return 'theme-language';
   }
 

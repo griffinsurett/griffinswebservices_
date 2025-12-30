@@ -443,7 +443,7 @@ body {
 }
 
   @utility hero-spacing {
-    @apply space-y-5 lg:space-y-3;
+    @apply space-y-3 lg:space-y-2.5;
   }
 
   @utility menu-item-spacing {

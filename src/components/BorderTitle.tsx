@@ -19,8 +19,8 @@ export default function BorderTitle({
   className = "",
   duration = 1200,
   hoverSweep = true,
-  pillClassName = "text-sm px-5 py-2.5 tracking-wider",
-  visibleRootMargin,
+  pillClassName = "text-sm px-3.5 py-2.5 lg:px-4.5 lg:py-2 tracking-wider",
+  visibleRootMargin = { top: -100, right: 0, bottom: -100, left: 0 },
 }: BorderTitleProps) {
   return (
     <div className="inline-block mb-3">

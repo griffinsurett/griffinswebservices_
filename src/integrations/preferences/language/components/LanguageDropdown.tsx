@@ -1,4 +1,4 @@
-// src/components/ThemeControls/LanguageDropdown.tsx
+// src/integrations/preferences/language/components/LanguageDropdown.tsx
 /**
  * Language Dropdown (ThemeControls Design)
  *
@@ -12,9 +12,15 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onLanguageChange: (code: string) => void;
+  className?: string;
 }
 
-export default function LanguageDropdown({ open, onClose, onLanguageChange }: Props) {
+export default function LanguageDropdown({
+  open,
+  onClose,
+  onLanguageChange,
+  className = "",
+}: Props) {
   const {
     currentLanguage,
     requiresConsent,
@@ -42,9 +48,16 @@ export default function LanguageDropdown({ open, onClose, onLanguageChange }: Pr
 
   if (!open) return null;
 
+  const containerClasses = [
+    "absolute top-full z-[60] mt-3 min-w-[220px] rounded-2xl border card-bg p-3 shadow-2xl backdrop-blur-xl",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div
-      className="absolute top-full left-1/2 z-[60] mt-3 min-w-[220px] -translate-x-1/2 rounded-2xl border card-bg p-3 shadow-2xl backdrop-blur-xl"
+      className={containerClasses}
       onWheel={(event) => event.stopPropagation()}
       onWheelCapture={(event) => event.stopPropagation()}
     >
