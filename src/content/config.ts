@@ -76,6 +76,7 @@ export const collections = {
         author: refSchema("authors"),
         tags: z.array(z.string()).default([]),
         readingTime: z.number().optional(),
+        capabilities: refSchema("capabilities"),
       }),
   }),
 

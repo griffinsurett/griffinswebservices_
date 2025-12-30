@@ -12,8 +12,9 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import QuoteHero from "@/layouts/QuoteHero.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
-import { query, related } from "@/utils/query";
+import { query, related, sortByDate } from "@/utils/query";
 import { capitalizeWords } from "@/utils/string";
+import { getItemKey } from "@/utils/collections/core";
 import type { CollectionLayoutProps } from "./types";
 import DoubleCard from "../DoubleCard.astro";
 
@@ -37,11 +38,25 @@ const {
 } = data;
 
 // Get the current entry's slug for filtering related items
-const currentSlug = entry?.id;
+const currentSlug = entry ? getItemKey(entry) : "";
 
 // Determine collection type for conditional rendering
 const isCapabilities = collection === "capabilities";
 const isSolutions = collection === "solutions";
+
+const relatedSolutionsQuery = isCapabilities
+  ? related("solutions", "capabilities", currentSlug)
+  : null;
+
+const relatedCapabilitiesQuery = isSolutions
+  ? related("capabilities", "solutions", currentSlug)
+  : null;
+
+const relatedBlogsQuery = isCapabilities
+  ? related("blog", "capabilities", currentSlug).orderBy(
+      sortByDate("publishDate", "desc"),
+    )
+  : null;
 
 // Build the description with price if available
 const heroDescription = price ? `${description} ${price}` : description;
@@ -67,4 +82,48 @@ const displayTitle =
 
     {/* MDX Content */}
     {Content && <Content />}
+
+    {isCapabilities && relatedSolutionsQuery && relatedBlogsQuery && (
+      <>
+        <ContentRenderer
+          query={relatedSolutionsQuery}
+          variant="CardVariant"
+          title="Solutions"
+          heading={{
+            before: "Solutions that include",
+            text: displayTitle,
+          }}
+          description={`Explore our website packages that include ${displayTitle.toLowerCase()} as part of the build.`}
+          ctaHref="#services-quote-hero"
+          ctaText="Get Your Free Quote"
+          columns={3}
+        />
+
+        <ContentRenderer
+          query={relatedBlogsQuery}
+          variant="BlogVariant"
+          columns={2}
+          title="Related Articles"
+          heading={{
+            before: "Learn more about",
+            text: displayTitle,
+          }}
+          description={`Insights and guides related to ${displayTitle.toLowerCase()}.`}
+        />
+      </>
+    )}
+
+    {isSolutions && relatedCapabilitiesQuery && (
+      <ContentRenderer
+        query={relatedCapabilitiesQuery}
+        variant="CardVariant"
+        title="Capabilities"
+        heading={{
+          before: "Capabilities inside",
+          text: displayTitle,
+        }}
+        description={`Core skills and expertise packaged inside ${displayTitle.toLowerCase()}.`}
+        columns={3}
+      />
+    )}
 </BaseLayout>

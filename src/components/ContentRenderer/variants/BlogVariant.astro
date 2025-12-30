@@ -8,6 +8,7 @@
 import type { BaseVariantProps } from "../ContentRenderer.types";
 import BlogCard from "@/components/LoopComponents/BlogCard";
 import Section from "@/components/Section.astro";
+import SectionHeader from "@/components/SectionHeader.astro";
 import Button from "@/components/Button/Button";
 import { shouldShowCollectionCTA } from "../utils/helpers";
 import { toArray } from "@/utils/array";
@@ -22,6 +23,7 @@ interface Props extends BaseVariantProps {
 const {
   items = [],
   title,
+  heading,
   description,
   className = "",
   columns = 2,
@@ -32,6 +34,9 @@ const {
   ctaHref,
   ctaText,
 } = Astro.props as Props;
+
+// SectionHeader handles heading normalization automatically
+const showHeader = Boolean(title || heading || description);
 
 const safeItems = toArray(items);
 
@@ -91,13 +96,15 @@ const columnClasses = {
 };
 ---
 
-<Section id={id} class={`py-16 ${className}`}>
-  {(title || description) && (
-    <div class="text-center mb-12">
-      {title && <h2 class="text-4xl font-bold mb-4">{title}</h2>}
-      {description && (
-        <p class="text-lg text-text max-w-2xl mx-auto">{description}</p>
-      )}
+<Section id={id} class={`outer-section ${className}`.trim()}>
+    <div class="inner-section">
+  {showHeader && (
+    <div class="heading-padding">
+      <SectionHeader
+        title={title}
+        heading={heading}
+        description={description}
+      />
     </div>
   )}
 
@@ -135,4 +142,5 @@ const columnClasses = {
       </Button>
     </div>
   )}
+  </div>
 </Section>
