@@ -3,16 +3,18 @@
 
 import type { IconType } from 'react-icons';
 import { LuArrowLeft, LuArrowRight, LuArrowUpRight, LuBookOpen, LuBot, LuCheck, LuChevronRight, LuClock, LuCode, LuGithub, LuGlobe, LuImage, LuInstagram, LuLayers, LuLinkedin, LuLock, LuMail, LuMinus, LuPhone, LuPlus, LuSend, LuSettings, LuSparkles } from 'react-icons/lu';
-import { FaArrowTrendUp, FaArrowsUpDownLeftRight, FaAws, FaBolt, FaBoxOpen, FaBriefcase, FaBullseye, FaCartShopping, FaChartLine, FaClockRotateLeft, FaCloudflare, FaCode, FaCompass, FaCookieBite, FaCss3Alt, FaCubes, FaDisplay, FaDumbbell, FaEye, FaFeather, FaFigma, FaFileLines, FaGaugeHigh, FaGears, FaGithub, FaHandPointer, FaHandshake, FaHeadset, FaHeartPulse, FaHelmetSafety, FaHtml5, FaImages, FaJs, FaLaptop, FaLayerGroup, FaLifeRing, FaLightbulb, FaLink, FaMagnifyingGlassChart, FaMobileScreenButton, FaNodeJs, FaPalette, FaPenNib, FaPenToSquare, FaPersonRunning, FaPhp, FaPlug, FaPython, FaReact, FaRoad, FaRobot, FaRocket, FaRotate, FaRotateLeft, FaScaleBalanced, FaScrewdriverWrench, FaServer, FaShieldHalved, FaShieldHeart, FaShopify, FaShuffle, FaUniversalAccess, FaUtensils, FaWandMagicSparkles, FaWordpress, FaXmark } from 'react-icons/fa6';
+import { FaArrowTrendUp, FaArrowsRotate, FaArrowsUpDownLeftRight, FaAws, FaBolt, FaBoxOpen, FaBriefcase, FaBuilding, FaBullseye, FaCartShopping, FaChartLine, FaClockRotateLeft, FaCloudflare, FaCode, FaCompass, FaCookieBite, FaCss3Alt, FaCubes, FaDisplay, FaDumbbell, FaEye, FaFeather, FaFigma, FaFileLines, FaGears, FaGithub, FaHandPointer, FaHandshake, FaHeadset, FaHeartPulse, FaHelmetSafety, FaHtml5, FaImages, FaJs, FaLaptop, FaLayerGroup, FaLifeRing, FaLink, FaMagnifyingGlassChart, FaMobileScreenButton, FaNodeJs, FaPalette, FaPenNib, FaPenToSquare, FaPersonRunning, FaPhp, FaPlug, FaPython, FaReact, FaRoad, FaRobot, FaRocket, FaRotate, FaRotateLeft, FaScaleBalanced, FaScrewdriverWrench, FaServer, FaShieldHalved, FaShieldHeart, FaShopify, FaUniversalAccess, FaUtensils, FaWandMagicSparkles, FaWordpress, FaXmark } from 'react-icons/fa6';
 import { SiAstro, SiElementor, SiFacebook, SiFramer, SiGatsby, SiNextdotjs, SiSvelte, SiVercel, SiWebflow } from 'react-icons/si';
 
 export const iconMap = {
   'fa6:arrow-trend-up': FaArrowTrendUp,
+  'fa6:arrows-rotate': FaArrowsRotate,
   'fa6:arrows-up-down-left-right': FaArrowsUpDownLeftRight,
   'fa6:aws': FaAws,
   'fa6:bolt': FaBolt,
   'fa6:box-open': FaBoxOpen,
   'fa6:briefcase': FaBriefcase,
+  'fa6:building': FaBuilding,
   'fa6:bullseye': FaBullseye,
   'fa6:cart-shopping': FaCartShopping,
   'fa6:chart-line': FaChartLine,
@@ -29,7 +31,6 @@ export const iconMap = {
   'fa6:feather': FaFeather,
   'fa6:figma': FaFigma,
   'fa6:file-lines': FaFileLines,
-  'fa6:gauge-high': FaGaugeHigh,
   'fa6:gears': FaGears,
   'fa6:github': FaGithub,
   'fa6:hand-pointer': FaHandPointer,
@@ -43,7 +44,6 @@ export const iconMap = {
   'fa6:laptop': FaLaptop,
   'fa6:layer-group': FaLayerGroup,
   'fa6:life-ring': FaLifeRing,
-  'fa6:lightbulb': FaLightbulb,
   'fa6:link': FaLink,
   'fa6:magnifying-glass-chart': FaMagnifyingGlassChart,
   'fa6:mobile-screen-button': FaMobileScreenButton,
@@ -67,7 +67,6 @@ export const iconMap = {
   'fa6:shield-halved': FaShieldHalved,
   'fa6:shield-heart': FaShieldHeart,
   'fa6:shopify': FaShopify,
-  'fa6:shuffle': FaShuffle,
   'fa6:universal-access': FaUniversalAccess,
   'fa6:utensils': FaUtensils,
   'fa6:wand-magic-sparkles': FaWandMagicSparkles,

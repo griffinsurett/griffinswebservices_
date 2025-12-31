@@ -3,62 +3,38 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import { query, sortByOrder, sortByDate } from "@/utils/query";
-import TextHero from "@/layouts/TextHero.astro";
 import { siteData } from "@/content/siteData";
 import { roots, byTag } from "@/utils/query/snippets";
 import CTASection from "@/layouts/CTASection.astro";
-import Video from "@/components/Video/Video.astro";
-import PortfolioShowcaseSection from "@/layouts/PortfolioShowcaseSection.astro";
-import GradientLayout from "@/layouts/GradientLayout.astro";
 import FrontPageHero from "@/layouts/FrontPageHero.astro";
-// import FrontPageHero2 from "@/layouts/FrontPageHero2.astro";
-import ColorBorderLayout from "@/layouts/ColorBorderLayout.astro";
 import DoubleCard from "@/layouts/DoubleCard.astro";
+import TrustStatement from "@/components/TrustStatement.astro";
 import { animationProps } from "@/integrations/scroll-animations/props";
 
 const heroHeading = {
-  before: "Launch a website that works.",
-  text: "Fast, secure, growth-ready.",
+  before: "Launch a Website That Actually Works.",
+  text: "Fast. Secure. Built to Grow.",
   after: "",
 };
 
 const heroDescription =
-  "We're a New Jersey based Web Agency that creates fast, engaging websites built to grow your business. We handle hosting, maintenance, and security — and provide full SEO services to help you get found and stay ahead.";
+  "We're a New Jersey–based web agency focused on building high-quality websites for businesses that want something done right the first time. Every site we deliver is built with intention — prioritizing performance, reliability, and long-term value over shortcuts or throwaway builds.";
 ---
 
 <BaseLayout title="Home" description={siteData.description}>
-    <!-- <GradientLayout> -->
-    <!-- Lightweight text-only hero - zero carousel JS on initial load -->
-    <!-- <TextHero
-        heading={heroHeading}
-        description={heroDescription}
-        primaryCTA={{
-          text: "Get Started",
-          link: "/contact-us",
-        }}
-        scrollToSection="#portfolio-showcase"
-      /> -->
+  <!-- HERO -->
+  <FrontPageHero
+    heading={heroHeading}
+    description={heroDescription}
+    primaryCTA={{
+      text: "Get Started",
+      link: "/contact-us",
+    }}
+    scrollToSection="#under-hero"
+  />
 
-    <FrontPageHero
-      heading={heroHeading}
-      description={heroDescription}
-      primaryCTA={{
-        text: "Get Started",
-        link: "/contact-us",
-      }}
-      scrollToSection="#under-hero"
-    />
-
-      <!-- <FrontPageHero
-      heading={heroHeading}
-      description={heroDescription}
-      primaryCTA={{
-        text: "Get Started",
-        link: "/contact-us",
-      }}
-      scrollToSection="#website-services"
-    /> -->
-      <div id="under-hero">
+  <div id="under-hero">
+    <!-- Portfolio Showcase -->
     <div
       class="block lg:min-h-screen inner-section"
       {...animationProps("fade-in-up", { once: false, threshold: 0.2 })}
@@ -70,105 +46,64 @@ const heroDescription =
       />
     </div>
 
-    <!-- Under-hero portfolio showcase -->
-    <!-- <PortfolioShowcaseSection /> -->
+    <DoubleCard />
 
-    <!-- </GradientLayout> -->
-
-        <DoubleCard />
-
+    <!-- PHILOSOPHY -->
     <ContentRenderer
-      query={roots("capabilities").orderBy(sortByOrder()).limit(6)}
+      query={query("philosophy").orderBy(sortByOrder())}
       variant="CardVariant"
-      id="website-services"
-      title="Website Services"
-      heading={{
-        before: "Websites aren't just something we do.",
-        text: "They're our specialty.",
-      }}
-      description="You deserve a lightning-fast, secure, and scalable website that turn your visitors into customers. Every site we build is built to dominate and stand the test of time."
-      columns={3}
-      gap="lg"
-      showButtonSection={false}
-      className="pt-35 lg:pt-20"
+      id="philosophy"
+      title="Philosophy"
+      heading="Why Our Websites Work When Others Don't"
+      description="Most websites don't fail all at once. They quietly slow down, become harder to manage, or stop supporting the business they were built for. We take a different approach. Every website we build is guided by clear principles that prioritize performance, stability, and maintainability — so your site doesn't just launch strong, it continues working as your business grows. We intentionally build websites in a way that minimizes ongoing maintenance without sacrificing reliability, security, or long-term performance."
     />
 
-    <!-- Filtered Capabilities by Parent (auto-detects parent field) -->
-    <!-- <ContentRenderer
-      query={query("capabilities").where((entry) => !!entry.data.parent).orderBy(sortByOrder())}
-      variant="FilteredCardVariant"
-      id="capabilities-filtered"
-      title="Our Capabilities"
-      heading={{
-        before: "Explore our",
-        text: "specialized skills",
-        after: "by category.",
-      }}
-      description="Filter through our expertise areas to find exactly what you need for your project."
-      filter={{ showAll: false, showCount: true }}
-      columns={3}
-      filterSize="sm"
-    /> -->
-
-    <!-- Website Benefits -->
+    <!-- BENEFITS -->
     <ContentRenderer
       query={byTag("benefits", "featured").orderBy(sortByOrder())}
       variant="BenefitsVariant"
+      id="benefits"
+      title="What This Means for You"
+      heading="What You Can Expect From Your Website"
+      description="These principles translate directly into real-world benefits — things you and your customers notice immediately when using your website."
       columns={2}
       gap="lg"
-      title="Why Choose Us"
-      heading="What Makes Our Websites Different",
     />
 
-    <!-- About Us Two-Column Section -->
-    <!-- <ContentRenderer
-      query={query("about-us").orderBy(sortByOrder())}
-      variant="TwoColumnImageVariant"
-      imagePosition="right"
-      imagePlaceholder="👨‍💻"
-      imageAlt="Griffin Surett - Founder"
-      contentType="text"
-      borderClass=""
-      ctaText="Learn More About Us"
-    >
-    <Video
-      src="/speed-site.mov"
-      alt="Speed site walkthrough"
-      controls
-      clientLoadPlaceholder={true}
-      wrapperClass="video-shell"
-    />
-    </ContentRenderer> -->
-
-    <!-- <ContentRenderer query={query("projects")} variant="PortfolioVariant" /> -->
+    <!-- SOLUTIONS -->
     <ContentRenderer
-      query={query("solutions")}
+      query={query("solutions").orderBy(sortByOrder())}
       variant="IconListVariant"
-      heading="Premium Websites for Any Business, Built for Your Growth.",
-      title="Web Solutions"
-      description="We design top-tier websites for businesses in every industry — from local services to global brands. Every site is custom-built for your goals, lightning-fast, secure, and easy to manage. No templates, no bloat — just a powerful online presence that looks sharp, performs flawlessly, and grows with you."
-      autoAdvanceDelay={2000}
+      id="solutions"
+      title="Website Solutions"
+      heading="Ways We Turn Strategy Into Working Websites"
+      description="Different businesses need different outcomes. Our solutions are built around real goals — generating leads, establishing credibility, and converting visitors — not arbitrary page counts or feature lists."
     />
-    <!-- <ColorBorderLayout borderPosition="both"> -->
-      <!-- <ContentRenderer
-        query={query("solutions")}
-        variant="VideoAccordionVariant"
-        title="Website Solutions"
-        heading="Premium Websites for Any Business, Built for Your Growth."
-        description="Dive deeper into the speed, visuals, and UX of every solution with quick video overviews pulled straight from our library."
-        className="pt-16"
-        autoAdvanceDelay={3500}
-      /> -->
-    <!-- </ColorBorderLayout> -->
 
-    <!-- Testimonials with rating filter -->
+    <!-- CAPABILITIES -->
+    <ContentRenderer
+      query={roots("capabilities").orderBy(sortByOrder()).limit(6)}
+      variant="CardVariant"
+      id="capabilities"
+      title="Core Capabilities"
+      heading="The Capabilities That Make the Work Possible"
+      description="Everything above depends on having the right technical foundation and ongoing oversight. Our capabilities work together to ensure your website stays fast, stable, and dependable over time."
+      columns={3}
+      gap="lg"
+      showButtonSection={false}
+    />
+
+    <!-- TRUST STATEMENT -->
+    <TrustStatement className="min-h-100vh inner-section" text="We build websites designed to hold up over time. Hosting and ongoing maintenance help keep performance, stability, and security consistent as your business grows. Every site includes search-friendly foundations, and when deeper SEO or marketing work is needed, we coordinate with trusted specialists without compromising the technical foundation." />
+
+    <!-- TESTIMONIALS -->
     <ContentRenderer
       query={query("testimonials").where((entry) => entry.data.rating >= 4)}
       variant="TestimonialCarouselVariant"
-      id="testimonials-home"
+      id="testimonials"
     />
 
-    <!-- Portfolio filtered by industries -->
+    <!-- PORTFOLIO -->
     <ContentRenderer
       query={query('industries').orderBy(sortByOrder())}
       variant="FilteredPortfolioVariant"
@@ -182,38 +117,15 @@ const heroDescription =
       showArrows={true}
     />
 
-
-    <!-- Technologies -->
+    <!-- FAQ (featured only) -->
     <ContentRenderer
-      query={byTag("technologies", "featured").orderBy(sortByOrder())}
-      variant="TechnologiesVariant"
-    />
-
-    <!-- Filtered query - still gets meta from authors -->
-    <!-- <ContentRenderer
-      query={query("authors").where(whereArrayContains("tags", "featured"))}
-      variant="CardVariant"
-      columns={3}
-      gap="lg"
-    /> -->
-
-    <!-- Addon Capabilities - auto-populates from capabilities meta -->
-    <!-- <ContentRenderer
-      query={query("capabilities").orderBy(sortByOrder())}
-      variant="CardVariant"
-      columns={3}
-      gap="lg"
-    /> -->
-
-    <!-- FAQ ContentRenderer -->
-    <ContentRenderer
-      query={query("faq").orderBy(sortByOrder())}
+      query={byTag("faq", "featured").orderBy(sortByOrder())}
       variant="AccordionVariant"
       allowMultiple={false}
       title="FAQs"
     />
 
-    <!-- Blog - Most Recent Posts -->
+    <!-- BLOG -->
     <ContentRenderer
       query={query("blog").orderBy(sortByDate("publishDate", "desc")).limit(4)}
       variant="BlogVariant"
@@ -225,35 +137,10 @@ const heroDescription =
       }}
     />
 
+    <!-- CTA -->
     <CTASection
       title="Get Started"
-      heading={{
-        before: "Ready to Transform Your Online Presence into a ",
-        text: "High-Performance Growth Engine?",
-      }}
-      description="Join hundreds of successful businesses who trust Griffin's Web Services. While others juggle dozens of services, we've mastered one: building lightning-fast, secure, and scalable sites that turn visitors into customers."
+      heading="Ready to Build a Website That Works?"
     />
-
-    <!-- Contact ContentRenderer -->
-    <!-- <ContentRenderer
-      query={query("contact-us")}
-      variant="ContactVariant"
-      columns={2}
-    /> -->
-
-    <!-- Blog with limit - auto-populates from blog meta -->
-    <!-- <ContentRenderer
-      query={query("blog").limit(2)}
-      variant="BlogVariant"
-      columns={2}
-    /> -->
-
-    <!-- Multi-collection query - requires manual title/description -->
-    <!-- <ContentRenderer
-      query={query(["blog", "projects"]).orderBy(sortByDate()).limit(10)}
-      variant="ListVariant"
-      title="Recent Updates"
-      description="Latest from our blog and portfolio"
-    /> -->
-    </div>
+  </div>
 </BaseLayout>

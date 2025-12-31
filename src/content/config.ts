@@ -183,4 +183,10 @@ export const collections = {
       }),
   }),
 
+  // ── philosophy ──────────────────────────────────────────
+  "philosophy": defineCollection({
+    schema: ({ image }) =>
+      baseSchema({ image }),
+  }),
+
 };
