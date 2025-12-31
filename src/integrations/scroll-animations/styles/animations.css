@@ -891,6 +891,7 @@
 /* ACCESSIBILITY: REDUCED MOTION                                         */
 /* ═══════════════════════════════════════════════════════════════════ */
 
+/* System preference: prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   /* Disable CSS-only animations */
   [data-animate-css] {
@@ -909,9 +910,9 @@
 
   /* Disable special animations */
   .color-text-fade {
-    transition: none;
-    opacity: 1;
-    color: var(--ctf-color-visible);
+    transition: none !important;
+    opacity: 1 !important;
+    color: var(--ctf-color-visible) !important;
   }
 
   .heartbeat {
@@ -942,5 +943,139 @@
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  /* Disable all hover/group-hover transitions */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/* User accessibility toggle: data-a11y-motion="reduced" */
+:root[data-a11y-motion="reduced"] {
+  /* Disable CSS-only animations */
+  [data-animate-css] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable JS-observed animations */
+  [data-animate] {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  /* Disable special animations */
+  .color-text-fade {
+    transition: none !important;
+    opacity: 1 !important;
+    color: var(--ctf-color-visible) !important;
+  }
+
+  .heartbeat {
+    animation: none !important;
+  }
+
+  .circle {
+    transition: none !important;
+  }
+
+  /* Disable Tailwind animation utilities */
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-fade-in-up,
+  .animate-fade-in-down,
+  .animate-fade-in-left,
+  .animate-fade-in-right,
+  .animate-scale-in,
+  .animate-scale-out,
+  .animate-pop-in,
+  .animate-zoom-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-slide-left,
+  .animate-slide-right,
+  .animate-spin-once,
+  .animate-heartbeat {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable all hover/group-hover transitions */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/* User accessibility toggle: data-a11y-animations="true" (pause animations) */
+:root[data-a11y-animations="true"] {
+  /* Disable CSS-only animations */
+  [data-animate-css] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable JS-observed animations */
+  [data-animate] {
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  /* Disable special animations */
+  .color-text-fade {
+    transition: none !important;
+    opacity: 1 !important;
+    color: var(--ctf-color-visible) !important;
+  }
+
+  .heartbeat {
+    animation: none !important;
+  }
+
+  .circle {
+    transition: none !important;
+  }
+
+  /* Disable Tailwind animation utilities */
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-fade-in-up,
+  .animate-fade-in-down,
+  .animate-fade-in-left,
+  .animate-fade-in-right,
+  .animate-scale-in,
+  .animate-scale-out,
+  .animate-pop-in,
+  .animate-zoom-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-slide-left,
+  .animate-slide-right,
+  .animate-spin-once,
+  .animate-heartbeat {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable all hover/group-hover transitions */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
   }
 }

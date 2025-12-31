@@ -1,9 +1,9 @@
 // src/components/AnimatedBorder/AnimatedBorder.tsx
 import {
-  useEffect,
   useMemo,
   useRef,
   useState,
+  useEffect,
   type AnchorHTMLAttributes,
   type HTMLAttributes,
   type MouseEvent,
@@ -14,63 +14,7 @@ import {
   type HoverIntentOptions,
   type TriggerInput,
 } from "./useEngagedByTriggers";
-
-/**
- * Hook to detect if reduced motion is preferred (system or user preference)
- * Safe for SSR - only runs checks on client side
- */
-function useReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    // Only run on client side (SSR safe)
-    if (typeof window === "undefined") return;
-
-    // Check system preference
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-    const checkMotionPreference = () => {
-      // Check system preference
-      const systemPreference = mediaQuery.matches;
-
-      // Check user accessibility preference
-      const userPreference =
-        document.documentElement.getAttribute("data-a11y-motion") === "reduced";
-
-      setPrefersReducedMotion(systemPreference || userPreference);
-    };
-
-    // Initial check
-    checkMotionPreference();
-
-    // Listen for system preference changes
-    mediaQuery.addEventListener("change", checkMotionPreference);
-
-    // Listen for user preference changes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (
-          mutation.type === "attributes" &&
-          mutation.attributeName === "data-a11y-motion"
-        ) {
-          checkMotionPreference();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-a11y-motion"],
-    });
-
-    return () => {
-      mediaQuery.removeEventListener("change", checkMotionPreference);
-      observer.disconnect();
-    };
-  }, []);
-
-  return prefersReducedMotion;
-}
+import { useMotionPreference } from "../../hooks/useMotionPreference";
 
 export type AnimatedBorderVariant =
   | "none"
@@ -143,10 +87,24 @@ export default function AnimatedBorder({
   ...rest
 }: AnimatedBorderProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotion = useMotionPreference();
 
-  // Override variant to "none" if reduced motion is preferred (accessibility)
-  const effectiveVariant = prefersReducedMotion ? "none" : variant;
+  // Determine if this is a load-time animation (visible/always) vs interactive (hover, etc.)
+  const isLoadTimeAnimation = useMemo(() => {
+    const list = Array.isArray(triggers) ? triggers : [triggers];
+    const triggerStrings = list.map((t) => String(t || "").toLowerCase());
+    return triggerStrings.includes("visible") || triggerStrings.includes("always");
+  }, [triggers]);
+
+  // If reduced motion is preferred:
+  // - Load-time animations (visible/always): show "solid" (finished state)
+  // - Interactive animations (hover, etc.): show "none" (no border)
+  const effectiveVariant = useMemo(() => {
+    if (!prefersReducedMotion || variant === "none" || variant === "solid") {
+      return variant;
+    }
+    return isLoadTimeAnimation ? "solid" : "none";
+  }, [prefersReducedMotion, variant, isLoadTimeAnimation]);
 
   const { engaged, onEnter, onLeave, isAlways } = useEngagedByTriggers({
     ref: hostRef,
@@ -262,8 +220,14 @@ export default function AnimatedBorder({
   if (effectiveVariant === "progress") {
     overlayStyle.opacity = engagedFinal || fadingOut ? 1 : 0;
   } else if (effectiveVariant === "solid") {
-    overlayStyle.opacity = engagedFinal ? 1 : 0;
-    overlayStyle.padding = engagedFinal ? borderWidthValue : "0px";
+    // When reduced motion is preferred, always show the border (finished state)
+    if (prefersReducedMotion) {
+      overlayStyle.opacity = 1;
+      overlayStyle.padding = borderWidthValue;
+    } else {
+      overlayStyle.opacity = engagedFinal ? 1 : 0;
+      overlayStyle.padding = engagedFinal ? borderWidthValue : "0px";
+    }
   } else if (effectiveVariant === "progress-infinite") {
     overlayStyle.opacity = engagedFinal ? 1 : 0;
     overlayStyle.animationPlayState = engagedFinal ? "running" : "paused";
@@ -279,7 +243,11 @@ export default function AnimatedBorder({
   ];
 
   if (effectiveVariant === "solid") {
-    overlayClassNames.push("is-solid", "transition-all", "duration-800", "ease-in-out");
+    overlayClassNames.push("is-solid");
+    // Only add transitions when motion is allowed
+    if (!prefersReducedMotion) {
+      overlayClassNames.push("transition-all", "duration-800", "ease-in-out");
+    }
   } else if (effectiveVariant === "progress") {
     overlayClassNames.push("progress");
   } else if (effectiveVariant === "progress-b-f") {

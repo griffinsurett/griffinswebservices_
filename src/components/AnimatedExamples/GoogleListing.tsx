@@ -58,33 +58,31 @@ export default function GoogleListing({
         <span className="text-primary ml-1">Read more</span>
       </p>
 
-      {/* Animated cursor - show in final position for reduced motion */}
-      <div
-        className={`absolute pointer-events-none ${
-          prefersReducedMotion ? "" : "animate-[cursorMove_3s_ease-in-out_infinite]"
-        }`}
-        style={{
-          top: '50px',
-          left: '-20px',
-          // Final state: cursor at position over the title
-          transform: prefersReducedMotion ? 'translate(80px, 10px)' : undefined,
-        }}
-      >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          className="drop-shadow-lg"
+      {/* Animated cursor - hidden when reduced motion is preferred */}
+      {!prefersReducedMotion && (
+        <div
+          className="absolute pointer-events-none animate-[cursorMove_3s_ease-in-out_infinite]"
+          style={{
+            top: '50px',
+            left: '-20px',
+          }}
         >
-          <path
-            d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.86a.5.5 0 0 0-.85.35Z"
-            fill="white"
-            stroke="black"
-            strokeWidth="1"
-          />
-        </svg>
-      </div>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="drop-shadow-lg"
+          >
+            <path
+              d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.86a.5.5 0 0 0-.85.35Z"
+              fill="white"
+              stroke="black"
+              strokeWidth="1"
+            />
+          </svg>
+        </div>
+      )}
 
       <style>{`
         @keyframes cursorMove {

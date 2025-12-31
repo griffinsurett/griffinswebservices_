@@ -4,6 +4,7 @@ import AnimatedBorder, {
 } from "@/components/AnimatedBorder/AnimatedBorder";
 import Heading from "@/components/Heading";
 import type { ReactNode } from "react";
+import { useMotionPreference } from "@/hooks/useMotionPreference";
 
 export interface BorderTitleProps {
   children: ReactNode;
@@ -22,6 +23,11 @@ export default function BorderTitle({
   pillClassName = "text-xs lg:text-sm px-3 py-2 lg:px-4.5 lg:py-2 tracking-wider",
   visibleRootMargin = { top: -100, right: 0, bottom: -100, left: 0 },
 }: BorderTitleProps) {
+  const prefersReducedMotion = useMotionPreference();
+
+  // Don't show decorative hover sweep when reduced motion is preferred
+  const showHoverSweep = hoverSweep && !prefersReducedMotion;
+
   return (
     <div className="inline-block mb-3">
       <div className="relative inline-block">
@@ -40,18 +46,22 @@ export default function BorderTitle({
             tagName="span"
             className={`uppercase tracking-wider font-semibold text-heading ${className}`}
           >
-            <span
-              data-animate="color-text-fade"
-              data-animate-once="false"
-              className="color-text-fade"
-              style={{ "--animation-duration": `${duration}ms` } as React.CSSProperties}
-            >
-              {children}
-            </span>
+            {prefersReducedMotion ? (
+              <span className="text-primary">{children}</span>
+            ) : (
+              <span
+                data-animate="color-text-fade"
+                data-animate-once="false"
+                className="color-text-fade"
+                style={{ "--animation-duration": `${duration}ms` } as React.CSSProperties}
+              >
+                {children}
+              </span>
+            )}
           </Heading>
         </AnimatedBorder>
 
-        {hoverSweep && (
+        {showHoverSweep && (
           <div className="absolute inset-0 pointer-events-none">
             <AnimatedBorder
               variant="progress-infinite"
