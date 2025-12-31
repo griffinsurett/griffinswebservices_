@@ -128,9 +128,7 @@ export default function MultiStepQuoteForm() {
           options={[
             { value: "web-design", label: "Web Design" },
             { value: "web-development", label: "Web Development" },
-            { value: "seo", label: "SEO Services" },
-            { value: "branding", label: "Branding" },
-            { value: "marketing", label: "Digital Marketing" },
+            { value: "hosting-maintenance", label: "Hosting & Maintenance" },
             { value: "consulting", label: "Consulting" },
           ]}
           selectClassName="w-full px-4 py-3 bg-text/5 border-0 rounded-md focus:outline-none focus:ring-2 focus:ring-MainDark"
