@@ -66,6 +66,7 @@ const finalTwitterCard = seo?.twitterCard || "summary_large_image";
 // Additional SEO fields
 const finalKeywords = seo?.keywords || ["astro", "static site generator", "web development"];
 const finalCanonicalUrl = seo?.canonicalUrl || `${siteData.url}${Astro.url.pathname}`;
+console.log(finalCanonicalUrl)
 const effectiveRobots = seo?.robots || "index, follow";
 
 // Author and publisher
