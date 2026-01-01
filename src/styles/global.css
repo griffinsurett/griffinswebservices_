@@ -4,6 +4,7 @@
 @import "../integrations/preferences/styles/preferences.css";
 @import "./legal.css";
 @import "./system.css";
+@import "./menu.css";
 
 /* ============================================================
  * 1. COLOR MODES & TOKENS
@@ -446,30 +447,29 @@ body {
     @apply space-y-3 lg:space-y-2.5;
   }
 
-  @utility menu-item-spacing {
-    @apply space-y-3;
+/* Hero spacing landscape adjustments - small landscape devices only */
+.hero-spacing {
+  @media (orientation: landscape) and (max-height: 700px) {
+    gap: 0rem; /* space-y-2 */
+    padding-top: 2rem; /* pt-4 */
   }
+}
 
 /* ============================================================
- * HERO SECTION STYLES
- * Consolidated hero layout with landscape viewport adjustments
+ * LANDSCAPE VIEWPORT ADJUSTMENTS
+ * For hero sections and menus on landscape devices
+ * Only targets mobile/tablet - excludes desktop via max-width
  * ============================================================ */
-@layer components {
-  .hero-section {
-    /* Core layout */
-    @apply relative min-h-screen flex items-center justify-center overflow-hidden;
-    /* Default top padding for fixed header */
-    @apply pt-16;
+.landscape-hero {
+  /* Landscape phones/tablets with short viewports */
+  @media (orientation: landscape) and (max-height: 700px) and (max-width: 1024px) {
+    padding-top: 6rem;
+    min-height: auto !important;
+  }
 
-    /* Landscape phones/tablets with short viewports */
-    @media (orientation: landscape) and (max-height: 700px) {
-      @apply pt-20;
-      min-height: auto !important;
-    }
-
-    @media (orientation: landscape) and (max-height: 500px) {
-      @apply pt-24 pb-8;
-    }
+  @media (orientation: landscape) and (max-height: 500px) and (max-width: 1024px) {
+    padding-top: 6rem;
+    padding-bottom: 2rem;
   }
 }
 
