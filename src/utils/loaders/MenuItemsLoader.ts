@@ -361,6 +361,24 @@ async function processCollectionMenus(
     }
 
     if (data.itemsAddToMenu) {
+      // Build a lookup of parent usage so we can include non-page containers that
+      // still need to appear in menus (e.g., category parents).
+      const parentUsage = new Map<string, number>();
+      for (const [itemPath, itemMod] of Object.entries(modules)) {
+        if (!itemPath.includes(`content/${collection}/`)) continue;
+        if (isMetaFile(itemPath)) continue;
+
+        const itemData = itemMod.frontmatter ?? {};
+        const parents = itemData.parent;
+        const parentList = Array.isArray(parents) ? parents : parents ? [parents] : [];
+
+        for (const parent of parentList) {
+          if (typeof parent === "string") {
+            parentUsage.set(parent, (parentUsage.get(parent) ?? 0) + 1);
+          }
+        }
+      }
+
       const configs = ensureArray(data.itemsAddToMenu);
 
       for (const menuConfig of configs) {
@@ -378,12 +396,14 @@ async function processCollectionMenus(
           const { slug } = parseContentPath(itemPath);
 
           const hasRenderablePage = shouldItemHavePageData(itemData, meta);
+          const isParentContainer = parentUsage.get(slug) > 0;
 
-          // Skip items that don't have pages - they shouldn't appear in menus
-          // unless they serve as parent containers for other items (handled separately)
-          if (!hasRenderablePage) continue;
+          // Skip items with no page unless they are referenced as parents.
+          if (!hasRenderablePage && !isParentContainer) continue;
 
-          const itemUrl = shouldItemUseRootPathData(itemData, meta) ? `/${slug}` : `/${collection}/${slug}`;
+          const itemUrl = hasRenderablePage
+            ? (shouldItemUseRootPathData(itemData, meta) ? `/${slug}` : `/${collection}/${slug}`)
+            : undefined;
 
           let parent = attachTo;
           // If attachTo is the collection but no explicit collection parent exists in the store,

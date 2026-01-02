@@ -122,7 +122,7 @@ export const collections = {
     schema: ({ image }) =>
       baseSchema({ image }).extend({
         category: z.string().optional(),
-        solutions: refSchema("solutions"),
+        solutions: refSchema(["solutions", "features"]),
         capabilities: refSchema("capabilities"),
       }),
   }),
@@ -136,12 +136,20 @@ export const collections = {
       }),
   }),
 
+  // ── features ──────────────────────────────────────────────
+  "features": defineCollection({
+    schema: ({ image }) =>
+      baseSchema({ image }).extend({
+        solutions: refSchema("solutions"),
+      }),
+  }),
+
   // ── capabilities ──────────────────────────────────────────
   "capabilities": defineCollection({
     schema: ({ image }) =>
       baseSchema({ image }).extend({
         features: z.array(z.string()).default([]),
-        solutions: refSchema("solutions"),
+        solutions: refSchema(["solutions", "features"]),
       }),
   }),
 
@@ -179,7 +187,7 @@ export const collections = {
     schema: ({ image }) =>
       baseSchema({ image }).extend({
         highlight: z.boolean().optional(),
-        solutions: refSchema("solutions"),
+        solutions: refSchema(["solutions", "features"]),
       }),
   }),
 

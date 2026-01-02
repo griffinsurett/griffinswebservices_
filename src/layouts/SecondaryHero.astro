@@ -17,7 +17,7 @@
 import { getAuthorName } from "@/layouts/collections/helpers/layoutHelpers";
 import BackgroundMedia from "@/components/BackgroundMedia.astro";
 import SectionHeader from "@/components/SectionHeader.astro";
-import Section from "@/components/Section.astro";
+import Hero from "@/components/Hero.astro";
 import backgroundSvg from "@/assets/background.svg";
 import type { HeadingContent } from "@/content/schema";
 
@@ -61,7 +61,13 @@ const backgroundMedia = {
 };
 ---
 
-<Section class={`relative min-h-screen lg:min-h-[65vh] flex items-center justify-center overflow-hidden card-bg landscape-hero ${className}`}>
+<Hero
+  class={`card-bg landscape-hero ${className}`}
+  size="medium"
+  minHeight={minHeight}
+  contentAlign="center"
+  contentVerticalAlign="center"
+>
   <div
     class="relative flex items-center justify-center overflow-hidden w-full"
     style={`min-height: ${minHeight}`}
@@ -155,7 +161,7 @@ const backgroundMedia = {
 
   {/* Optional slot for additional content below hero */}
   <slot />
-</Section>
+</Hero>
 
 <style>
   /* Ensure text is readable on all backgrounds */

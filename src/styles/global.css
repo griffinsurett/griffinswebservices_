@@ -612,6 +612,10 @@ body {
   .hover-emphasis-text {
     @apply font-bold text-heading hover:text-transparent hover:secondary-gradient hover:bg-clip-text
   }
+  
+  .text-primary-gradient {
+    @apply text-transparent primary-gradient bg-clip-text;
+  }
 
   /* Card shells */
   .outer-card-transition {

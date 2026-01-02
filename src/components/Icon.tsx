@@ -1,5 +1,5 @@
 // src/components/Icon.tsx
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { renderIcon, type IconSize } from '@/integrations/icons';
 import type { IconType } from '@/content/schema';
 
@@ -8,6 +8,7 @@ export interface IconProps {
   size?: IconSize;
   className?: string;
   color?: string;
+  style?: CSSProperties;
   /** Accessibility label for the icon. If not provided, icon is treated as decorative (aria-hidden="true") */
   'aria-label'?: string;
   /** Explicitly set aria-hidden. Default: true when no aria-label, false when aria-label is provided */
@@ -19,6 +20,7 @@ export default function Icon({
   size = 'md',
   className = '',
   color,
+  style,
   'aria-label': ariaLabel,
   'aria-hidden': ariaHidden,
 }: IconProps): ReactNode {
@@ -26,6 +28,7 @@ export default function Icon({
     size,
     className,
     color,
+    style,
     ariaLabel,
     ariaHidden,
   });

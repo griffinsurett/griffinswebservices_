@@ -38,6 +38,7 @@ export interface IconRenderOptions {
   size: IconSize;           // Size preset
   className?: string;       // Additional CSS classes
   color?: string;          // Icon color
+  style?: Record<string, any>; // Inline style overrides
   ariaLabel?: string;      // Accessibility label
   ariaHidden?: boolean;    // Explicitly set aria-hidden (default: true when no ariaLabel)
 }
@@ -116,11 +117,14 @@ function renderEmojiIcon(
   icon: string,
   options: IconRenderOptions
 ): ReactNode {
-  const { size, className = '', color, ariaLabel } = options;
-  
+  const { size, className = '', color, ariaLabel, style } = options;
+  const sizeValue = iconSizeMap[size];
+
+  const combinedStyle = { fontSize: sizeValue, color, ...(style || {}) };
+
   return createElement('span', {
     className: `inline-flex items-center justify-center ${className}`,
-    style: { fontSize: iconSizeMap[size], color },
+    style: combinedStyle,
     role: 'img',
     'aria-label': ariaLabel,
     children: icon,
@@ -140,7 +144,7 @@ function renderLibraryIcon(
   iconName: string,
   options: IconRenderOptions
 ): ReactNode {
-  const { size, className = '', color, ariaLabel, ariaHidden } = options;
+  const { size, className = '', color, ariaLabel, ariaHidden, style } = options;
   const IconComponent = getIconComponent(library, iconName);
 
   if (!IconComponent) {
@@ -151,6 +155,7 @@ function renderLibraryIcon(
     size: iconSizeMap[size],
     className,
     color,
+    style,
   };
 
   // Handle accessibility attributes
@@ -207,7 +212,7 @@ export function renderObjectIcon(
   icon: any,
   options: IconRenderOptions
 ): ReactNode {
-  const { size, className = '', color, ariaLabel } = options;
+  const { size, className = '', color, ariaLabel, style } = options;
   const sizeValue = iconSizeMap[size];
 
   // Image object with src
@@ -218,7 +223,7 @@ export function renderObjectIcon(
       className,
       width: sizeValue,
       height: sizeValue,
-      style: { color },
+      style: { color, ...(style || {}) },
     });
   }
 
@@ -229,7 +234,7 @@ export function renderObjectIcon(
         // Raw SVG content
         return createElement('span', {
           className: `inline-flex items-center justify-center ${className}`,
-          style: { width: sizeValue, height: sizeValue, color },
+          style: { width: sizeValue, height: sizeValue, color, ...(style || {}) },
           dangerouslySetInnerHTML: { __html: icon.content },
           'aria-label': ariaLabel,
         });
@@ -238,7 +243,7 @@ export function renderObjectIcon(
         // Emoji content
         return createElement('span', {
           className: `inline-flex items-center justify-center ${className}`,
-          style: { fontSize: sizeValue, color },
+          style: { fontSize: sizeValue, color, ...(style || {}) },
           role: 'img',
           'aria-label': ariaLabel,
           children: icon.content,
@@ -248,7 +253,7 @@ export function renderObjectIcon(
         // Plain text icon
         return createElement('span', {
           className: `inline-flex items-center justify-center ${className}`,
-          style: { fontSize: sizeValue, color },
+          style: { fontSize: sizeValue, color, ...(style || {}) },
           children: icon.content,
         });
     }

@@ -13,6 +13,7 @@ import type { BaseVariantProps } from "../ContentRenderer.types";
 import Section from "@/components/Section.astro";
 import DividerHeading from "@/components/DividerHeading/DividerHeading";
 import Icon from "@/components/Icon";
+import Button from "@/components/Button/Button";
 import { toArray } from "@/utils/array";
 
 interface Props extends BaseVariantProps {
@@ -31,67 +32,53 @@ const {
 } = Astro.props as Props;
 
 const safeItems = toArray(items);
+const fallbackIcon = "fa6-solid:circle-dot";
 ---
 
 <Section id={id} class={`${className}`}>
-  {showHeadingSection && (title || description) && (
+  <!-- {showHeadingSection && (title || description) && (
     <DividerHeading
       title={title}
       showDivider={showHeadingDivider}
       className="mb-4"
       headingClassName="h4 text-heading"
     />
-  )}
+  )} -->
 
   {safeItems.length > 0 && (
-    <ul class="flex flex-col items-start justify-center gap-2 list-none">
+    <ul class="flex flex-col items-start justify-center gap-3 list-none">
       {safeItems.map((item: any) => {
         // url and displayValue come from linkBehavior in prepareEntry
         const href = item.url;
-        const displayTitle = item.title;
         // Use displayValue if available (from linkBehavior), fallback to description
         const displayValue = item.displayValue ?? item.description;
-        const iconName = item.icon;
+        const iconName = item.icon ?? fallbackIcon;
         return (
           <li class="py-0" data-contact-id={item.slug}>
             {href ? (
-              <a
+              <Button
                 href={href}
-                class="flex items-center gap-1 group hover:text-primary transition-colors"
+                variant="link"
+                size="sm"
+                aria-label={displayValue}
               >
-                <span class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-colors">
-                  <Icon
-                    icon={iconName}
-                    size="md"
-                    className="w-7 h-7 text-primary"
-                  />
-                </span>
-                <span class="flex flex-col">
-                  <span class="text-heading font-semibold">
-                    {displayTitle}
-                  </span>
-                  <span class="text-sm text-text/70">
-                    {displayValue}
-                  </span>
-                </span>
-              </a>
+                <Icon
+                  icon={iconName}
+                  size="md"
+                  className="w-5 h-5 mr-1 shrink-0 text-primary"
+                />
+                <span class="text-base">{displayValue}</span>
+              </Button>
             ) : (
               <div class="flex items-center gap-3">
-                <span class="w-12 h-12 rounded-full flex items-center justify-center text-primary shrink-0">
-                  <Icon
-                    icon={iconName}
-                    size="md"
-                    className="w-5 h-5"
-                  />
+                <Icon
+                  icon={iconName}
+                  size="md"
+                  className="w-5 h-5 shrink-0 text-primary"
+                />
+                <span class="text-heading font-semibold text-base">
+                  {displayValue}
                 </span>
-                <div class="flex flex-col">
-                  <span class="text-heading font-semibold">
-                    {displayTitle}
-                  </span>
-                  <span class="text-sm text-text/70">
-                    {displayValue}
-                  </span>
-                </div>
               </div>
             )}
           </li>

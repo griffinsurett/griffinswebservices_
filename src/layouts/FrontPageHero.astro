@@ -4,7 +4,7 @@
 import Button from "@/components/Button/Button";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import SectionHeader from "@/components/SectionHeader.astro";
-import Section from "@/components/Section.astro";
+import Hero from "@/components/Hero.astro";
 import ScrollIndicator from "@/components/ScrollIndicator.astro";
 import { query } from "@/utils/query";
 import { siteData } from "@/content/siteData";
@@ -49,10 +49,12 @@ const {
 } = Astro.props as Props;
 ---
 
-<Section
+<Hero
   id={id}
-  class={`min-h-screen flex items-center justify-center relative overflow-hidden landscape-hero ${className}`}
-  animateRootMargin="-40% 0px -10% 0px"
+  class={`landscape-hero ${className}`}
+  size="full"
+  contentAlign="center"
+  contentVerticalAlign="center"
 >
   <div class="relative z-10 inner-section flex flex-wrap items-center h-full">
     <div class="mx-auto px-2 lg:px-0 max-w-6xl lg:max-w-7xl w-full h-full">
@@ -134,5 +136,5 @@ const {
     </div>
   </div>
 
-<ScrollIndicator href={scrollToSection} />
-</Section>
+<ScrollIndicator slot="after" href={scrollToSection} />
+</Hero>

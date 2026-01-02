@@ -2,7 +2,7 @@
 // src/layouts/QuoteHero.astro
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import SectionHeader from "@/components/SectionHeader.astro";
-import Section from "@/components/Section.astro";
+import Hero from "@/components/Hero.astro";
 import QuoteForm from "@/components/Form/forms/QuoteForm.astro";
 import { query } from "@/utils/query";
 import { siteData } from "@/content/siteData";
@@ -55,10 +55,12 @@ const resolvedHeading =
   incomingHeading === undefined || incomingHeading === null ? title : incomingHeading;
 ---
 
-<Section
+<Hero
   id={id}
-  class={`min-h-screen inner-section flex items-center justify-center relative overflow-hidden ${className}`}
-  animateRootMargin="-40% 0px -10% 0px"
+  class={`inner-section ${className}`}
+  size="full"
+  contentAlign="center"
+  contentVerticalAlign="center"
 >
   <!-- <div class="absolute inset-0 hero-gradient-bg"></div> -->
 
@@ -107,4 +109,4 @@ const resolvedHeading =
         <QuoteForm />
       </div>
   </div>
-</Section>
+</Hero>

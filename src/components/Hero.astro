@@ -10,13 +10,11 @@
  * - Full viewport height by default (customizable)
  * - LCP-optimized animations (fast scale-fade on mobile, full animation on desktop)
  * - Responsive animation breakpoints
- * - Optional scroll indicator
  * - Background media support
  * - Flexible content alignment
  */
 
 import Section from "@/components/Section.astro";
-import ScrollIndicator from "@/components/ScrollIndicator.astro";
 import BackgroundMedia from "@/components/BackgroundMedia.astro";
 
 type AnimationType =
@@ -56,10 +54,6 @@ export interface Props {
   animateRootMargin?: string;
   /** Animation plays only once */
   animateOnce?: boolean;
-  /** Show scroll indicator */
-  showScrollIndicator?: boolean;
-  /** Scroll indicator target section */
-  scrollToSection?: string;
   /** Background media configuration */
   backgroundMedia?: {
     image?: {
@@ -110,8 +104,6 @@ const {
   animateBreakpoint = "lg",
   animateRootMargin = "-40% 0px -10% 0px",
   animateOnce = false,
-  showScrollIndicator = false,
-  scrollToSection,
   backgroundMedia,
   innerClassName = "",
   ...rest
@@ -120,6 +112,9 @@ const {
 const heightClass = minHeight ? "" : sizeMap[size];
 const heightStyle = minHeight ? `min-height: ${minHeight}` : undefined;
 
+// Add breakpoint class for CSS-based animation control
+const breakpointClass = animate !== "none" ? `hero-animate-${animateBreakpoint}` : "";
+
 const classes = [
   heightClass,
   "flex",
@@ -127,6 +122,7 @@ const classes = [
   verticalAlignMap[contentVerticalAlign],
   "relative",
   "overflow-hidden",
+  breakpointClass,
   classAttr,
   className,
 ].filter(Boolean).join(" ");
@@ -137,7 +133,6 @@ const classes = [
   class={classes}
   style={heightStyle}
   animate={animate !== "none" ? animate : undefined}
-  animateBreakpoint={animateBreakpoint}
   animateRootMargin={animateRootMargin}
   animateOnce={animateOnce}
   {...rest}
@@ -158,6 +153,64 @@ const classes = [
     <slot />
   </div>
 
-  {/* Scroll indicator */}
-  {showScrollIndicator && <ScrollIndicator href={scrollToSection} />}
+  {/* Content outside the inner wrapper (e.g., scroll indicator) */}
+  <slot name="after" />
 </Section>
+
+<style is:global>
+  /* Disable hero animations below breakpoint - show content immediately */
+  /* sm: 640px */
+  @media (max-width: 639px) {
+    .hero-animate-sm[data-animate],
+    .hero-animate-md[data-animate],
+    .hero-animate-lg[data-animate],
+    .hero-animate-xl[data-animate],
+    .hero-animate-2xl[data-animate] {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+  }
+
+  /* md: 768px */
+  @media (max-width: 767px) {
+    .hero-animate-md[data-animate],
+    .hero-animate-lg[data-animate],
+    .hero-animate-xl[data-animate],
+    .hero-animate-2xl[data-animate] {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+  }
+
+  /* lg: 1024px */
+  @media (max-width: 1023px) {
+    .hero-animate-lg[data-animate],
+    .hero-animate-xl[data-animate],
+    .hero-animate-2xl[data-animate] {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+  }
+
+  /* xl: 1280px */
+  @media (max-width: 1279px) {
+    .hero-animate-xl[data-animate],
+    .hero-animate-2xl[data-animate] {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+  }
+
+  /* 2xl: 1536px */
+  @media (max-width: 1535px) {
+    .hero-animate-2xl[data-animate] {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+  }
+</style>

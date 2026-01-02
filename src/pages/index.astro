@@ -4,7 +4,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import ContentRenderer from "@/components/ContentRenderer/ContentRenderer.astro";
 import { query, sortByOrder, sortByDate } from "@/utils/query";
 import { siteData } from "@/content/siteData";
-import { roots, byTag } from "@/utils/query/snippets";
+import { roots, byTag, children } from "@/utils/query/snippets";
 import CTASection from "@/layouts/CTASection.astro";
 import FrontPageHero from "@/layouts/FrontPageHero.astro";
 import DoubleCard from "@/layouts/DoubleCard.astro";
@@ -72,10 +72,10 @@ const heroDescription =
 
     <!-- SOLUTIONS -->
     <ContentRenderer
-      query={query("solutions").orderBy(sortByOrder())}
+      query={children("solutions", "new-builds")}
       variant="IconListVariant"
       id="solutions"
-      title="Website Solutions"
+      title="Web Solutions"
       heading="Ways We Turn Strategy Into Working Websites"
       description="Different businesses need different outcomes. Our solutions are built around real goals — generating leads, establishing credibility, and converting visitors — not arbitrary page counts or feature lists."
     />
