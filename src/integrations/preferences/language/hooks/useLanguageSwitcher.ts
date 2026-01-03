@@ -79,15 +79,22 @@ export function useLanguageSwitcher(): UseLanguageSwitcherReturn {
   const [languageCode, setLanguageCode] = useState(getStoredLanguageCode);
   const [hasFunctionalConsent, setHasFunctionalConsent] = useState(hasFunctionalConsentFast);
 
-  // Sync language code from storage
+  // Sync language code from storage (cross-tab) and custom event (same-tab)
   useEffect(() => {
     const handleStorage = (event: StorageEvent) => {
       if (event.key === "user-language") {
         setLanguageCode(event.newValue || defaultLanguage.code);
       }
     };
+    const handleLanguageChange = (event: CustomEvent<string>) => {
+      setLanguageCode(event.detail || defaultLanguage.code);
+    };
     window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    window.addEventListener("language-changed", handleLanguageChange as EventListener);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("language-changed", handleLanguageChange as EventListener);
+    };
   }, []);
 
   // Listen for consent changes
@@ -134,8 +141,11 @@ export function useLanguageSwitcher(): UseLanguageSwitcherReturn {
       };
     }
 
-    // Update state
+    // Update state and notify other instances
     setLanguageCode(code);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("language-changed", { detail: code }));
+    }
 
     // Trigger actual translation via global function
     if (typeof window !== "undefined" && (window as any).changeLanguage) {

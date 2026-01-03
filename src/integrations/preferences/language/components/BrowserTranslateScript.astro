@@ -52,6 +52,7 @@ const {
     googleScriptRequested: false,
     pendingGoogleLanguage: null,
     config: CONFIG,
+    translationVersion: 0, // Incremented on each translation request to cancel stale ones
   };
 
   window.__browserTranslation = state;
@@ -383,12 +384,14 @@ const {
     return nodes;
   }
 
-  async function translateNodesNative(nodes) {
+  async function translateNodesNative(nodes, version) {
     if (!state.translator || nodes.length === 0) return;
 
     // Translate all nodes in parallel for speed
     await Promise.all(
       nodes.map(async function(node) {
+        // Check if this translation was cancelled (new language selected)
+        if (version !== state.translationVersion) return;
         if (!node.parentElement || state.translatedNodes.has(node)) return;
 
         var originalText = node.textContent || "";
@@ -400,6 +403,8 @@ const {
 
         try {
           var translated = await state.translator.translate(originalText);
+          // Check again after async operation
+          if (version !== state.translationVersion) return;
           if (translated && translated !== originalText && node.parentElement) {
             node.textContent = translated;
             state.translatedNodes.add(node);
@@ -414,6 +419,7 @@ const {
   // Quick scan to translate any nodes that haven't been translated yet
   // Used for follow-up scans after React hydration
   async function translateUntranslatedNodes() {
+    var currentVersion = state.translationVersion;
     if (state.translationMethod !== 'native') return;
     if (state.currentLanguage === 'en') return;
     if (!state.translator) {
@@ -425,6 +431,7 @@ const {
       }
     }
     if (!state.translator) return;
+    if (currentVersion !== state.translationVersion) return;
 
     var allNodes = getTranslatableNodes();
     var untranslatedNodes = allNodes.filter(function(n) {
@@ -432,7 +439,7 @@ const {
     });
 
     if (untranslatedNodes.length > 0) {
-      await translateNodesNative(untranslatedNodes);
+      await translateNodesNative(untranslatedNodes, currentVersion);
     }
   }
 
@@ -443,6 +450,7 @@ const {
 
     // Quick 50ms debounce - fast response for React hydration
     state.translateTimeout = setTimeout(async function() {
+      var currentVersion = state.translationVersion;
       if (state.pendingNodes.size === 0) return;
       if (state.translationMethod !== 'native') return;
       if (state.currentLanguage === 'en') return;
@@ -463,7 +471,7 @@ const {
       }
 
       if (state.translator) {
-        await translateNodesNative(validNodes);
+        await translateNodesNative(validNodes, currentVersion);
       }
     }, 50);
   }
@@ -531,23 +539,31 @@ const {
     }
   }
 
-  async function translatePageNative(targetLang) {
+  async function translatePageNative(targetLang, version) {
     state.isTranslating = true;
     document.documentElement.dataset.translating = "true";
 
     try {
+      // Check if cancelled before expensive operations
+      if (version !== state.translationVersion) return false;
+
       var isSupported = await checkLanguageSupport(targetLang);
       if (!isSupported) return false;
+      if (version !== state.translationVersion) return false;
 
       var translator = await createTranslator(targetLang);
       if (!translator) return false;
+      if (version !== state.translationVersion) return false;
 
       state.translator = translator;
       state.translationMethod = 'native';
       state.currentLanguage = targetLang;
 
       var nodes = getTranslatableNodes();
-      await translateNodesNative(nodes);
+      await translateNodesNative(nodes, version);
+
+      // Check if cancelled after translation
+      if (version !== state.translationVersion) return false;
 
       setupMutationObserver();
 
@@ -555,16 +571,20 @@ const {
       document.documentElement.dataset.preferredLanguage = targetLang;
 
       // Quick follow-up scans for lazy React components (client:visible, client:idle)
-      setTimeout(function() { translateUntranslatedNodes(); }, 200);
-      setTimeout(function() { translateUntranslatedNodes(); }, 600);
-      setTimeout(function() { translateUntranslatedNodes(); }, 1200);
+      // These also check the version internally
+      setTimeout(function() { if (version === state.translationVersion) translateUntranslatedNodes(); }, 200);
+      setTimeout(function() { if (version === state.translationVersion) translateUntranslatedNodes(); }, 600);
+      setTimeout(function() { if (version === state.translationVersion) translateUntranslatedNodes(); }, 1200);
 
       return true;
     } catch (error) {
       return false;
     } finally {
-      state.isTranslating = false;
-      delete document.documentElement.dataset.translating;
+      // Only clear isTranslating if this is still the current version
+      if (version === state.translationVersion) {
+        state.isTranslating = false;
+        delete document.documentElement.dataset.translating;
+      }
     }
   }
 
@@ -590,7 +610,9 @@ const {
   // ============================================
 
   async function translatePage(targetLang) {
-    if (state.isTranslating) return;
+    // Increment version to cancel any in-progress translation
+    state.translationVersion++;
+    var currentVersion = state.translationVersion;
 
     if (targetLang === "en") {
       // Revert to English
@@ -602,8 +624,10 @@ const {
       }
       state.currentLanguage = "en";
       state.translationMethod = 'none';
+      state.isTranslating = false;
       document.documentElement.lang = "en";
       document.documentElement.removeAttribute("data-preferred-language");
+      delete document.documentElement.dataset.translating;
       return;
     }
 
@@ -618,10 +642,12 @@ const {
 
     // Try native Translator API first (Chrome/Edge - no consent needed)
     if (hasTranslatorAPI()) {
-      var success = await translatePageNative(targetLang);
+      var success = await translatePageNative(targetLang, currentVersion);
       if (success) {
         return;
       }
+      // If cancelled (version changed), exit early
+      if (currentVersion !== state.translationVersion) return;
     }
 
     // Fall back to Google Translate SDK (requires functional consent)
