@@ -11,6 +11,7 @@ interface LottieLogoProps {
   respectReducedMotion?: boolean;
   fadeMs?: number;
   loop?: boolean;
+  decorative?: boolean;
 }
 
 const ANIMATION_URL = "/lotties/Animation_logo_small_size.json";
@@ -23,14 +24,18 @@ export default function LottieLogo({
   respectReducedMotion = true,
   fadeMs = 180,
   loop = true,
+  decorative = true,
   children,
 }: PropsWithChildren<LottieLogoProps>) {
   const shouldDisableMotion = useMotionPreference(respectReducedMotion);
+  const accessibilityProps = decorative
+    ? { "aria-hidden": true, role: "presentation" as const }
+    : { "aria-label": alt };
 
   // If reduced motion is enabled, just render the static fallback - don't load Lottie at all
   if (shouldDisableMotion) {
     return (
-      <div className={`${className} relative ${mediaClasses}`} aria-label={alt}>
+      <div className={`${className} relative ${mediaClasses}`} {...accessibilityProps}>
         {children}
       </div>
     );
@@ -39,7 +44,7 @@ export default function LottieLogo({
   return (
     <OptimizedLottie
       animationUrl={ANIMATION_URL}
-      alt={alt}
+      alt={decorative ? "" : alt}
       className={className}
       containerClasses={`relative ${mediaClasses}`}
       trigger={trigger}
@@ -53,6 +58,7 @@ export default function LottieLogo({
       scrollThreshold={1}
       debounceDelay={8}
       wheelSensitivity={1}
+      decorative={decorative}
     >
       {children}
     </OptimizedLottie>

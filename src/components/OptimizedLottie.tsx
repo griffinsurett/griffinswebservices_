@@ -54,6 +54,7 @@ export default function OptimizedLottie({
   
   // Fallback content (Astro Image)
   children,
+  decorative = false,
 }) {
   const containerRef = useRef(null);
   const lottieContainerRef = useRef(null);
@@ -350,7 +351,9 @@ export default function OptimizedLottie({
   return (
     <div
       ref={containerRef}
-      aria-label={alt}
+      aria-label={decorative ? undefined : alt}
+      aria-hidden={decorative ? true : undefined}
+      role={decorative ? "presentation" : undefined}
       className={`${className} ${containerClasses}`}
     >
       {/* Fallback layer (Astro Image) */}
@@ -360,7 +363,7 @@ export default function OptimizedLottie({
           transition: `opacity ${fadeMs}ms ease`,
           opacity: shouldShowFallback ? 1 : 0,
         }}
-        aria-hidden={!shouldShowFallback}
+        aria-hidden={decorative ? true : !shouldShowFallback}
       >
         <div className="w-full h-full">{children}</div>
       </div>
@@ -371,7 +374,7 @@ export default function OptimizedLottie({
           ref={lottieContainerRef}
           className="absolute inset-0"
           style={{ visibility: motionDisabled ? "hidden" : "visible" }}
-          aria-hidden={shouldShowFallback}
+          aria-hidden={decorative ? true : shouldShowFallback}
         />
       )}
     </div>

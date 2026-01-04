@@ -110,6 +110,7 @@ export default function AIChatSimulation({
             type="text"
             placeholder="Ask anything..."
             className="flex-1 bg-transparent text-sm text-text placeholder:text-text/40 outline-none"
+            aria-label="AI assistant prompt input (demo only)"
             disabled
             tabIndex={-1}
           />
