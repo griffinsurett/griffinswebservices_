@@ -96,6 +96,12 @@ body {
     @apply focus:outline-none;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
+  .btn-base:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--color-bg, #0f0f0f) 75%, transparent),
+      0 0 0 4px color-mix(in srgb, var(--color-primary) 80%, transparent);
+  }
 
   /* Size variants */
   .btn-none {
@@ -123,6 +129,12 @@ body {
     @apply focus:outline-none focus:ring-0 focus:ring-offset-0;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
+  .link-base:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--color-bg, #0f0f0f) 75%, transparent),
+      0 0 0 4px color-mix(in srgb, var(--color-primary) 80%, transparent);
+  }
 
   /* Link sizes (no padding) */
   .link-sm {
@@ -146,6 +158,12 @@ body {
     @apply focus:outline-none focus:ring-0 focus:ring-offset-0;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
+  .logo-link-base:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--color-bg, #0f0f0f) 75%, transparent),
+      0 0 0 4px color-mix(in srgb, var(--color-primary) 80%, transparent);
+  }
 
   .logo-link-icon {
     @apply inline-flex items-center justify-center;
@@ -156,6 +174,10 @@ body {
   .logo-link-icon img {
     @apply transition-transform duration-300 ease-out;
     transform: rotate(0deg);
+  }
+  .circle-checkbox-input:focus-visible + .circle-checkbox-visual {
+    outline: 2px solid color-mix(in srgb, var(--color-primary) 85%, #ffffff00);
+    outline-offset: 3px;
   }
 
   .logo-link-text {
