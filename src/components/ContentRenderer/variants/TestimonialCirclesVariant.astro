@@ -80,7 +80,11 @@ const resolveImage = (face: any) => {
   </div>
 
   <div class="flex flex-col items-start">
-    <span class={`${counterClassName} capitalize`} role="presentation">
+    <span
+      class={`${counterClassName} capitalize`}
+      role="heading"
+      aria-level="3"
+    >
       <Counter
         prefix={counterPrefix}
         start={counterStart}

@@ -23,7 +23,10 @@ import { related } from "@/utils/query/snippets";
       <div class="flex items-center gap-4">
         <ThemeControls className="lg:hidden" client:hover />
 
-        <div class="flex items-center justify-center sm:gap-4">
+        <nav
+          class="flex items-center justify-center sm:gap-4"
+          aria-label="Primary navigation"
+        >
           <!-- Navigation Menu using query -->
           <ContentRenderer
             query={related("menu-items", "menu", "main-menu")}
@@ -33,7 +36,7 @@ import { related } from "@/utils/query/snippets";
             hamburgerTransform={true}
             closeButton={false}
           />
-        </div>
+        </nav>
       </div>
     </div>
 </header>

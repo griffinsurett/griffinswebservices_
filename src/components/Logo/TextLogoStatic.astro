@@ -10,6 +10,8 @@ interface Props {
   restClass?: string;
   fadeDuration?: number;
   animateOutText?: boolean;
+  asHeading?: boolean;
+  headingLevel?: number;
 }
 
 const {
@@ -19,16 +21,26 @@ const {
   restClass = "font-light emphasized-text uppercase text-xs lg:text-sm p-0 m-0 tracking-[0.2em]",
   fadeDuration = 1200,
   animateOutText = false,
+  asHeading = true,
+  headingLevel = 2,
 } = Astro.props;
 
 const words = title.split(" ");
 const firstWord = words[0] || "";
 const restOfTitle = words.slice(1).join(" ");
+
+const headingAttrs = asHeading
+  ? ({
+      role: "heading",
+      "aria-level": headingLevel,
+    } as const)
+  : {};
 ---
 
 <div
   class={className}
   data-scroll-fade-css={animateOutText ? "true" : undefined}
+  {...headingAttrs}
 >
   <span class={firstClass} style="line-height: normal;">
     {firstWord}
