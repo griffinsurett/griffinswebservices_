@@ -89,7 +89,7 @@ export default function TestimonialCard({
             className="gap-2"
             imageClassName="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
             titleClassName="h4"
-            titleTag="span"
+            titleTag="h4"
             descriptionClassName="text-text text-sm"
             descriptionTag="p"
             showIcon={false}

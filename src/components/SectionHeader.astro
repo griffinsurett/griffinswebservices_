@@ -26,6 +26,10 @@ interface Props {
   emphasisClassName?: string;
   description?: ReactNode;
   descriptionClassName?: string;
+  /** Treat description as heading (adds role/aria-level). Defaults to true when large-text styles are used */
+  descriptionAsHeading?: boolean;
+  /** Heading level used when description is treated as heading */
+  descriptionHeadingLevel?: number;
   className?: string;
   headerProps?: Record<string, unknown>;
   animateHeading?: boolean;
@@ -47,6 +51,8 @@ const {
   emphasisClassName = "emphasized-text",
   description,
   descriptionClassName = "large-text",
+  descriptionAsHeading,
+  descriptionHeadingLevel,
   className = "text-section",
   headerProps = {},
   animateHeading = false,
@@ -73,6 +79,26 @@ const hasSegmentedHeading =
 const hasContentHeading = headingContent !== undefined;
 const hasPlainHeading =
   !hasContentHeading && headingValue !== undefined && headingValue !== null;
+
+const classContains = (classValue: string | undefined, needle: string) =>
+  Boolean(classValue && classValue.split(/\s+/).some((cls) => cls === needle));
+
+const headingLevelFromTag = (() => {
+  if (typeof headingTag !== "string") return 2;
+  const match = headingTag.match(/h([1-6])/i);
+  return match ? Number(match[1]) : 2;
+})();
+
+const shouldTreatDescriptionAsHeading =
+  Boolean(
+    description &&
+      ((descriptionAsHeading ?? undefined) !== undefined
+        ? descriptionAsHeading
+        : classContains(descriptionClassName, "large-text"))
+  );
+
+const resolvedDescriptionHeadingLevel =
+  descriptionHeadingLevel ?? Math.min(headingLevelFromTag + 1, 6);
 ---
 
 <div class={className}>
@@ -133,6 +159,10 @@ const hasPlainHeading =
       class={descriptionClassName}
       data-animate={animateDescription ? "fade-in" : undefined}
       data-animate-once={animateDescription ? String(animateOnce) : undefined}
+      role={shouldTreatDescriptionAsHeading ? "heading" : undefined}
+      aria-level={
+        shouldTreatDescriptionAsHeading ? String(resolvedDescriptionHeadingLevel) : undefined
+      }
     >
       {description}
     </p>
