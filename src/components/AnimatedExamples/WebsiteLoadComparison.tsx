@@ -114,7 +114,7 @@ export default function WebsiteLoadComparison({ className = "" }: WebsiteLoadCom
                 <div className="w-1 h-1 rounded-full bg-green-500/60" />
               </div>
               <div className="flex-1 bg-bg2 rounded px-1 ml-0.5">
-                <span className="text-[6px] text-text/50">oursites.com</span>
+                <span className="text-[6px] text-text">oursites.com</span>
               </div>
             </div>
 
@@ -277,7 +277,7 @@ export default function WebsiteLoadComparison({ className = "" }: WebsiteLoadCom
                 <div className="w-1 h-1 rounded-full bg-green-500/60" />
               </div>
               <div className="flex-1 bg-bg2 rounded px-1 ml-0.5">
-                <span className="text-[6px] text-text/50">theirsites.com</span>
+                <span className="text-[6px] text-text">theirsites.com</span>
               </div>
             </div>
 
