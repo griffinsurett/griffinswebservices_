@@ -163,11 +163,16 @@ export default function IconListItem({
         !isValidElement(icon) &&
         !isIconConfig);
 
+    const getWrapperProps = (label?: string) =>
+      label && label.length > 0
+        ? { role: "img", "aria-label": label }
+        : { "aria-hidden": "true" as const };
+
     if (isIconConfig) {
       const { icon: iconName, size, className: customClass = "", color, ariaLabel } =
         icon as IconRenderConfig;
       return (
-        <div className={`shrink-0 ${resolvedIconClassName}`}>
+        <div className={`shrink-0 ${resolvedIconClassName}`} {...getWrapperProps(ariaLabel)}>
           <Icon
             icon={iconName}
             size={size ?? iconSize}
@@ -181,13 +186,17 @@ export default function IconListItem({
 
     if (isRenderableIcon) {
       return (
-        <div className={`shrink-0 ${resolvedIconClassName}`}>
+        <div className={`shrink-0 ${resolvedIconClassName}`} aria-hidden="true">
           <Icon icon={icon as IconType} size={iconSize} />
         </div>
       );
     }
 
-    return <div className={`shrink-0 ${resolvedIconClassName}`}>{icon}</div>;
+    return (
+      <div className={`shrink-0 ${resolvedIconClassName}`} aria-hidden="true">
+        {icon}
+      </div>
+    );
   })();
 
   // Responsive layout: stacked on mobile, horizontal on md+
